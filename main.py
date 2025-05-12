@@ -1,4 +1,10 @@
 # Interfaz principal al lanzar el programa
+# Este archivo contiene la interfaz gráfica del programa
+# Importar las librerías necesarias
+# Importar las librerías necesarias
+# Importar las librerías necesarias
+# Importar las librerías necesarias
+# Importar las librerías necesarias        
 import tkinter as tk
 import customtkinter as ctk
 
