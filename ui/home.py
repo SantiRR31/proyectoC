@@ -1,16 +1,23 @@
 import tkinter as tk
 import customtkinter as ctk
-from ui.formIngresosDiarios import mostar_formulario_ingreos
+from ui.formIngresosDiarios import mostrar_formulario_ingresos
 from styles.styles import estilo_btn
 
 def lanzar_ventana_principal():
     ctk.set_appearance_mode("light")
     ctk.set_default_color_theme("blue")
 
+    
     root = ctk.CTk()
-    root.state("zoomed")
 
+# Obtener tamaño de pantalla
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+
+# Establecer tamaño de ventana
+    root.geometry(f"{screen_width}x{screen_height}+0+0")
     root.title("Ventana Principal")
+
 
     # ---------------- HEADER ----------------
     header = ctk.CTkFrame(root, height=60, fg_color="#1E90FF")
@@ -23,7 +30,7 @@ def lanzar_ventana_principal():
     navbar.pack(fill="x", padx=0, pady=0)
 
     def abrir_formulario():
-        mostar_formulario_ingreos(frame_contenido)
+        mostrar_formulario_ingresos(frame_contenido)
 
     def mostrar_inicio():
         limpiar_contenido()
@@ -40,7 +47,7 @@ def lanzar_ventana_principal():
 
     
 
-    btn_inicio = ctk.CTkButton(navbar_inner, text="🏠 Inicio", command=mostrar_inicio, **estilo_btn)
+    btn_inicio = ctk.CTkButton(navbar_inner, text="🏠 Inicio", command=mostrar_inicio, **estilo_btn )
     btn_inicio.pack(side="left", padx=10)
 
     btn_formulario = ctk.CTkButton(navbar_inner, text="📄 Ingresos Diarios", command=abrir_formulario, **estilo_btn)

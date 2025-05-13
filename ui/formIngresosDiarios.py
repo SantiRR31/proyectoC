@@ -1,51 +1,101 @@
 import tkinter as tk
 import customtkinter as ctk
-import os
 
-def mostar_formulario_ingreos(frame_padre):
+def mostrar_formulario_ingresos(frame_padre):
     for widget in frame_padre.winfo_children():
         widget.destroy()
-        widget.destroy()
-   
-    # --- INTERFAZ PRINCIPAL ---
-    tittle = ctk.CTkLabel(frame_padre, text="Control de ingresos diarios", font=("Arial", 24))
-    tittle.pack(pady=20)
 
-    frame1 = ctk.CTkFrame(frame_padre, fg_color="transparent")
-    frame1.pack(pady=20)
+    ctk.set_appearance_mode("light")
+    ctk.set_default_color_theme("blue")
 
-    fila_Actual = [0]
-    entradas = []
+    # --- TÍTULO PRINCIPAL ---
+    titulo = ctk.CTkLabel(frame_padre, text="Póliza de Ingresos", font=("Arial", 28, "bold"))
+    titulo.pack(pady=30)
+
+    # --- CONTENEDOR GENERAL ---
+    contenedor_general = ctk.CTkFrame(frame_padre, fg_color="#F7F9FC", corner_radius=15)
+    contenedor_general.pack(fill="both", expand=True, padx=30, pady=10)
+
+    # Configurar columnas generales
+    for i in range(3):
+        contenedor_general.grid_columnconfigure(i, weight=1)
+
+    # --- SECCIÓN 1: DATOS DE LA PÓLIZA ---
+    seccion_poliza = ctk.CTkFrame(contenedor_general, fg_color="transparent")
+    seccion_poliza.grid(row=0, column=0, columnspan=3, sticky="ew", pady=(10, 20))
+
+    label_poliza = ctk.CTkLabel(seccion_poliza, text=" Datos de la Póliza", font=("Arial", 20, "bold"))
+    label_poliza.pack(anchor="w", pady=10)
+
+    entrada_frame = ctk.CTkFrame(seccion_poliza, fg_color="transparent")
+    entrada_frame.pack(fill="x")
+
+    fecha_policia = ctk.CTkEntry(entrada_frame, placeholder_text="📅 Fecha de ingreso")
+    fecha_policia.grid(row=0, column=0, padx=10, pady=5, sticky="ew")
+
+    no_poliza = ctk.CTkEntry(entrada_frame, placeholder_text="🔢 No. Póliza")
+    no_poliza.grid(row=0, column=1, padx=10, pady=5, sticky="ew")
+
+    banco_o_caja = ctk.CTkEntry(entrada_frame, placeholder_text="🏦 Banco o Caja")
+    banco_o_caja.grid(row=1, column=0, padx=10, pady=5, sticky="ew")
+
+    fecha_deposito = ctk.CTkEntry(entrada_frame, placeholder_text="📅 Fecha del Depósito")
+    fecha_deposito.grid(row=1, column=1, padx=10, pady=5, sticky="ew")
+
+    cuanto_pago = ctk.CTkEntry(entrada_frame, placeholder_text="💰 Cuánto Pago")
+    cuanto_pago.grid(row=2, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
+
+    # Hacer entradas responsivas
+    entrada_frame.grid_columnconfigure((0, 1), weight=1)
+    
+    
+    # --- SECCIÓN 3: FILAS ADICIONALES ---
+    seccion_filas = ctk.CTkFrame(contenedor_general, fg_color="transparent")
+    seccion_filas.grid(row=2, column=0, columnspan=3, sticky="ew")
+
+    label_filas = ctk.CTkLabel(seccion_filas, text="Claves y Partidas", font=("Arial", 20, "bold"))
+    label_filas.pack(anchor="w", pady=10)
+
+    frame_filas = ctk.CTkFrame(seccion_filas, fg_color="transparent")
+    frame_filas.pack(fill="x")
 
     def agregar_fila():
-        fila_Actual[0] += 1
-        nueva_partida = ctk.CTkEntry(frame1, placeholder_text="Partida")
-        nueva_partida.grid(row=fila_Actual[0], column=0, padx=10, pady=5)
-        nuevo_resultado = ctk.CTkEntry(frame1, placeholder_text="Resultado")
-        nuevo_resultado.grid(row=fila_Actual[0], column=1, padx=10, pady=5)
-        entradas.append(nueva_partida)
-        entradas.append(nuevo_resultado)
-        btnOK.grid(row=fila_Actual[0], column=2, padx=10, pady=10)
+        fila_frame = ctk.CTkFrame(frame_filas, fg_color="transparent")
+        fila_frame.pack(fill="x", pady=5)
 
-    partida = ctk.CTkEntry(frame1, placeholder_text="Partida")
-    partida.grid(row=0, column=0, padx=10)
-    resultado = ctk.CTkEntry(frame1, placeholder_text="Resultado")
-    resultado.grid(row=0, column=1, padx=10)
-    btnOK = ctk.CTkButton(frame1, text="SI", command=agregar_fila)
-    btnOK.grid(row=0, column=2, padx=10)
+        clave = ctk.CTkEntry(fila_frame, placeholder_text="🔑 Clave")
+        clave.grid(row=0, column=0, padx=10, sticky="ew")
 
-    # Botones guardar y descargar
-    frame2 = ctk.CTkFrame(frame_padre, fg_color="transparent")
-    frame2.place(relx=1.0, rely=1.0, anchor="se", x=-40, y=-40)
+        partida = ctk.CTkEntry(fila_frame, placeholder_text="📄 Denominación")
+        partida.grid(row=0, column=1, padx=10, sticky="ew")
 
-    btnGuardar = ctk.CTkButton(frame2, text="Guardar")
-    btnGuardar.grid(row=0, column=0, padx=10)
+        resultado = ctk.CTkEntry(fila_frame, placeholder_text="📊 Cargo")
+        resultado.grid(row=0, column=2, padx=10, sticky="ew")
 
-    btnGenerar = ctk.CTkButton(frame2, text="Descargar")
-    btnGenerar.grid(row=0, column=1, padx=10)
+        btn_eliminar = ctk.CTkButton(
+            fila_frame,
+            text="❌",
+            width=30,
+            fg_color="#F44336",
+            hover_color="#D32F2F",
+            command=lambda: fila_frame.destroy()
+        )
+        btn_eliminar.grid(row=0, column=3, padx=5)
 
-    btnRegresar = ctk.CTkButton(frame2, text="Regresar al menú")
-    btnRegresar.grid(row=0, column=2, padx=10)
+    # Hacer que cada columna se expanda
+        fila_frame.grid_columnconfigure((0, 1, 2), weight=1)
 
+    agregar_fila()  # Cargar una fila por defecto
 
+    btn_agregar_fila = ctk.CTkButton(seccion_filas, text="➕ Agregar ", command=agregar_fila, fg_color="#4CAF50", hover_color="#45A049")
+    btn_agregar_fila.pack(pady=10)
 
+    # --- BOTONES FINALES ---
+    botones_frame = ctk.CTkFrame(frame_padre, fg_color="transparent")
+    botones_frame.pack(pady=20)
+
+    btn_guardar = ctk.CTkButton(botones_frame, text="💾 Guardar", width=120, fg_color="#2196F3", hover_color="#1976D2")
+    btn_guardar.grid(row=0, column=0, padx=10)
+
+    btn_descargar = ctk.CTkButton(botones_frame, text="⬇️ Descargar", width=120, fg_color="#FF9800", hover_color="#F57C00")
+    btn_descargar.grid(row=0, column=1, padx=10)
