@@ -40,7 +40,7 @@ def lanzar_ventana_principal():
 
     
 
-    btn_inicio = ctk.CTkButton(navbar_inner, text="🏠 Inicio", command=mostrar_inicio, **estilo_btn)
+    btn_inicio = ctk.CTkButton(navbar_inner, text="🏠 Inicio", command=mostrar_inicio, **estilo_btn )
     btn_inicio.pack(side="left", padx=10)
 
     btn_formulario = ctk.CTkButton(navbar_inner, text="📄 Ingresos Diarios", command=abrir_formulario, **estilo_btn)
