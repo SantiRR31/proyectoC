@@ -58,8 +58,9 @@ def lanzar_ventana_principal():
         "corner_radius": 5
     }
 
-    def create_sidebar_btn(parent, text, icon, command):
-        btn = ctk.CTkButton(parent, text=f"  {icon}  {text}", command=command, **btn_style)
+    def create_sidebar_btn(parent, text, image_path, command):
+        image = CTkImage(Image.open(image_path), size=(20, 20))
+        btn = ctk.CTkButton(parent, text=text, image=image, compound="left", command=command, **btn_style)
         btn.pack(fill="x", padx=10, pady=5)
         sidebar_buttons.append(btn)
         return btn
@@ -95,18 +96,41 @@ def lanzar_ventana_principal():
             widget.destroy()
 
     # ---------------- BOTONES DEL SIDEBAR ----------------
-    btn_inicio_sidebar = create_sidebar_btn(sidebar, "Inicio", "🏠", lambda: abrir_inicio(frame_contenido))
-    btn_ingresos_sidebar = create_sidebar_btn(sidebar, "Ingresos Diarios", "📊", lambda: abrir_formulario(frame_contenido))
-    btn_clientes_sidebar = create_sidebar_btn(sidebar, "Clientes", "👥", lambda: None)
-    btn_reportes_sidebar = create_sidebar_btn(sidebar, "Reportes", "📈", lambda: None)
-    btn_config_sidebar = create_sidebar_btn(sidebar, "Configuración", "⚙️", lambda: None)
+    btn_inicio_sidebar = create_sidebar_btn(sidebar, "Inicio", "assets/home.png", lambda: abrir_inicio(frame_contenido))
+    btn_ingresos_sidebar = create_sidebar_btn(sidebar, "Ingresos Diarios", "assets/increase.png", lambda: abrir_formulario(frame_contenido))
+    btn_clientes_sidebar = create_sidebar_btn(sidebar, "Clientes", "assets/increase.png", lambda: None)
+    btn_reportes_sidebar = create_sidebar_btn(sidebar, "Reportes", "assets/increase.png", lambda: None)
+    btn_config_sidebar = create_sidebar_btn(sidebar, "Configuración", "assets/increase.png", lambda: None)
+
 
     separator = ctk.CTkFrame(sidebar, height=2, fg_color="#34495e")
     separator.pack(fill="x", pady=20, padx=10)
 
-    btn_salir_sidebar = create_sidebar_btn(sidebar, "Cerrar Sesión", "🚪", root.quit)
+    btn_salir_sidebar = create_sidebar_btn(sidebar, "Cerrar Sesión", "assets/exit.png", root.quit)
+    
+        # ---------------- CAMBIO DE TEMA ----------------
+    modo_claro = [False]  # Usamos una lista para hacerlo mutable en la función interna
 
-    # Mostrar contenido inicial
+    def cambiar_tema():
+        if modo_claro[0]:
+            ctk.set_appearance_mode("dark")
+            btn_tema.configure(text="🌙 Modo Oscuro")
+            modo_claro[0] = False
+        else:
+            ctk.set_appearance_mode("light")
+            btn_tema.configure(text="☀️ Modo Claro")
+            modo_claro[0] = True
+
+    btn_tema = ctk.CTkButton(
+        sidebar,
+        text="🌙 Modo Oscuro",
+        command=cambiar_tema,
+        **btn_style
+    )
+    btn_tema.pack(fill="x", padx=10, pady=(5, 20))
+
+
+# ---------------- CARGAR PÁGINA INICIAL ----------------
     abrir_inicio(frame_contenido)
     cambiar_boton_activo(btn_inicio_sidebar)
 
