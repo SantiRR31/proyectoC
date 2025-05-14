@@ -3,6 +3,8 @@ import customtkinter as ctk
 from ui.formIngresosDiarios import mostrar_formulario_ingresos
 from styles.styles import estilo_btn
 from ui.inicio_content import mostrar_inicio
+from PIL import Image
+from customtkinter import CTkImage
 
 def lanzar_ventana_principal():
     ctk.set_appearance_mode("light")
@@ -43,8 +45,9 @@ def lanzar_ventana_principal():
         "corner_radius": 5
     }
 
-    def create_sidebar_btn(parent, text, icon, command):
-        btn = ctk.CTkButton(parent, text=f"  {icon}  {text}", command=command, **btn_style)
+    def create_sidebar_btn(parent, text, image_path, command):
+        image = CTkImage(Image.open(image_path), size=(20, 20))
+        btn = ctk.CTkButton(parent, text=text, image=image, compound="left", command=command, **btn_style)
         btn.pack(fill="x", padx=10, pady=5)
         return btn
 
@@ -72,16 +75,17 @@ def lanzar_ventana_principal():
             widget.destroy()
 
     # ---------------- BOTONES DEL SIDEBAR ----------------
-    btn_inicio_sidebar = create_sidebar_btn(sidebar, "Inicio", "🏠", lambda: abrir_inicio(frame_contenido))
-    btn_ingresos_sidebar = create_sidebar_btn(sidebar, "Ingresos Diarios", "📊", lambda: abrir_formulario(frame_contenido))
-    btn_clientes_sidebar = create_sidebar_btn(sidebar, "Clientes", "👥", lambda: None)
-    btn_reportes_sidebar = create_sidebar_btn(sidebar, "Reportes", "📈", lambda: None)
-    btn_config_sidebar = create_sidebar_btn(sidebar, "Configuración", "⚙️", lambda: None)
+    btn_inicio_sidebar = create_sidebar_btn(sidebar, "Inicio", "assets/home.png", lambda: abrir_inicio(frame_contenido))
+    btn_ingresos_sidebar = create_sidebar_btn(sidebar, "Ingresos Diarios", "assets/increase.png", lambda: abrir_formulario(frame_contenido))
+    btn_clientes_sidebar = create_sidebar_btn(sidebar, "Clientes", "assets/increase.png", lambda: None)
+    btn_reportes_sidebar = create_sidebar_btn(sidebar, "Reportes", "assets/increase.png", lambda: None)
+    btn_config_sidebar = create_sidebar_btn(sidebar, "Configuración", "assets/increase.png", lambda: None)
+
 
     separator = ctk.CTkFrame(sidebar, height=2, fg_color="#34495e")
     separator.pack(fill="x", pady=20, padx=10)
 
-    btn_salir_sidebar = create_sidebar_btn(sidebar, "Cerrar Sesión", "🚪", root.quit)
+    btn_salir_sidebar = create_sidebar_btn(sidebar, "Cerrar Sesión", "assets/exit.png", root.quit)
 
     # Mostrar contenido inicial
     abrir_inicio(frame_contenido)

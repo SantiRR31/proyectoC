@@ -2,6 +2,8 @@ import tkinter as tk
 import customtkinter as ctk
 import sqlite3
 import datetime
+from PIL import Image
+from customtkinter import CTkImage
 
 def obtener_fecha_actual():
     """Devuelve la fecha actual en formato 'DD-MM-AAAA'."""
@@ -37,23 +39,39 @@ def mostrar_formulario_ingresos(frame_padre):
 
     entrada_frame = ctk.CTkFrame(seccion_poliza, fg_color="transparent")
     entrada_frame.pack(fill="x")
-
+    
+    # Configuración de columnas para labels + entries
+    entrada_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)
+    
+    # Fila 1 - Fecha y Número de Póliza
+    lbl_fecha = ctk.CTkLabel(entrada_frame, text="Fecha:", font=("Arial", 14))
+    lbl_fecha.grid(row=0, column=0, padx=(10,5), pady=5, sticky="w")
     fecha_policia = ctk.CTkEntry(entrada_frame, placeholder_text="📅 Fecha de ingreso")
-    fecha_policia.grid(row=0, column=0, padx=10, pady=5, sticky="ew")
+    fecha_policia.grid(row=0, column=1, padx=(5,10), pady=5, sticky="ew")
     fecha_policia.insert(0, obtener_fecha_actual())
     fecha_policia.configure(state="readonly")
     
+    lbl_no_poliza = ctk.CTkLabel(entrada_frame, text="No. Póliza:", font=("Arial", 14))
+    lbl_no_poliza.grid(row=0, column=2, padx=(10,5), pady=5, sticky="w")
     no_poliza = ctk.CTkEntry(entrada_frame, placeholder_text="🔢 No. Póliza")
-    no_poliza.grid(row=0, column=1, padx=10, pady=5, sticky="ew")
+    no_poliza.grid(row=0, column=3, padx=(5,10), pady=5, sticky="ew")
 
+    # Fila 2 - Banco y Fecha Depósito
+    lbl_banco = ctk.CTkLabel(entrada_frame, text="Banco/Caja:", font=("Arial", 14))
+    lbl_banco.grid(row=1, column=0, padx=(10,5), pady=5, sticky="w")
     banco_o_caja = ctk.CTkEntry(entrada_frame, placeholder_text="🏦 Banco o Caja")
-    banco_o_caja.grid(row=1, column=0, padx=10, pady=5, sticky="ew")
+    banco_o_caja.grid(row=1, column=1, padx=(5,10), pady=5, sticky="ew")
 
+    lbl_fecha_deposito = ctk.CTkLabel(entrada_frame, text="Fecha Depósito:", font=("Arial", 14))
+    lbl_fecha_deposito.grid(row=1, column=2, padx=(10,5), pady=5, sticky="w")
     fecha_deposito = ctk.CTkEntry(entrada_frame, placeholder_text="📅 Fecha del Depósito")
-    fecha_deposito.grid(row=1, column=1, padx=10, pady=5, sticky="ew")
+    fecha_deposito.grid(row=1, column=3, padx=(5,10), pady=5, sticky="ew")
 
-    cuanto_pago = ctk.CTkEntry(entrada_frame, placeholder_text="💰 Cuánto Pagó")
-    cuanto_pago.grid(row=2, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
+    # Fila 3 - Importe
+    lbl_cuanto_pago = ctk.CTkLabel(entrada_frame, text="Importe:", font=("Arial", 14))
+    lbl_cuanto_pago.grid(row=2, column=0, padx=(10,5), pady=5, sticky="w")
+    cuanto_pago = ctk.CTkEntry(entrada_frame, placeholder_text="💰 Importe")
+    cuanto_pago.grid(row=2, column=1, columnspan=3, padx=(5,10), pady=5, sticky="ew")
 
     entrada_frame.grid_columnconfigure((0, 1), weight=1)
 
@@ -61,7 +79,7 @@ def mostrar_formulario_ingresos(frame_padre):
     seccion_filas = ctk.CTkFrame(contenedor_general, fg_color="transparent")
     seccion_filas.grid(row=2, column=0, columnspan=3, sticky="ew")
 
-    label_filas = ctk.CTkLabel(seccion_filas, text="Claves y Partidas", font=("Arial", 20, "bold"))
+    label_filas = ctk.CTkLabel(seccion_filas, text="Clave", font=("Arial", 20, "bold"))
     label_filas.pack(anchor="w", pady=10)
 
     frame_filas = ctk.CTkFrame(seccion_filas, fg_color="transparent")
@@ -122,8 +140,26 @@ def mostrar_formulario_ingresos(frame_padre):
     botones_frame = ctk.CTkFrame(contenedor_principal, fg_color="transparent")
     botones_frame.pack(fill="x", pady=10, padx=20, anchor="e")
 
-    btn_guardar = ctk.CTkButton(botones_frame, text="💾 Guardar", width=120, fg_color="#004b8f", hover_color="#0065a5", corner_radius=32)
+    imgBtnGuardar = Image.open("assets/check.png")
+    btn_guardar = ctk.CTkButton(
+        botones_frame, 
+        text="Guardar", 
+        width=120, 
+        fg_color="#004b8f", 
+        hover_color="#0065a5", 
+        corner_radius=32,
+        image=CTkImage(imgBtnGuardar, size=(20, 20))  # nota: es "image", no "Image"
+    )
     btn_guardar.pack(side="right", padx=10)
 
-    btn_descargar = ctk.CTkButton(botones_frame, text="⬇️ Descargar", width=120, fg_color="#008d62", hover_color="#2ca880", corner_radius=32)
+    imgBtnDescargar = Image.open("assets/downlo.png")
+    btn_descargar = ctk.CTkButton(
+        botones_frame,
+        text="Descargar",
+        width=120,
+        fg_color="#008d62",
+        hover_color="#2ca880",
+        corner_radius=32,
+        image=CTkImage(imgBtnDescargar, size=(20, 20))  # nota: es "image", no "Image"
+    )
     btn_descargar.pack(side="right", padx=10)
