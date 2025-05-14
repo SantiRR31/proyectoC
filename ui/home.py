@@ -105,8 +105,30 @@ def lanzar_ventana_principal():
     separator.pack(fill="x", pady=20, padx=10)
 
     btn_salir_sidebar = create_sidebar_btn(sidebar, "Cerrar Sesión", "assets/exit.png", root.quit)
+    
+        # ---------------- CAMBIO DE TEMA ----------------
+    modo_claro = [False]  # Usamos una lista para hacerlo mutable en la función interna
 
-    # Mostrar contenido inicial
+    def cambiar_tema():
+        if modo_claro[0]:
+            ctk.set_appearance_mode("dark")
+            btn_tema.configure(text="🌙 Modo Oscuro")
+            modo_claro[0] = False
+        else:
+            ctk.set_appearance_mode("light")
+            btn_tema.configure(text="☀️ Modo Claro")
+            modo_claro[0] = True
+
+    btn_tema = ctk.CTkButton(
+        sidebar,
+        text="🌙 Modo Oscuro",
+        command=cambiar_tema,
+        **btn_style
+    )
+    btn_tema.pack(fill="x", padx=10, pady=(5, 20))
+
+
+# ---------------- CARGAR PÁGINA INICIAL ----------------
     abrir_inicio(frame_contenido)
     cambiar_boton_activo(btn_inicio_sidebar)
 

@@ -5,6 +5,7 @@ import datetime
 from PIL import Image
 from customtkinter import CTkImage
 
+
 def obtener_fecha_actual():
     """Devuelve la fecha actual en formato 'DD-MM-AAAA'."""
     return datetime.datetime.now().strftime("%d-%m-%Y")
@@ -99,6 +100,29 @@ def mostrar_formulario_ingresos(frame_padre):
         entrada_resultado.delete(0, tk.END)
         entrada_resultado.insert(0, denominacion)
         entrada_resultado.configure(state="readonly")
+        
+    # Funcion para ir sumando los valores de la entrada de abono e ir actualizando el total
+    def actualizar_total():
+        """Suma los valores de los campos de abono y actualiza el campo total."""
+        try:
+            suma_total = sum(float(entrada[2].get()) for entrada in entradas if entrada[2].get().strip())
+            total.configure(state="normal")
+            total.delete(0, tk.END)
+            total.insert(0, f"{suma_total:.2f}")
+            total.configure(state="readonly")
+            
+            #validar si el total es igual al importe
+            importe_valor = cuanto_pago.get().strip()
+            if importe_valor:
+                importe_float = float(importe_valor)
+                if abs(importe_float - suma_total) < 0.01:
+                    validacion_totales.configure(text="✅", text_color="#008d62")
+                else:
+                    validacion_totales.configure(text="❌", text_color="#d10d2f")
+            else:
+                validacion_totales.configure(text="❌", text_color="gray")           
+        except ValueError:
+            pass  # Ignorar errores si algún campo tiene un valor no numérico
 
     def agregar_fila(enfocar_nueva_clave=False):
         fila_frame = ctk.CTkFrame(frame_filas, fg_color="transparent")
@@ -112,6 +136,8 @@ def mostrar_formulario_ingresos(frame_padre):
 
         entrada_abono = ctk.CTkEntry(fila_frame, placeholder_text="Abono")
         entrada_abono.grid(row=0, column=2, padx=10, sticky="ew")
+        entrada_abono.bind("<KeyRelease>", lambda event: actualizar_total())
+
 
         entrada_clave.bind("<FocusOut>", lambda event: llenar_denominacion(event, entrada_clave, entrada_resultado))
         entrada_clave.bind("<Return>", lambda event: entrada_abono.focus_set())
@@ -136,6 +162,14 @@ def mostrar_formulario_ingresos(frame_padre):
     # --- BOTONES FINALES FIJOS ABAJO ---
     botones_frame = ctk.CTkFrame(contenedor_principal, fg_color="transparent")
     botones_frame.pack(fill="x", pady=10, padx=20, anchor="e")
+    
+    llb_total = ctk.CTkLabel(botones_frame, text="Total:", font=("Arial", 16))
+    llb_total.pack(side="left", padx=(0, 10))
+    total = ctk.CTkEntry(botones_frame, placeholder_text="💰 Total", state="readonly")
+    total.pack(side="left", padx=(0, 10), fill="x", expand=False)
+    
+    validacion_totales = ctk.CTkLabel(botones_frame, text="❌", font=("Arial", 20))
+    validacion_totales.pack(side="left", padx=(0, 10))
 
     imgBtnGuardar = Image.open("assets/check.png")
     btn_guardar = ctk.CTkButton(
