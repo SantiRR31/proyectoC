@@ -17,7 +17,7 @@ def mostrar_formulario_ingresos(frame_padre):
     titulo.pack(pady=30)
 
     # --- CONTENEDOR PRINCIPAL (Scroll + Botones fijos) ---
-    contenedor_principal = ctk.CTkFrame(frame_padre, fg_color="transparent")
+    contenedor_principal = ctk.CTkFrame(frame_padre, fg_color="transparent" , corner_radius=15)
     contenedor_principal.pack(fill="both", expand=True)
 
     # --- CONTENIDO CON SCROLL ---
@@ -28,13 +28,13 @@ def mostrar_formulario_ingresos(frame_padre):
         contenedor_general.grid_columnconfigure(i, weight=1)
 
     # --- SECCIÓN DATOS PÓLIZA ---
-    seccion_poliza = ctk.CTkFrame(contenedor_general, fg_color="transparent")
+    seccion_poliza = ctk.CTkFrame(contenedor_general, fg_color="transparent", corner_radius=15)
     seccion_poliza.grid(row=0, column=0, columnspan=3, sticky="ew", pady=(10, 20))
 
     label_poliza = ctk.CTkLabel(seccion_poliza, text="Datos de la Póliza", font=("Arial", 20, "bold"))
     label_poliza.pack(anchor="w", pady=10)
 
-    entrada_frame = ctk.CTkFrame(seccion_poliza, fg_color="transparent")
+    entrada_frame = ctk.CTkFrame(seccion_poliza, fg_color="transparent", corner_radius=15)
     entrada_frame.pack(fill="x")
     
     # Configuración de columnas para labels + entries
@@ -73,13 +73,13 @@ def mostrar_formulario_ingresos(frame_padre):
     entrada_frame.grid_columnconfigure((0, 1), weight=1)
 
     # --- SECCIÓN FILAS ADICIONALES ---
-    seccion_filas = ctk.CTkFrame(contenedor_general, fg_color="transparent")
+    seccion_filas = ctk.CTkFrame(contenedor_general, fg_color="transparent", corner_radius=15)
     seccion_filas.grid(row=2, column=0, columnspan=3, sticky="ew")
 
     label_filas = ctk.CTkLabel(seccion_filas, text="Clave", font=("Arial", 20, "bold"))
     label_filas.pack(anchor="w", pady=10)
 
-    frame_filas = ctk.CTkFrame(seccion_filas, fg_color="transparent")
+    frame_filas = ctk.CTkFrame(seccion_filas, fg_color="transparent", corner_radius=15)
     frame_filas.pack(fill="x")
 
     entradas = []
@@ -101,7 +101,7 @@ def mostrar_formulario_ingresos(frame_padre):
         entrada_resultado.configure(state="readonly")
 
     def agregar_fila(enfocar_nueva_clave=False):
-        fila_frame = ctk.CTkFrame(frame_filas, fg_color="transparent")
+        fila_frame = ctk.CTkFrame(frame_filas, fg_color="transparent", corner_radius=15)
         fila_frame.pack(fill="x", pady=5)
 
         entrada_clave = ctk.CTkEntry(fila_frame, placeholder_text="🔑 Clave")
@@ -134,7 +134,7 @@ def mostrar_formulario_ingresos(frame_padre):
     btn_agregar_fila.pack(pady=10)
 
     # --- BOTONES FINALES FIJOS ABAJO ---
-    botones_frame = ctk.CTkFrame(contenedor_principal, fg_color="transparent")
+    botones_frame = ctk.CTkFrame(contenedor_principal, fg_color="transparent", corner_radius=15)
     botones_frame.pack(fill="x", pady=10, padx=20, anchor="e")
 
     imgBtnGuardar = Image.open("assets/check.png")
