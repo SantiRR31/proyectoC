@@ -3,6 +3,8 @@ import customtkinter as ctk
 from ui.formIngresosDiarios import mostrar_formulario_ingresos
 from styles.styles import estilo_btn
 from ui.inicio_content import mostrar_inicio
+from PIL import Image
+from customtkinter import CTkImage
 
 def lanzar_ventana_principal():
     ctk.set_appearance_mode("dark")
@@ -57,11 +59,7 @@ def lanzar_ventana_principal():
     }
 
     def create_sidebar_btn(parent, text, icon, command):
-    # Se define dentro para capturar el botón en su propio comando
-        def wrapped_command():
-            cambiar_boton_activo(btn)
-            command()
-        btn = ctk.CTkButton(parent, text=f"  {icon}  {text}", command=wrapped_command, **btn_style)
+        btn = ctk.CTkButton(parent, text=f"  {icon}  {text}", command=command, **btn_style)
         btn.pack(fill="x", padx=10, pady=5)
         sidebar_buttons.append(btn)
         return btn
@@ -96,7 +94,7 @@ def lanzar_ventana_principal():
         for widget in frame_contenido.winfo_children():
             widget.destroy()
 
-# ---------------- BOTONES DEL SIDEBAR ----------------
+    # ---------------- BOTONES DEL SIDEBAR ----------------
     btn_inicio_sidebar = create_sidebar_btn(sidebar, "Inicio", "🏠", lambda: abrir_inicio(frame_contenido))
     btn_ingresos_sidebar = create_sidebar_btn(sidebar, "Ingresos Diarios", "📊", lambda: abrir_formulario(frame_contenido))
     btn_clientes_sidebar = create_sidebar_btn(sidebar, "Clientes", "👥", lambda: None)
@@ -107,30 +105,8 @@ def lanzar_ventana_principal():
     separator.pack(fill="x", pady=20, padx=10)
 
     btn_salir_sidebar = create_sidebar_btn(sidebar, "Cerrar Sesión", "🚪", root.quit)
-    
-        # ---------------- CAMBIO DE TEMA ----------------
-    modo_claro = [False]  # Usamos una lista para hacerlo mutable en la función interna
 
-    def cambiar_tema():
-        if modo_claro[0]:
-            ctk.set_appearance_mode("dark")
-            btn_tema.configure(text="🌙 Modo Oscuro")
-            modo_claro[0] = False
-        else:
-            ctk.set_appearance_mode("light")
-            btn_tema.configure(text="☀️ Modo Claro")
-            modo_claro[0] = True
-
-    btn_tema = ctk.CTkButton(
-        sidebar,
-        text="🌙 Modo Oscuro",
-        command=cambiar_tema,
-        **btn_style
-    )
-    btn_tema.pack(fill="x", padx=10, pady=(5, 20))
-
-
-# ---------------- CARGAR PÁGINA INICIAL ----------------
+    # Mostrar contenido inicial
     abrir_inicio(frame_contenido)
     cambiar_boton_activo(btn_inicio_sidebar)
 
