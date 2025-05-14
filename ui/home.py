@@ -11,16 +11,12 @@ def lanzar_ventana_principal():
     ctk.set_default_color_theme("blue")
 
     root = ctk.CTk()
-    ##root.overrideredirect(True)  # Quita el borde y barra de título
-
     root.iconbitmap("assets/cecati-122.ico")
     root.title("Ventana Principal")
-    root.configure(fg_color="#2c3e50") 
-    ##root.state("zoomed")   
-    root.geometry("1280x720")  # Tamaño inicial
+    root.geometry("1280x720")
     root.minsize(640, 720)
-    root.configure(bg="#2c3e50")
-    
+    root.configure(fg_color="#2c3e50")
+
     # ---------------- HEADER ----------------
     header = ctk.CTkFrame(root, height=60, fg_color="#2c3e50", corner_radius=0)
     header.pack(fill="x")
@@ -31,13 +27,14 @@ def lanzar_ventana_principal():
     main_container = ctk.CTkFrame(root, fg_color="transparent")
     main_container.pack(fill="both", expand=True)
 
+    # Configurar grid responsivo
+    main_container.grid_rowconfigure(0, weight=1)
+    main_container.grid_columnconfigure(0, weight=0)  # Sidebar no se expande
+    main_container.grid_columnconfigure(1, weight=1)  # Content sí se expande
 
-
-# Colores para botones
+    # Colores y botones
     COLOR_ACTIVO = "#5b44e0"
     COLOR_INACTIVO = "transparent"
-
-# Lista para almacenar botones
     sidebar_buttons = []
 
     def cambiar_boton_activo(boton_activo):
@@ -47,7 +44,6 @@ def lanzar_ventana_principal():
             else:
                 btn.configure(fg_color=COLOR_INACTIVO)
 
-# Estilo de los botones
     btn_style = {
         "fg_color": COLOR_INACTIVO,
         "hover_color": "#34495e",
@@ -60,26 +56,35 @@ def lanzar_ventana_principal():
 
     def create_sidebar_btn(parent, text, image_path, command):
         image = CTkImage(Image.open(image_path), size=(20, 20))
-        btn = ctk.CTkButton(parent, text=text, image=image, compound="left", command=command, **btn_style)
+        def wrapped_command():
+            cambiar_boton_activo(btn)
+            command()
+        btn = ctk.CTkButton(parent, text=text, image=image, command=wrapped_command, **btn_style)
         btn.pack(fill="x", padx=10, pady=5)
         return btn
 
-# ---------------- SIDEBAR ----------------
+    # ---------------- SIDEBAR ----------------
     sidebar = ctk.CTkFrame(main_container, width=220, fg_color="#2c3e50", corner_radius=0)
-    sidebar.pack(side="left", fill="y", padx=0, pady=0)
+    sidebar.grid(row=0, column=0, sticky="ns")
 
     sidebar_title = ctk.CTkLabel(sidebar, text="MENÚ PRINCIPAL", font=("Arial", 16, "bold"), text_color="white")
-    sidebar_title.pack(pady=(20, 30), padx=10)
+    sidebar_title.pack(pady=(20, 10),)
+    separator = ctk.CTkFrame(sidebar, height=2, fg_color="#34495e")
+    separator.pack(fill="x", pady=5, padx=10)
+    
+    
 
-# ---------------- CONTENIDO PRINCIPAL ----------------
+
+    # ---------------- CONTENIDO PRINCIPAL ----------------
     content_frame = ctk.CTkFrame(main_container, fg_color="transparent")
-    content_frame.pack(side="right", expand=True, fill="both", padx=20, pady=20)
+    content_frame.grid(row=0, column=1, sticky="nsew", padx=20, pady=20)
 
-# ---------------- ÁREA DE CONTENIDO DINÁMICO ----------------
+    # ÁREA DE CONTENIDO DINÁMICO
+    content_frame.grid_rowconfigure(0, weight=1)
+    content_frame.grid_columnconfigure(0, weight=1)
     frame_contenido = ctk.CTkFrame(content_frame, corner_radius=15)
-    frame_contenido.pack(expand=True, fill="both")
+    frame_contenido.grid(row=0, column=0, sticky="nsew")
 
-# ---------------- FUNCIONES ----------------
     def abrir_formulario(contenedor):
         for widget in contenedor.winfo_children():
             widget.destroy()
@@ -94,44 +99,65 @@ def lanzar_ventana_principal():
         for widget in frame_contenido.winfo_children():
             widget.destroy()
 
-    # ---------------- BOTONES DEL SIDEBAR ----------------
+    # Botones del sidebar
     btn_inicio_sidebar = create_sidebar_btn(sidebar, "Inicio", "assets/home.png", lambda: abrir_inicio(frame_contenido))
-    btn_ingresos_sidebar = create_sidebar_btn(sidebar, "Ingresos Diarios", "assets/increase.png", lambda: abrir_formulario(frame_contenido))
-    btn_clientes_sidebar = create_sidebar_btn(sidebar, "Clientes", "assets/increase.png", lambda: None)
+    sidebar_subtitle = ctk.CTkLabel(sidebar, text="Pólizas", font=("Arial", 12), text_color="white")
+    sidebar_subtitle.pack(pady=5,)
+    separator = ctk.CTkFrame(sidebar, height=2, fg_color="#34495e")
+    separator.pack(fill="x", pady=5, padx=10)
+    
+    
+    btn_ingresos_sidebar = create_sidebar_btn(sidebar, "Ingresos", "assets/increase.png", lambda: abrir_formulario(frame_contenido))
+    btn_clientes_sidebar = create_sidebar_btn(sidebar, "Egresos", "assets/increase.png", lambda: None)
+    
+    sidebar_subtitle = ctk.CTkLabel(sidebar, text="Reportes", font=("Arial", 12), text_color="white")
+    sidebar_subtitle.pack(pady=5,)
+    separator = ctk.CTkFrame(sidebar, height=2, fg_color="#34495e")
+    separator.pack(fill="x", pady=5, padx=10)
+    
+    
     btn_reportes_sidebar = create_sidebar_btn(sidebar, "Reportes", "assets/increase.png", lambda: None)
+    
+    
+    sidebar_subtitle = ctk.CTkLabel(sidebar, text="Informes", font=("Arial", 12), text_color="white")
+    sidebar_subtitle.pack(pady=5,)
+    separator = ctk.CTkFrame(sidebar, height=2, fg_color="#34495e")
+    separator.pack(fill="x", pady=5, padx=10)
+    
     btn_config_sidebar = create_sidebar_btn(sidebar, "Configuración", "assets/increase.png", lambda: None)
 
     separator = ctk.CTkFrame(sidebar, height=2, fg_color="#34495e")
     separator.pack(fill="x", pady=20, padx=10)
 
-    btn_salir_sidebar = create_sidebar_btn(sidebar, "Cerrar Sesión", "assets/exit.png", root.quit)
-    
-        # ---------------- CAMBIO DE TEMA ----------------
-    modo_claro = [False]  # Usamos una lista para hacerlo mutable en la función interna
+    btn_salir_sidebar = create_sidebar_btn(sidebar, "Salir", "assets/exit.png", root.quit)
+
+    # Cambio de tema
+    modo_claro = [False]
+    imagenes = {}
 
     def cambiar_tema():
         if modo_claro[0]:
             ctk.set_appearance_mode("dark")
-            btn_tema.configure(text="🌙 Modo Oscuro")
+            imagenes["tema"] = CTkImage(Image.open("assets/moon.png"), size=(20, 20))
+            btn_tema.configure(text="Modo Oscuro", image=imagenes["tema"])
             modo_claro[0] = False
         else:
             ctk.set_appearance_mode("light")
-            btn_tema.configure(text="☀️ Modo Claro")
+            imagenes["tema"] = CTkImage(Image.open("assets/sun.png"), size=(20, 20))
+            btn_tema.configure(text="Modo Claro", image=imagenes["tema"])
             modo_claro[0] = True
 
     btn_tema = ctk.CTkButton(
         sidebar,
-        text="🌙 Modo Oscuro",
+        text="Modo Oscuro",
         command=cambiar_tema,
+        image=CTkImage(Image.open("assets/moon.png"), size=(20, 20)),
         **btn_style
     )
     btn_tema.pack(fill="x", padx=10, pady=(5, 20))
 
-
-# ---------------- CARGAR PÁGINA INICIAL ----------------
+    # Cargar pantalla inicial
     abrir_inicio(frame_contenido)
     cambiar_boton_activo(btn_inicio_sidebar)
-
-    # Mostrar contenido inicial
 
     root.mainloop()
