@@ -9,7 +9,7 @@ def lanzar_ventana_principal():
 
     
     root = ctk.CTk()
-
+    root.iconbitmap("assets/cecati-122.ico")
 # Obtener tamaño de pantalla
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
