@@ -10,9 +10,6 @@ def obtener_fecha_actual():
 def mostrar_formulario_ingresos(frame_padre):
     for widget in frame_padre.winfo_children():
         widget.destroy()
-        
-    ctk.set_appearance_mode("light")  # Modo claro
-    ctk.set_default_color_theme("blue")
 
     titulo = ctk.CTkLabel(frame_padre, text="Póliza de Ingresos", font=("Arial", 28, "bold"))
     titulo.pack(pady=30)
@@ -22,7 +19,7 @@ def mostrar_formulario_ingresos(frame_padre):
     contenedor_principal.pack(fill="both", expand=True)
 
     # --- CONTENIDO CON SCROLL ---
-    contenedor_general = ctk.CTkScrollableFrame(contenedor_principal, fg_color="#DBDBDB", corner_radius=15)
+    contenedor_general = ctk.CTkScrollableFrame(contenedor_principal, fg_color="transparent", corner_radius=15)
     contenedor_general.pack(fill="both", expand=True, padx=30, pady=(10, 0))  # sin padding abajo
 
     for i in range(3):
