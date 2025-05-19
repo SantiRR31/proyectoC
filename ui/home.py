@@ -1,10 +1,22 @@
 import tkinter as tk
 import customtkinter as ctk
-from ui.formIngresosDiarios import mostrar_formulario_ingresos
-from styles.styles import estilo_btn
+from styles.styles import (
+    btn_style,
+    COLOR_FONDO,
+    COLOR_ACTIVO,
+    COLOR_INACTIVO,
+    COLOR_SEPARADOR,
+    FUENTE_TITULO,
+    FUENTE_MENU,
+    FUENTE_SUBMENU,
+    COLOR_TEXTO
+)
 from ui.inicio_content import mostrar_inicio
+from ui.egresos import mostrar_formulario_egresos
+from ui.formIngresosDiarios import mostrar_formulario_ingresos
 from PIL import Image
 from customtkinter import CTkImage
+
 
 def lanzar_ventana_principal():
     ctk.set_appearance_mode("dark")
@@ -15,12 +27,12 @@ def lanzar_ventana_principal():
     root.title("Ventana Principal")
     root.geometry("1280x720")
     root.minsize(640, 720)
-    root.configure(fg_color="#2c3e50")
+    root.configure(fg_color=COLOR_FONDO)
 
     # ---------------- HEADER ----------------
-    header = ctk.CTkFrame(root, height=60, fg_color="#2c3e50", corner_radius=0)
+    header = ctk.CTkFrame(root, height=60, fg_color=COLOR_FONDO, corner_radius=0)
     header.pack(fill="x")
-    titulo = ctk.CTkLabel(header, text="Sistema de Gestión", font=("Arial", 24, "bold"), text_color="white")
+    titulo = ctk.CTkLabel(header, text="Sistema de Gestión", font= FUENTE_TITULO , text_color= COLOR_TEXTO)
     titulo.pack(pady=10)
 
     # ---------------- MAIN CONTAINER ----------------
@@ -33,8 +45,6 @@ def lanzar_ventana_principal():
     main_container.grid_columnconfigure(1, weight=1)  # Content sí se expande
 
     # Colores y botones
-    COLOR_ACTIVO = "#5b44e0"
-    COLOR_INACTIVO = "transparent"
     sidebar_buttons = []
 
     def cambiar_boton_activo(boton_activo):
@@ -44,16 +54,7 @@ def lanzar_ventana_principal():
             else:
                 btn.configure(fg_color=COLOR_INACTIVO)
 
-    btn_style = {
-        "fg_color": COLOR_INACTIVO,
-        "hover_color": "#34495e",
-        "text_color": "white",
-        "anchor": "w",
-        "font": ("Arial", 14),
-        "height": 40,
-        "corner_radius": 5
-    }
-
+    
     def create_sidebar_btn(parent, text, image_path, command):
         image = CTkImage(Image.open(image_path), size=(20, 20))
         def wrapped_command():
@@ -64,19 +65,19 @@ def lanzar_ventana_principal():
         return btn
 
     # ---------------- SIDEBAR ----------------
-    sidebar = ctk.CTkFrame(main_container, width=220, fg_color="#2c3e50", corner_radius=0)
+    sidebar = ctk.CTkFrame(main_container, width=220, fg_color = COLOR_FONDO, corner_radius=0)
     sidebar.grid(row=0, column=0, sticky="ns")
 
-    sidebar_title = ctk.CTkLabel(sidebar, text="MENÚ PRINCIPAL", font=("Arial", 16, "bold"), text_color="white")
+    sidebar_title = ctk.CTkLabel(sidebar, text="MENÚ PRINCIPAL", font=FUENTE_MENU, text_color= COLOR_TEXTO)
     sidebar_title.pack(pady=(20, 10),)
-    separator = ctk.CTkFrame(sidebar, height=2, fg_color="#34495e")
+    separator = ctk.CTkFrame(sidebar, height=2, fg_color= COLOR_SEPARADOR)
     separator.pack(fill="x", pady=5, padx=10)
     
     
 
 
     # ---------------- CONTENIDO PRINCIPAL ----------------
-    content_frame = ctk.CTkFrame(main_container, fg_color="transparent")
+    content_frame = ctk.CTkFrame(main_container, fg_color= COLOR_INACTIVO)
     content_frame.grid(row=0, column=1, sticky="nsew", padx=20, pady=20)
 
     # ÁREA DE CONTENIDO DINÁMICO
@@ -94,6 +95,11 @@ def lanzar_ventana_principal():
         for widget in contenedor.winfo_children():
             widget.destroy()
         mostrar_inicio(contenedor)
+        
+    def abrir_formulario_egresos(contenedor):
+        for widget in contenedor.winfo_children():
+            widget.destroy()
+        mostrar_formulario_egresos(contenedor)
 
     def limpiar_contenido():
         for widget in frame_contenido.winfo_children():
@@ -101,32 +107,32 @@ def lanzar_ventana_principal():
 
     # Botones del sidebar
     btn_inicio_sidebar = create_sidebar_btn(sidebar, "Inicio", "assets/home.png", lambda: abrir_inicio(frame_contenido))
-    sidebar_subtitle = ctk.CTkLabel(sidebar, text="Pólizas", font=("Arial", 12), text_color="white")
+    sidebar_subtitle = ctk.CTkLabel(sidebar, text="Pólizas", font=FUENTE_SUBMENU, text_color= COLOR_TEXTO)
     sidebar_subtitle.pack(pady=5,)
-    separator = ctk.CTkFrame(sidebar, height=2, fg_color="#34495e")
+    separator = ctk.CTkFrame(sidebar, height=2, fg_color= COLOR_SEPARADOR)
     separator.pack(fill="x", pady=5, padx=10)
     
     
     btn_ingresos_sidebar = create_sidebar_btn(sidebar, "Ingresos", "assets/increase.png", lambda: abrir_formulario(frame_contenido))
-    btn_clientes_sidebar = create_sidebar_btn(sidebar, "Egresos", "assets/increase.png", lambda: None)
+    btn_clientes_sidebar = create_sidebar_btn(sidebar, "Egresos", "assets/decrease.png", lambda: abrir_formulario_egresos(frame_contenido))
     
-    sidebar_subtitle = ctk.CTkLabel(sidebar, text="Reportes", font=("Arial", 12), text_color="white")
+    sidebar_subtitle = ctk.CTkLabel(sidebar, text="Reportes", font=FUENTE_SUBMENU, text_color= COLOR_TEXTO)
     sidebar_subtitle.pack(pady=5,)
-    separator = ctk.CTkFrame(sidebar, height=2, fg_color="#34495e")
+    separator = ctk.CTkFrame(sidebar, height=2, fg_color= COLOR_SEPARADOR)
     separator.pack(fill="x", pady=5, padx=10)
     
     
     btn_reportes_sidebar = create_sidebar_btn(sidebar, "Reportes", "assets/increase.png", lambda: None)
     
     
-    sidebar_subtitle = ctk.CTkLabel(sidebar, text="Informes", font=("Arial", 12), text_color="white")
+    sidebar_subtitle = ctk.CTkLabel(sidebar, text="Informes", font= FUENTE_SUBMENU, text_color= COLOR_TEXTO)
     sidebar_subtitle.pack(pady=5,)
-    separator = ctk.CTkFrame(sidebar, height=2, fg_color="#34495e")
+    separator = ctk.CTkFrame(sidebar, height=2, fg_color=COLOR_SEPARADOR)
     separator.pack(fill="x", pady=5, padx=10)
     
     btn_config_sidebar = create_sidebar_btn(sidebar, "Configuración", "assets/increase.png", lambda: None)
 
-    separator = ctk.CTkFrame(sidebar, height=2, fg_color="#34495e")
+    separator = ctk.CTkFrame(sidebar, height=2, fg_color= COLOR_SEPARADOR)
     separator.pack(fill="x", pady=20, padx=10)
 
     btn_salir_sidebar = create_sidebar_btn(sidebar, "Salir", "assets/exit.png", root.quit)
