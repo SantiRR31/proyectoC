@@ -314,9 +314,9 @@ def mostrar_formulario_ingresos(frame_padre):
     validacion_totales.pack(side="left", padx=(0, 10))
     
     
-    crear_boton_imagen(botones_frame,"Ver Descargas", "assets/look.png",btn_guardar_style,abrir_carpeta,side ="right",padx= 10)    
+    """ crear_boton_imagen(botones_frame,"Ver Descargas", "assets/look.png",btn_guardar_style,abrir_carpeta,side ="right",padx= 10)    
     btn_guardar = crear_boton_imagen(botones_frame, "Guardar", "assets/check.png", btn_guardar_style, None, side="right", padx=10)
-    btn_descargar = crear_boton_imagen(botones_frame, "Descargar", "assets/downlo.png", btn_descargar_style, None, side="right", padx=10)
+    btn_descargar = crear_boton_imagen(botones_frame, "Descargar", "assets/downlo.png", btn_descargar_style, None, side="right", padx=10) """
 
     imgGenerarReporte = Image.open("assets/generate.png")
     btn_generar_reporte = ctk.CTkButton(

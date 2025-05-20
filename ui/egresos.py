@@ -24,7 +24,6 @@ from styles.styles import (
     COLOR_VALIDACION_ERROR,
     COLOR_VALIDACION_NEUTRO,
 )
-
 def mostrar_formulario_egresos(frame_padre):
     for widget in frame_padre.winfo_children():
         widget.destroy()
