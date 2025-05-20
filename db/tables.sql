@@ -31,3 +31,4 @@ INSERT INTO partidasIngresos (partida, denominacion) VALUES
 SELECT * FROM partidasIngresos;
 
 
+

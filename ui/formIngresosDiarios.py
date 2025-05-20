@@ -4,9 +4,28 @@ import sqlite3
 import datetime
 from PIL import Image
 from customtkinter import CTkImage
+from widgets.widgets import crear_boton_imagen
 import xlwings as xw
 import os
 from tkinter import messagebox
+
+
+from styles.styles import (
+    FUENTE_FORMULARIO_T,
+    FUENTE_FORMULARIO_S,
+    FONDO_CONTENEDORES,
+    ENTRADA_FRAME_C,
+    FUENTE_LABEL,
+    FUENTE_SECCION_TITULO,
+    FUENTE_VALIDACION,
+    btn_eliminar_style,
+    btn_agregar_style,
+    btn_guardar_style,
+    btn_descargar_style,
+    COLOR_VALIDACION_OK,
+    COLOR_VALIDACION_ERROR,
+    COLOR_VALIDACION_NEUTRO,
+)
 
 
 def obtener_fecha_actual():
@@ -252,41 +271,8 @@ def mostrar_formulario_ingresos(frame_padre):
     
     validacion_totales = ctk.CTkLabel(botones_frame, text="❌", font=("Arial", 20))
     validacion_totales.pack(side="left", padx=(0, 10))
-
-    imgVerDescargas = Image.open("assets/look.png")
-    btn_ver_descargas = ctk.CTkButton(
-        botones_frame,
-        text="Ver Descargas",
-        width=120,
-        fg_color="#004b8f", 
-        hover_color="#0065a5", 
-        corner_radius=32,
-        image=CTkImage(imgVerDescargas, size=(20, 20)),
-        command=abrir_carpeta
-    )
-    btn_ver_descargas.pack(side="right", padx=10)
     
-    imgBtnGuardar = Image.open("assets/check.png")
-    btn_guardar = ctk.CTkButton(
-        botones_frame, 
-        text="Guardar", 
-        width=120, 
-        fg_color="#004b8f", 
-        hover_color="#0065a5", 
-        corner_radius=32,
-        image=CTkImage(imgBtnGuardar, size=(20, 20))  # nota: es "image", no "Image"
-    )
-    btn_guardar.pack(side="right", padx=10)
-
-    imgBtnDescargar = Image.open("assets/downlo.png")
-    btn_descargar = ctk.CTkButton(
-        botones_frame,
-        text="Descargar",
-        width=120,
-        fg_color="#008d62",
-        hover_color="#2ca880",
-        corner_radius=32,
-        image=CTkImage(imgBtnDescargar, size=(20, 20)), # nota: es "image", no "Image",
-        command=guardar_Ingresos
-    )
-    btn_descargar.pack(side="right", padx=10)
+    
+    crear_boton_imagen(botones_frame,"Ver Descargas", "assets/look.png",btn_guardar_style,abrir_carpeta,side ="right",padx= 10)    
+    btn_guardar = crear_boton_imagen(botones_frame, "Guardar", "assets/check.png", btn_guardar_style, None, side="right", padx=10)
+    btn_descargar = crear_boton_imagen(botones_frame, "Descargar", "assets/downlo.png", btn_descargar_style, None, side="right", padx=10)
