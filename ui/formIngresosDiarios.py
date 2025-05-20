@@ -8,6 +8,7 @@ from widgets.widgets import crear_boton_imagen
 import xlwings as xw
 import os
 from tkinter import messagebox
+from functions import genRegIngresos
 
 
 from styles.styles import (
@@ -250,10 +251,50 @@ def mostrar_formulario_ingresos(frame_padre):
             messagebox.showerror("Error al guardar", f"Ocurrió un error:\n{e}")
             
     def abrir_carpeta():
-        carpeta_descargas = os.path.expanduser("~/Documentos/Cecati122/PolizasDeIngresos")
+        carpeta_descargas = os.path.expanduser("~/Documentos/Cecati122")
         if not os.path.exists(carpeta_descargas):
             os.makedirs(carpeta_descargas, exist_ok=True)
         os.startfile(carpeta_descargas)
+        
+    def guardar_datos_en_db():
+        try:
+            conn = sqlite3.connect('prueba.db')
+            cursor = conn.cursor()
+
+            # --- Guardar datos en polizasIngresos ---
+            fecha = fecha_policia.get().strip()
+            no = no_poliza.get().strip()
+            banco = banco_o_caja.get().strip()
+            importe = cuanto_pago.get().strip()
+            nota_texto = nota.get().strip()
+
+            if not (fecha and no and banco and importe):
+                messagebox.showerror("Error", "Por favor completa todos los campos obligatorios.")
+                return
+
+            cursor.execute("""
+                INSERT INTO polizasIngresos (fecha, noPoliza, banco, importe, nota)
+                VALUES (?, ?, ?, ?, ?)
+            """, (fecha, no, banco, float(importe), nota_texto))
+
+            # --- Guardar entradas en detallePolizaIngreso ---
+            for clave_entry, _, abono_entry in entradas:
+                clave = clave_entry.get().strip()
+                abono = abono_entry.get().strip()
+                if clave and abono:
+                    cursor.execute("""
+                        INSERT INTO detallePolizaIngreso (noPoliza, clave, abono)
+                        VALUES (?, ?, ?)
+                    """, (no, clave, float(abono)))
+
+            conn.commit()
+            conn.close()
+
+            messagebox.showinfo("Éxito", "Datos guardados correctamente.")
+        
+        except Exception as e:
+            messagebox.showerror("Error al guardar", f"Ocurrió un error: {e}")
+
     
 
     btn_agregar_fila = ctk.CTkButton(seccion_filas, text="➕ Agregar", command=agregar_fila, corner_radius=32,
@@ -276,3 +317,55 @@ def mostrar_formulario_ingresos(frame_padre):
     crear_boton_imagen(botones_frame,"Ver Descargas", "assets/look.png",btn_guardar_style,abrir_carpeta,side ="right",padx= 10)    
     btn_guardar = crear_boton_imagen(botones_frame, "Guardar", "assets/check.png", btn_guardar_style, None, side="right", padx=10)
     btn_descargar = crear_boton_imagen(botones_frame, "Descargar", "assets/downlo.png", btn_descargar_style, None, side="right", padx=10)
+
+    imgGenerarReporte = Image.open("assets/generate.png")
+    btn_generar_reporte = ctk.CTkButton(
+        botones_frame,
+        text="Generar Reporte Mensual",
+        width=120,
+        fg_color="#004b8f", 
+        hover_color="#0065a5", 
+        corner_radius=32,
+        image=CTkImage(imgGenerarReporte, size=(20, 20)),
+        command=genRegIngresos.generar_reporte_xlwings
+    )
+    btn_generar_reporte.pack(side="right", padx=10)
+    
+    imgVerDescargas = Image.open("assets/look.png")
+    btn_ver_descargas = ctk.CTkButton(
+        botones_frame,
+        text="Ver Descargas",
+        width=120,
+        fg_color="#004b8f", 
+        hover_color="#0065a5", 
+        corner_radius=32,
+        image=CTkImage(imgVerDescargas, size=(20, 20)),
+        command=abrir_carpeta
+    )
+    btn_ver_descargas.pack(side="right", padx=10)
+    
+    imgBtnGuardar = Image.open("assets/check.png")
+    btn_guardar = ctk.CTkButton(
+        botones_frame, 
+        text="Guardar", 
+        width=120, 
+        fg_color="#004b8f", 
+        hover_color="#0065a5", 
+        corner_radius=32,
+        image=CTkImage(imgBtnGuardar, size=(20, 20)),  # nota: es "image", no "Image"
+        command=guardar_datos_en_db
+    )
+    btn_guardar.pack(side="right", padx=10)
+
+    imgBtnDescargar = Image.open("assets/downlo.png")
+    btn_descargar = ctk.CTkButton(
+        botones_frame,
+        text="Descargar",
+        width=120,
+        fg_color="#008d62",
+        hover_color="#2ca880",
+        corner_radius=32,
+        image=CTkImage(imgBtnDescargar, size=(20, 20)), # nota: es "image", no "Image",
+        command=guardar_Ingresos
+    )
+    btn_descargar.pack(side="right", padx=10)
