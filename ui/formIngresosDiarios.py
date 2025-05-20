@@ -4,10 +4,29 @@ import sqlite3
 import datetime
 from PIL import Image
 from customtkinter import CTkImage
+from widgets.widgets import crear_boton_imagen
 import xlwings as xw
 import os
 from tkinter import messagebox
 from functions import genRegIngresos
+
+
+from styles.styles import (
+    FUENTE_FORMULARIO_T,
+    FUENTE_FORMULARIO_S,
+    FONDO_CONTENEDORES,
+    ENTRADA_FRAME_C,
+    FUENTE_LABEL,
+    FUENTE_SECCION_TITULO,
+    FUENTE_VALIDACION,
+    btn_eliminar_style,
+    btn_agregar_style,
+    btn_guardar_style,
+    btn_descargar_style,
+    COLOR_VALIDACION_OK,
+    COLOR_VALIDACION_ERROR,
+    COLOR_VALIDACION_NEUTRO,
+)
 
 
 def obtener_fecha_actual():
@@ -293,6 +312,11 @@ def mostrar_formulario_ingresos(frame_padre):
     
     validacion_totales = ctk.CTkLabel(botones_frame, text="❌", font=("Arial", 20))
     validacion_totales.pack(side="left", padx=(0, 10))
+    
+    
+    """ crear_boton_imagen(botones_frame,"Ver Descargas", "assets/look.png",btn_guardar_style,abrir_carpeta,side ="right",padx= 10)    
+    btn_guardar = crear_boton_imagen(botones_frame, "Guardar", "assets/check.png", btn_guardar_style, None, side="right", padx=10)
+    btn_descargar = crear_boton_imagen(botones_frame, "Descargar", "assets/downlo.png", btn_descargar_style, None, side="right", padx=10) """
 
     imgGenerarReporte = Image.open("assets/generate.png")
     btn_generar_reporte = ctk.CTkButton(

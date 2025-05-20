@@ -89,17 +89,21 @@ def lanzar_ventana_principal():
     def abrir_formulario(contenedor):
         for widget in contenedor.winfo_children():
             widget.destroy()
+        contenedor.update_idletasks()  # << fuerza refresco visual
         mostrar_formulario_ingresos(contenedor)
 
     def abrir_inicio(contenedor):
         for widget in contenedor.winfo_children():
             widget.destroy()
+        contenedor.update_idletasks()
         mostrar_inicio(contenedor)
-        
+
     def abrir_formulario_egresos(contenedor):
         for widget in contenedor.winfo_children():
             widget.destroy()
+        contenedor.update_idletasks()
         mostrar_formulario_egresos(contenedor)
+
 
     def limpiar_contenido():
         for widget in frame_contenido.winfo_children():
