@@ -1,0 +1,5 @@
+# Ignorar archivos temporales de Excel
+~$*.xlsx
+*.pyc
+__pycache__/
+
