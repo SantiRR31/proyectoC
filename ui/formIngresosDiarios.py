@@ -8,7 +8,7 @@ from widgets.widgets import crear_boton_imagen
 import xlwings as xw
 import os
 from tkinter import messagebox
-from functions import genRegIngresos
+from functions import genRegIngresos, funcions
 
 
 from styles.styles import (
@@ -186,7 +186,7 @@ def mostrar_formulario_ingresos(frame_padre):
             fg_color="#d10d2f", 
             hover_color="#d93954", 
             corner_radius=5,
-            command=eliminar_fila
+            command=lambda f=fila_frame, t=tupla: eliminar_fila(f, t)
         )
         btn_eliminar.grid(row=0, column=3, padx=5)
         entradas.append(tupla)
@@ -250,12 +250,6 @@ def mostrar_formulario_ingresos(frame_padre):
         except Exception as e:
             messagebox.showerror("Error al guardar", f"Ocurrió un error:\n{e}")
             
-    def abrir_carpeta():
-        carpeta_descargas = os.path.expanduser("~/Documentos/Cecati122")
-        if not os.path.exists(carpeta_descargas):
-            os.makedirs(carpeta_descargas, exist_ok=True)
-        os.startfile(carpeta_descargas)
-        
     def guardar_datos_en_db():
         try:
             conn = sqlite3.connect('prueba.db')
@@ -327,7 +321,7 @@ def mostrar_formulario_ingresos(frame_padre):
         hover_color="#0065a5", 
         corner_radius=32,
         image=CTkImage(imgGenerarReporte, size=(20, 20)),
-        command=genRegIngresos.generar_reporte_xlwings
+        command=genRegIngresos.confirmar_y_generar
     )
     btn_generar_reporte.pack(side="right", padx=10)
     
@@ -340,7 +334,7 @@ def mostrar_formulario_ingresos(frame_padre):
         hover_color="#0065a5", 
         corner_radius=32,
         image=CTkImage(imgVerDescargas, size=(20, 20)),
-        command=abrir_carpeta
+        command=funcions.abrir_carpeta
     )
     btn_ver_descargas.pack(side="right", padx=10)
     

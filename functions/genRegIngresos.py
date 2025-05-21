@@ -4,6 +4,11 @@ import os
 import xlwings as xw
 from tkinter import messagebox
 
+def confirmar_y_generar():
+    respuesta = messagebox.askyesno("Generar reporte","¿Está seguro de generar el reporte?")
+    if respuesta == True:
+        generar_reporte_xlwings()
+
 def generar_reporte_xlwings():
     try:
         conn = sqlite3.connect('prueba.db')
@@ -52,11 +57,11 @@ def generar_reporte_xlwings():
 
         # Escribir encabezados de claves
         col_inicio = 4
-        print("Escribiendo claves en encabezado:")
-        print("Claves obtenidas del mes:", claves_mes)
+        #print("Escribiendo claves en encabezado:")
+        #print("Claves obtenidas del mes:", claves_mes)
         for idx, clave in enumerate(claves_mes):
             celda = sht.range((8, col_inicio + idx))
-            print(f"Escribiendo clave '{clave}' en celda {celda.address}")
+            #print(f"Escribiendo clave '{clave}' en celda {celda.address}")
             celda.value = clave
 
         # Abonos por clave por cada póliza
@@ -68,11 +73,11 @@ def generar_reporte_xlwings():
                 WHERE noPoliza = ?
             """, (no_poliza,))
             abonos = dict(cursor.fetchall())
-            print(f"Abonos de póliza {no_poliza}: {abonos}")
+            #print(f"Abonos de póliza {no_poliza}: {abonos}")
             for col_idx, clave in enumerate(claves_mes):
                 valor = abonos.get(clave, 0)
                 celda = sht.range((fila, col_inicio + col_idx))
-                print(f"  Poniendo valor {valor} en {celda.address}")
+                #print(f"  Poniendo valor {valor} en {celda.address}")
                 celda.value = valor
 
         # Guardar el archivo
@@ -84,7 +89,7 @@ def generar_reporte_xlwings():
         app.quit()
         conn.close()
 
-        print(f"Reporte generado: {archivo}")
+        #print(f"Reporte generado: {archivo}")
         messagebox.showinfo("Reporte generado", f"El reporte se ha generado exitosamente:\n{archivo}")
         return archivo
 

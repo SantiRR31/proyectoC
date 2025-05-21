@@ -14,6 +14,7 @@ from styles.styles import (
 from ui.inicio_content import mostrar_inicio
 from ui.egresos import mostrar_formulario_egresos
 from ui.formIngresosDiarios import mostrar_formulario_ingresos
+from ui.infRealIngresos import mostrar_informe_real_ingresos
 from PIL import Image
 from customtkinter import CTkImage
 
@@ -103,6 +104,12 @@ def lanzar_ventana_principal():
             widget.destroy()
         contenedor.update_idletasks()
         mostrar_formulario_egresos(contenedor)
+        
+    def abrir_informe_real_ingresos(contenedor):
+        for widget in contenedor.winfo_children():
+            widget.destroy()
+        contenedor.update_idletasks()
+        mostrar_informe_real_ingresos(contenedor)
 
 
     def limpiar_contenido():
@@ -134,7 +141,7 @@ def lanzar_ventana_principal():
     separator = ctk.CTkFrame(sidebar, height=2, fg_color=COLOR_SEPARADOR)
     separator.pack(fill="x", pady=5, padx=10)
     
-    btn_config_sidebar = create_sidebar_btn(sidebar, "Configuración", "assets/increase.png", lambda: None)
+    btn_config_sidebar = create_sidebar_btn(sidebar, "Informe Real de Ingresos", "assets/report.png", lambda: abrir_informe_real_ingresos(frame_contenido))
 
     separator = ctk.CTkFrame(sidebar, height=2, fg_color= COLOR_SEPARADOR)
     separator.pack(fill="x", pady=20, padx=10)
