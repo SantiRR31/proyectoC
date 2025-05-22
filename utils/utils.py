@@ -18,12 +18,44 @@ def abrir_carpeta():
 
 def abrir_carpeta(ruta):
     import os
-    carpeta = os.path.dirname(os.path.abspath(ruta))
+    # Expandir ~ al directorio del usuario
+    ruta_expandida = os.path.expanduser(ruta)
+    carpeta = os.path.dirname(os.path.abspath(ruta_expandida))
+    
+    # Crear la carpeta si no existe
     if not os.path.exists(carpeta):
         os.makedirs(carpeta, exist_ok=True)
+    
+    # Abrir la carpeta
     os.startfile(carpeta)
 
-        
+
+
+
+def convertir_a_mayusculas(entry_widget, event=None):
+    texto = entry_widget.get()
+    entry_widget.delete(0, tk.END)
+    entry_widget.insert(0, texto.upper())
+    
+    
+    
+def solo_numeros_enteros(texto):
+    return texto.isdigit() or texto == ""
+
+def solo_numeros_decimales(texto):
+    if texto == "":
+        return True
+    try:
+        float(texto)
+        return True
+    except ValueError:
+        return False
+
+def solo_letras(texto):
+    return all(letra.isalpha() or letra.isspace() for letra in texto)
+
+def solo_numeros_y_letras(texto):
+    return all(letra.isalnum() or letra.isspace() for letra in texto)
         
 def numero_a_letras_mxn(numero):
     """
@@ -93,3 +125,6 @@ def numero_a_letras_mxn(numero):
         letras = letras.strip()
 
     return f"({letras} PESOS {centavos:02d}/100 M.N.)"
+
+
+
