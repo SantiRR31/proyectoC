@@ -15,6 +15,7 @@ from ui.inicio_content import mostrar_inicio
 from ui.egresos import mostrar_formulario_egresos
 from ui.formIngresosDiarios import mostrar_formulario_ingresos
 from ui.infRealIngresos import mostrar_informe_real_ingresos
+from ui.ajustes import mostrar_ajustes
 from PIL import Image
 from customtkinter import CTkImage
 
@@ -29,6 +30,8 @@ def lanzar_ventana_principal():
     root.geometry("1280x720")
     root.minsize(640, 720)
     root.configure(fg_color=COLOR_FONDO)
+    
+    clave_cecati = tk.StringVar(value="22DBT0005P")
 
     # ---------------- HEADER ----------------
     header = ctk.CTkFrame(root, height=60, fg_color=COLOR_FONDO, corner_radius=0)
@@ -109,8 +112,13 @@ def lanzar_ventana_principal():
         for widget in contenedor.winfo_children():
             widget.destroy()
         contenedor.update_idletasks()
-        mostrar_informe_real_ingresos(contenedor)
+        mostrar_informe_real_ingresos(contenedor, clave_cecati)
 
+    def abrir_ajustes(contenedor):
+        for widget in contenedor.winfo_children():
+            widget.destroy()
+        contenedor.update_idletasks()
+        mostrar_ajustes(contenedor, clave_cecati)
 
     def limpiar_contenido():
         for widget in frame_contenido.winfo_children():
@@ -141,13 +149,16 @@ def lanzar_ventana_principal():
     separator = ctk.CTkFrame(sidebar, height=2, fg_color=COLOR_SEPARADOR)
     separator.pack(fill="x", pady=5, padx=10)
     
-    btn_config_sidebar = create_sidebar_btn(sidebar, "Informe Real de Ingresos", "assets/report.png", lambda: abrir_informe_real_ingresos(frame_contenido))
+    btn_inf_real_sidebar = create_sidebar_btn(sidebar, "Informe Real de Ingresos", "assets/report.png", lambda: abrir_informe_real_ingresos(frame_contenido))
 
     separator = ctk.CTkFrame(sidebar, height=2, fg_color= COLOR_SEPARADOR)
     separator.pack(fill="x", pady=20, padx=10)
 
     btn_salir_sidebar = create_sidebar_btn(sidebar, "Salir", "assets/exit.png", root.quit)
 
+
+    btn_config = create_sidebar_btn(sidebar, "Ajustes", "assets/config.png", lambda: abrir_ajustes(frame_contenido))
+    
     # Cambio de tema
     modo_claro = [False]
     imagenes = {}
