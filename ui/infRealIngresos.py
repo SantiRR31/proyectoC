@@ -26,12 +26,12 @@ from styles.styles import (
 )
 
 #Entradas de arriba del documento
-clave_cecati = '22DBT0005P'
+#clave_cecati = '22DBT0005P'
 n_cuenta_cheques = 1056897860
 fecha_elaboracion = obtener_fecha_actual()
 #periodo_informe = False
 
-def mostrar_informe_real_ingresos(frame_padre):
+def mostrar_informe_real_ingresos(frame_padre, clave_cecati):
     for widget in frame_padre.winfo_children():
         widget.destroy()
         
@@ -60,8 +60,8 @@ def mostrar_informe_real_ingresos(frame_padre):
     
     # Denominación
     crear_label(entrada_frame, "Clave Cecati:", FUENTE_LABEL, row=6, column=0, padx=(10, 5), pady=25, sticky="w")
-    clav_cecati = crear_entry(entrada_frame, clave_cecati, 6, 1, padx=(5, 10), pady=5, sticky="ew")
-    clav_cecati.insert(0, clave_cecati)
+    clav_cecati = crear_entry(entrada_frame, clave_cecati.get(), 6, 1, padx=(5, 10), pady=5, sticky="ew")
+    clav_cecati.insert(0, clave_cecati.get())
     
     # Cargo
     crear_label(entrada_frame, "No. Cuenta Cheques:", FUENTE_LABEL, row=6, column=2, padx=(10, 5), pady=5, sticky="w")
