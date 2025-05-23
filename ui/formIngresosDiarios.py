@@ -9,6 +9,8 @@ import xlwings as xw
 import os
 from tkinter import messagebox
 from functions import genRegIngresos, funcions
+from tkcalendar import DateEntry
+
 
 
 from styles.styles import (
@@ -67,10 +69,10 @@ def mostrar_formulario_ingresos(frame_padre):
     # Fila 1 - Fecha y Número de Póliza
     lbl_fecha = ctk.CTkLabel(entrada_frame, text="Fecha:", font=("Arial", 14))
     lbl_fecha.grid(row=0, column=0, padx=(10,5), pady=5, sticky="w")
-    fecha_policia = ctk.CTkEntry(entrada_frame, placeholder_text="📅 Fecha de ingreso")
+    fecha_policia = DateEntry(entrada_frame, placeholder_text="📅 Fecha de ingreso")
     fecha_policia.grid(row=0, column=1, padx=(5,10), pady=5, sticky="ew")
-    fecha_policia.insert(0, obtener_fecha_actual())
-    fecha_policia.configure(state="readonly")
+    #fecha_policia.insert(0, obtener_fecha_actual())
+    #fecha_policia.configure(state="readonly")
     
     lbl_no_poliza = ctk.CTkLabel(entrada_frame, text="No. Póliza:", font=("Arial", 14))
     lbl_no_poliza.grid(row=0, column=2, padx=(10,5), pady=5, sticky="w")
@@ -235,7 +237,8 @@ def mostrar_formulario_ingresos(frame_padre):
             # Crear carpeta de destino
             fecha_hoy = datetime.datetime.now().strftime("%d-%m-%Y")
             nombre_archivo = f"Poliza_ingresos_{fecha_hoy}.xlsx"
-            carpeta_descargas = os.path.expanduser("~/Documentos/Cecati122/PolizasDeIngresos")
+            carpetaBase = r"C:\Cecati122"
+            carpeta_descargas = os.path.join(carpetaBase, "PolizasDeIngresos")
             os.makedirs(carpeta_descargas, exist_ok=True)
             ruta_completa = os.path.join(carpeta_descargas, nombre_archivo)
 
@@ -334,7 +337,7 @@ def mostrar_formulario_ingresos(frame_padre):
         hover_color="#0065a5", 
         corner_radius=32,
         image=CTkImage(imgVerDescargas, size=(20, 20)),
-        command=funcions.abrir_carpeta
+        command=lambda: funcions.abrir_carpeta()
     )
     btn_ver_descargas.pack(side="right", padx=10)
     

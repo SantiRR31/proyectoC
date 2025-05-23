@@ -2,16 +2,19 @@ import tkinter as tk
 import datetime
 import os
 import sqlite3
+import subprocess
 
 def obtener_fecha_actual():
     """Devuelve la fecha actual en formato 'DD-MM-AAAA'."""
     return datetime.datetime.now().strftime("%d-%m-%Y")
 
+
 def abrir_carpeta():
-    carpeta_descargas = os.path.expanduser("~/Documentos/Cecati122")
+    carpeta_descargas = r"C:\Cecati122"
     if not os.path.exists(carpeta_descargas):
-        os.makedirs(carpeta_descargas, exist_ok=True)
-    os.startfile(carpeta_descargas)
+        os.makedirs(carpeta_descargas)
+    
+    subprocess.Popen(f'explorer "{carpeta_descargas}"')
     
 def buscar_denominacion_db(clave):
         conn = sqlite3.connect('prueba.db')
