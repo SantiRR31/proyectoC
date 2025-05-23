@@ -4,9 +4,11 @@ import sqlite3
 import datetime
 from PIL import Image
 from customtkinter import CTkImage
+from utils.utils import convertir_a_mayusculas
 from widgets.widgets import crear_boton_imagen
 import xlwings as xw
 import os
+from tkcalendar import DateEntry
 from tkinter import messagebox
 from functions import genRegIngresos, funcions
 
@@ -65,12 +67,24 @@ def mostrar_formulario_ingresos(frame_padre):
     entrada_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)
     
     # Fila 1 - Fecha y Número de Póliza
-    lbl_fecha = ctk.CTkLabel(entrada_frame, text="Fecha:", font=("Arial", 14))
+    """ lbl_fecha = ctk.CTkLabel(entrada_frame, text="Fecha:", font=("Arial", 14))
     lbl_fecha.grid(row=0, column=0, padx=(10,5), pady=5, sticky="w")
     fecha_policia = ctk.CTkEntry(entrada_frame, placeholder_text="📅 Fecha de ingreso")
     fecha_policia.grid(row=0, column=1, padx=(5,10), pady=5, sticky="ew")
     fecha_policia.insert(0, obtener_fecha_actual())
-    fecha_policia.configure(state="readonly")
+    fecha_policia.configure(state="readonly") """
+    
+    lbl_fecha = ctk.CTkLabel(entrada_frame, text="Fecha:", font=("Arial", 14))
+    lbl_fecha.grid(row=0, column=0, padx=(10,5), pady=5, sticky="w")
+
+    fecha_policia = DateEntry(
+        entrada_frame,
+        date_pattern="dd/mm/yyyy",  # Ejemplo: 23/may/2025
+        font=("Arial", 14),
+        locale="es_MX"
+    )
+    fecha_policia.grid(row=0, column=1, padx=(5,10), pady=5, sticky="ew")
+
     
     lbl_no_poliza = ctk.CTkLabel(entrada_frame, text="No. Póliza:", font=("Arial", 14))
     lbl_no_poliza.grid(row=0, column=2, padx=(10,5), pady=5, sticky="w")
@@ -93,7 +107,8 @@ def mostrar_formulario_ingresos(frame_padre):
     lbl_nota.grid(row=2, column=0, padx=(10,5), pady=5, sticky="w")
     nota = ctk.CTkEntry(entrada_frame, placeholder_text="📝 Notas adicionales")
     nota.grid(row=2, column=1, columnspan=3, padx=(5,10), pady=5, sticky="ew")
-
+    nota.bind("<KeyRelease>", lambda event: convertir_a_mayusculas(nota, event))
+    
     entrada_frame.grid_columnconfigure((0, 1), weight=1)
 
     # --- SECCIÓN FILAS ADICIONALES ---

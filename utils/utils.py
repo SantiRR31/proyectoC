@@ -8,11 +8,11 @@ def obtener_fecha_actual():
     ahora = datetime.datetime.now()
     return ahora.strftime(f"%d-{meses[ahora.month-1]}%Y")
 
-def abrir_carpeta():
+""" def abrir_carpeta():
     carpeta_descargas = os.path.expanduser("~/Documentos/Cecati122/PolizasDeIngresos")
     if not os.path.exists(carpeta_descargas):
         os.makedirs(carpeta_descargas, exist_ok=True)
-        os.startfile(carpeta_descargas)
+        os.startfile(carpeta_descargas) """
         
     
 

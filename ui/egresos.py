@@ -4,6 +4,7 @@ from tkinter import messagebox
 import customtkinter as ctk
 import xlwings as xw
 from db.egresosDB import buscar_descripcion_db
+from tkcalendar import DateEntry
 from widgets.widgets import (
     crear_label,
     crear_entry,
@@ -68,10 +69,24 @@ def mostrar_formulario_egresos(frame_padre):
     entrada_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)
 
     # Fecha y Número de Póliza
-    crear_label(entrada_frame, "Fecha", FUENTE_LABEL, row=0, column=0, padx=(10, 5), pady=5, sticky="w")
+    """ crear_label(entrada_frame, "Fecha", FUENTE_LABEL, row=0, column=0, padx=(10, 5), pady=5, sticky="w")
     fecha_policia = crear_entry(entrada_frame, "Fecha Póliza...", 0, 1, padx=(5, 10), pady=5, sticky="ew")
     fecha_policia.insert(0, obtener_fecha_actual())
-    fecha_policia.configure(state="readonly")
+    fecha_policia.configure(state="readonly") """
+    
+    
+
+# ...dentro de tu función...
+    lbl_fecha = ctk.CTkLabel(entrada_frame, text="Fecha:", font=("Arial", 14))
+    lbl_fecha.grid(row=0, column=0, padx=(10,5), pady=5, sticky="w")
+
+    fecha_policia = DateEntry(
+        entrada_frame,
+        date_pattern="dd/mm/yyyy",  # Ejemplo: 23/may/2025
+        font=("Arial", 14),
+        locale="es_MX"
+    )
+    fecha_policia.grid(row=0, column=1, padx=(5,10), pady=5, sticky="ew")
 
     crear_label(entrada_frame, "No. Póliza:", FUENTE_LABEL, row=0, column=2, padx=(10, 5), pady=5, sticky="w")
     no_poliza = crear_entry(entrada_frame, "🔢 No. Póliza", 0, 3, padx=(5, 10), pady=5, sticky="ew")
