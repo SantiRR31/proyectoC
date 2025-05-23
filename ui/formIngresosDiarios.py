@@ -4,9 +4,11 @@ import sqlite3
 import datetime
 from PIL import Image
 from customtkinter import CTkImage
+from utils.utils import convertir_a_mayusculas
 from widgets.widgets import crear_boton_imagen
 import xlwings as xw
 import os
+from tkcalendar import DateEntry
 from tkinter import messagebox
 from functions import genRegIngresos, funcions
 from tkcalendar import DateEntry
@@ -97,7 +99,8 @@ def mostrar_formulario_ingresos(frame_padre):
     lbl_nota.grid(row=2, column=0, padx=(10,5), pady=5, sticky="w")
     nota = ctk.CTkEntry(entrada_frame, placeholder_text="📝 Notas adicionales")
     nota.grid(row=2, column=1, columnspan=3, padx=(5,10), pady=5, sticky="ew")
-
+    nota.bind("<KeyRelease>", lambda event: convertir_a_mayusculas(nota, event))
+    
     entrada_frame.grid_columnconfigure((0, 1), weight=1)
 
     # --- SECCIÓN FILAS ADICIONALES ---
