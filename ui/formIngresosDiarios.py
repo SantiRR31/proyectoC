@@ -76,7 +76,9 @@ def mostrar_formulario_ingresos(frame_padre):
     
     lbl_no_poliza = ctk.CTkLabel(entrada_frame, text="No. Póliza:", font=("Arial", 14))
     lbl_no_poliza.grid(row=0, column=2, padx=(10,5), pady=5, sticky="w")
-    no_poliza = ctk.CTkEntry(entrada_frame, placeholder_text="🔢 No. Póliza")
+    num_polizas = [str(i) for i in range(1, 101)]
+    no_poliza = ctk.CTkOptionMenu(entrada_frame, values=num_polizas)
+    no_poliza.set("🔢 No. Póliza")  # Texto inicial
     no_poliza.grid(row=0, column=3, padx=(5,10), pady=5, sticky="ew")
 
     # Fila 2 - Banco y Cargo o Importe
@@ -212,10 +214,11 @@ def mostrar_formulario_ingresos(frame_padre):
             banco = banco_o_caja.get()
             cargo_importe = cuanto_pago.get()
             notaAdicional = nota.get()
-            noPoliza = fecha_policia.get()
-            fecha1 = datetime.datetime.now().strftime("%d")
-            fecha2 = datetime.datetime.now().strftime("%m")
-            fecha3 = datetime.datetime.now().strftime("%Y")
+            noPoliza = no_poliza.get()
+            fecha_ingresada = fecha_policia.get_date()
+            fecha1 = fecha_ingresada.strftime("%d")
+            fecha2 = fecha_ingresada.strftime("%m") 
+            fecha3 = fecha_ingresada.strftime("%y")
 
             hoja.range("A10").value = banco
             hoja.range("AS10").value = cargo_importe
@@ -236,7 +239,7 @@ def mostrar_formulario_ingresos(frame_padre):
 
             # Crear carpeta de destino
             fecha_hoy = datetime.datetime.now().strftime("%d-%m-%Y")
-            nombre_archivo = f"Poliza_ingresos_{fecha_hoy}.xlsx"
+            nombre_archivo = f"Poliza_ingresos_{no_poliza.get()}.xlsx"
             carpetaBase = r"C:\Cecati122"
             carpeta_descargas = os.path.join(carpetaBase, "PolizasDeIngresos")
             os.makedirs(carpeta_descargas, exist_ok=True)
