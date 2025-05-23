@@ -2,6 +2,7 @@ import os
 import xlwings as xw
 from tkinter import messagebox
 from utils.utils import obtener_fecha_actual
+import customtkinter as ctk
 
 def obtener_valores_campos(form):
     return {
@@ -46,7 +47,7 @@ def insertar_entradas_en_hoja(hoja, entradas, fila_inicial=18):
             hoja.range(f"AV{fila_inicial}").value = float(cargo)
             fila_inicial += 1
         else:
-            messagebox.showerror("Error", f"Faltan datos en la fila {i + 1}. Verifica que todos los campos estén completos.")
+            messagebox.showerror("Error", "Faltan datos. Verifica que todos los campos estén completos.")
             return False
     return True
 
@@ -74,4 +75,57 @@ def guardar_egresos(form, entradas):
         wb.close()
     except Exception as e:
         print("Error al guardar:", e)
-        messagebox.showerror("Error", "No se pudo guardar la información. ", e)
+        messagebox.showerror("Error", f"No se pudo guardar la información.\n{e}")
+
+
+#import customtkinter as ctk
+
+class AnimacionDescarga(ctk.CTkToplevel):
+    def __init__(self, master=None):
+        super().__init__(master)
+        self.title("Descargando...")
+        self.geometry("300x300")
+        self.resizable(False, False)
+
+        self.paper = ctk.CTkLabel(self, text="||||\n||||\n||||", 
+                                  fg_color="#EEF0FD", text_color="#D3D4EC",
+                                  corner_radius=5, width=80, height=60,
+                                  anchor="n", font=("Courier", 12))
+        self.paper.place(x=110, y=200)
+
+        self.keyboard = ctk.CTkFrame(self, width=120, height=60, fg_color="#275EFE", corner_radius=10)
+        self.keyboard.place(x=90, y=240)
+
+        self.keys = []
+        key_positions = [(10,10), (30,10), (50,10), (70,10), (90,10),
+                         (20,30), (40,30), (60,30), (80,30)]
+
+        for x, y in key_positions:
+            key = ctk.CTkLabel(self.keyboard, width=10, height=5, text="", fg_color="white", corner_radius=2)
+            key.place(x=x, y=y)
+            self.keys.append(key)
+
+        self.paper_y = 200
+        self.direction = -1
+        self.key_index = 0
+        self.animate()
+
+    def animate(self):
+        self.paper_y += self.direction * 1
+        if self.paper_y < 120 or self.paper_y > 200:
+            self.direction *= -1
+        self.paper.place_configure(y=self.paper_y)
+
+        for i, key in enumerate(self.keys):
+            key.configure(fg_color="white" if i == self.key_index else "#275EFE")
+        self.key_index = (self.key_index + 1) % len(self.keys)
+
+        self.after(100, self.animate)
+
+
+
+
+def descargar_con_animacion(form, entradas):
+    animacion = AnimacionDescarga()
+    animacion.after(10000, animacion.destroy)  # Cierra después de 3 segundos
+    guardar_egresos(form, entradas)  # Ejecuta tu lógica real

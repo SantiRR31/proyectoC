@@ -21,7 +21,7 @@ from utils.utils import (
     solo_numeros_y_letras,
     )
 
-from utils.egresos_utils import guardar_egresos
+from utils.egresos_utils import descargar_con_animacion, guardar_egresos
 from datetime import datetime
     
 from styles.styles import (
@@ -299,10 +299,10 @@ def mostrar_formulario_egresos(frame_padre):
     "Descargar",
     "assets/downlo.png",
     btn_descargar_style,
-    command=lambda: guardar_egresos(form, entradas),
+    command=lambda: descargar_con_animacion(form, entradas),
     side="right",
     padx=10
-)
+    )
 
     
     def actualizar_estado_botones(event=None):
