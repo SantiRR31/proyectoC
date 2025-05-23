@@ -81,7 +81,8 @@ def generar_reporte_xlwings():
                 celda.value = valor
 
         # Guardar el archivo
-        carpeta_descargas = os.path.expanduser("~/Documentos/Cecati122/Reportes")
+        carpetaBase = r"C:\Cecati122"
+        carpeta_descargas = os.path.join(carpetaBase, "InformesDeIngresos")
         os.makedirs(carpeta_descargas, exist_ok=True)
         archivo = os.path.join(carpeta_descargas, f"ingresos_{mes_actual}.xlsx")
         wb.save(archivo)
