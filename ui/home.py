@@ -23,6 +23,7 @@ def lanzar_ventana_principal():
     
     
     clave_cecati = tk.StringVar(value="22DBT0005P")
+    banco_caja = tk.StringVar(value="BANORTE")
 
     # ---------------- HEADER MODERNO ----------------
     header = ctk.CTkFrame(
@@ -143,7 +144,9 @@ def lanzar_ventana_principal():
 
     # Funciones para cambiar contenido
     def abrir_formulario(contenedor):
-        limpiar_contenido(contenedor)
+        for widget in contenedor.winfo_children():
+            widget.destroy()
+        contenedor.update_idletasks()  # << fuerza refresco visual
         mostrar_formulario_ingresos(contenedor)
 
     def abrir_inicio(contenedor):
@@ -166,29 +169,19 @@ def lanzar_ventana_principal():
         for widget in contenedor.winfo_children():
             widget.destroy()
         contenedor.update_idletasks()
+        mostrar_ajustes(contenedor, clave_cecati)
 
-    # ---------------- BOTONES DEL SIDEBAR MEJORADOS ----------------
-    btn_inicio_sidebar = create_sidebar_btn(
-        sidebar, 
-        "Inicio", 
-        "assets/house.png", 
-        lambda: abrir_inicio(frame_contenido)
-    )
+    def limpiar_contenido():
+        for widget in frame_contenido.winfo_children():
+            widget.destroy()
+
+    # Botones del sidebar
+    btn_inicio_sidebar = create_sidebar_btn(sidebar, "Inicio", "assets/home.png", lambda: abrir_inicio(frame_contenido))
+    sidebar_subtitle = ctk.CTkLabel(sidebar, text="Pólizas", font=FUENTE_SUBMENU, text_color= COLOR_TEXTO)
+    sidebar_subtitle.pack(pady=5,)
+    separator = ctk.CTkFrame(sidebar, height=2, fg_color= COLOR_SEPARADOR)
+    separator.pack(fill="x", pady=5, padx=10)
     
-    # Sección Pólizas
-    ctk.CTkLabel(
-        sidebar, 
-        text="PÓLIZAS", 
-        font=CTkFont("Arial", 11, "bold"), 
-        text_color=("#64748b", "#94a3b8")
-    ).pack(pady=(15, 5), anchor="w", padx=20)
-    
-    separator = ctk.CTkFrame(
-        sidebar, 
-        height=1, 
-        fg_color=("#334155", "#475569")
-    )
-    separator.pack(fill="x", pady=2, padx=15)
     
     btn_ingresos_sidebar = create_sidebar_btn(
         sidebar, 
