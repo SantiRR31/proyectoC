@@ -188,32 +188,6 @@ def mostrar_informe_real_ingresos(frame_padre, clave_cecati):
         **btn_agregar_style
     ).pack(pady=10)
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     # Botones inferiores
     botones_frame = ctk.CTkFrame(contenedor_principal, fg_color=FONDO_CONTENEDORES, corner_radius=15)
     botones_frame.pack(fill="x", pady=10, padx=20, anchor="e")

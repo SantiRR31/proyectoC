@@ -1,5 +1,51 @@
-# Estilo común para botones del sidebar
-btn_style = {
+# --- COLORES MODO CLARO / OSCURO (tuplas: claro, oscuro) ---
+COLOR_FONDO = ("#cc3d42", "#cc3d42")
+BG_COLOR = ("#f9f9f9", "#121212")
+SURFACE_COLOR = ("#ffffff", "#1e1e1e")
+
+TEXT_PRIMARY = ("#1a1a1a", "#ffffff")
+TEXT_SECONDARY = ("#4d4d4d", "#cccccc")
+TEXT_DISABLED = ("#a3a3a3", "#6b6b6b")
+
+SEPARATOR = ("#dcdcdc", "#2a2a2a")
+SEPARATOR_LIGHT = ("#f0f0f0", "#3a3a3a")
+
+PRIMARY_COLOR = ("#cc3d42", "#cc3d42")
+ACCENT_COLOR = ("#e57373", "#ff999c")
+BORDER_COLOR = ("#dcdcdc", "#2a2a2a")
+
+COLOR_VALIDACION_OK = ("#008d62", "#00b27a")
+COLOR_VALIDACION_ERROR = ("#d10d2f", "#ff4056")
+COLOR_VALIDACION_NEUTRO = ("gray", "#a0a0a0")
+
+# Colores globales adicionales
+COLOR_ACTIVO = "#5b44e0"
+COLOR_INACTIVO = "transparent"
+FONDO_CONTENEDORES = "transparent"
+COLOR_SEPARADOR = SEPARATOR
+COLOR_TEXTO = "white"
+ENTRADA_FRAME_C = FONDO_CONTENEDORES  # igual que fondo de contenedores
+
+NAVBAR_COLOR = "#e6e9f0"
+
+# --- FUENTES ---
+FUENTE_TITULO = ("Arial", 24, "bold")
+FUENTE_FORMULARIO_T = ("Arial", 28, "bold")
+FUENTE_MENU = ("Arial", 16, "bold")
+FUENTE_TOTAL = ("Arial", 16)
+FUENTE_VALIDACION = ("Arial", 20)
+FUENTE_SECCION_TITULO = ("Arial", 14, "bold")
+FUENTE_LABEL = ("Arial", 14)
+FUENTE_SUBMENU = ("Arial", 12)
+FUENTE_FORMULARIO_S = ("Arial", 16)
+
+# --- TAMAÑOS Y RADIOS ---
+RADIO_BOTON = 5
+RADIO_CONTENEDORES = 15
+RADIO_BOTON_AGREGAR = 32
+
+# --- ESTILOS DE BOTONES ---
+btn_sidebar_style = {
     "font": ("Arial", 14),
     "text_color": "white",
     "fg_color": "transparent",
@@ -9,69 +55,17 @@ btn_style = {
     "anchor": "w"
 }
 
+btn_inactivo_style = {
+    "fg_color": COLOR_INACTIVO,
+    "hover_color": "#34495e",
+    "text_color": "white",
+    "anchor": "w",
+    "font": ("Arial", 14),
+    "height": 40,
+    "corner_radius": 5
+}
 
-COLOR_VALIDACION_OK = "#008d62"      # Verde para validación correcta
-COLOR_VALIDACION_ERROR = "#d10d2f"   # Rojo para error de validación
-COLOR_VALIDACION_NEUTRO = "gray"     # Gris para estado neutro
-
-
-# Colores globales
-COLOR_FONDO = "#2c3e50"
-COLOR_ACTIVO = "#5b44e0"
-COLOR_INACTIVO = "transparent"
-FONDO_CONTENEDORES = "transparent"
-COLOR_SEPARADOR = "#34495e"
-COLOR_TEXTO = "white"
-ENTRADA_FRAME_C = "transparent"
-
-#FUENTES---
-FUENTE_TITULO = ("Arial", 24, "bold")
-FUENTE_MENU = ("Arial", 16, "bold")
-FUENTE_SUBMENU = ("Arial", 12)
-FUENTE_FORMULARIO_T = ("Arial", 28, "bold")
-
-# Fuentes
-FUENTE_FORMULARIO_S = ("Arial", 16)
-FUENTE_SECCION_TITULO = ("Arial", 14, "bold")
-FUENTE_LABEL = ("Arial", 14)
-FUENTE_TOTAL = ("Arial", 16)
-FUENTE_VALIDACION = ("Arial", 20)
-
-# Colores
-#FONDO_CONTENEDORES = "#f0f0f0"
-#ENTRADA_FRAME_C = "#ffffff"
-#COLOR_BOTON_ELIMINAR = "#d10d2f"
-#COLOR_BOTON_ELIMINAR_HOVER = "#d93954"
-#COLOR_BOTON_AGREGAR = "#008d62"
-#COLOR_BOTON_AGREGAR_HOVER = "#2ca880"
-
-# Tamaños / Estilos
-RADIO_BOTON = 5
-RADIO_CONTENEDORES = 15
-RADIO_BOTON_AGREGAR = 32
-
-
-btn_style = {
-        "fg_color": COLOR_INACTIVO,
-        "hover_color": "#34495e",
-        "text_color": "white",
-        "anchor": "w",
-        "font": ("Arial", 14),
-        "height": 40,
-        "corner_radius": 5
-    }
-
-estilo_btn = {
-        "corner_radius": 10,
-        "fg_color": "#007acc",
-        "hover_color": "#005f99",
-        "text_color": "white",
-        "font": ("Arial", 14),
-        "height": 35,
-        "width": 160
-    }
-
-boton_primario = {
+btn_primario = {
     "corner_radius": 10,
     "fg_color": "#007acc",
     "hover_color": "#005f99",
@@ -81,7 +75,7 @@ boton_primario = {
     "width": 160
 }
 
-boton_secundario = {
+btn_secundario = {
     "corner_radius": 10,
     "fg_color": "#d9d9d9",
     "hover_color": "#c0c0c0",
@@ -91,7 +85,6 @@ boton_secundario = {
     "width": 160
 }
 
-
 btn_eliminar_style = {
     "width": 30,
     "fg_color": "#d10d2f",
@@ -100,7 +93,7 @@ btn_eliminar_style = {
 }
 
 btn_agregar_style = {
-    "corner_radius": 32,
+    "corner_radius": RADIO_BOTON_AGREGAR,
     "fg_color": "#008d62",
     "hover_color": "#2ca880"
 }
@@ -109,15 +102,12 @@ btn_guardar_style = {
     "width": 120,
     "fg_color": "#004b8f",
     "hover_color": "#0065a5",
-    "corner_radius": 32
+    "corner_radius": RADIO_BOTON_AGREGAR
 }
 
 btn_descargar_style = {
     "width": 120,
     "fg_color": "#008d62",
     "hover_color": "#2ca880",
-    "corner_radius": 32
+    "corner_radius": RADIO_BOTON_AGREGAR
 }
-
-
-navbar_color = "#e6e9f0"

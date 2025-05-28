@@ -1,12 +1,27 @@
 import tkinter as tk
+from tkinter import filedialog as fd
 import customtkinter as ctk
 from widgets.widgets import *
 from styles.styles import *
+import json
+
+
+
 
 
 def mostrar_ajustes(frame_padre, clave_cecati):
     for widget in frame_padre.winfo_children():
         widget.destroy()
+        
+    carpeta_destino = tk.StringVar(value="~/Documentos/Cecati122/Polizas")
+
+    def selecionar_carpeta():
+        carpeta = fd.askdirectory(title="Seleccionar carpeta de destino")
+        if carpeta:
+            carpeta_destino.set(carpeta)
+            print(f"Carpeta seleccionada: {carpeta_destino.get()}")
+            with open("config.json", "w") as f:
+                json.dump({"carpeta_destino": carpeta}, f)
 
     # Título
     ctk.CTkLabel(frame_padre, text="Ajustes", font=FUENTE_FORMULARIO_T).pack(pady=(20, 10))
@@ -22,6 +37,7 @@ def mostrar_ajustes(frame_padre, clave_cecati):
     entrada_clave = ctk.CTkFrame(seccion_items, fg_color=ENTRADA_FRAME_C, corner_radius=15)
     entrada_clave.pack(fill="x", padx=10, pady=10)
     entrada_clave.grid_columnconfigure((0, 1, 2, 3), weight=1)
+    
 
     # Entry de la clave del plantel
     # Etiqueta para la clave
@@ -52,8 +68,16 @@ def mostrar_ajustes(frame_padre, clave_cecati):
         corner_radius=10,
         command=lambda: abrir_ventana_clave(frame_padre, clave_cecati)
     )
+    
     btn_cambiar_clave.pack(side="right")
+    frame_carpeta = ctk.CTkFrame(contenedor_principal, fg_color="transparent")
+    frame_carpeta.pack(fill="x", pady=(10, 10), padx=20)
 
+    ctk.CTkLabel(frame_carpeta, text="Carpeta de destino:", font=FUENTE_LABEL).pack(side="left", padx=(0, 10))
+    entry_carpeta = ctk.CTkEntry(frame_carpeta, textvariable=carpeta_destino, state="readonly", width=300)
+    entry_carpeta.pack(side="left", padx=(0, 10))
+    btn_seleccionar_carpeta = ctk.CTkButton(frame_carpeta, text="Seleccionar", command=selecionar_carpeta)
+    btn_seleccionar_carpeta.pack(side="left")
     # Créditos
     creditos_label = ctk.CTkLabel(
         frame_padre,
@@ -114,6 +138,10 @@ def abrir_ventana_clave(frame_padre, clave_cecati):
     btn_cancelar.pack(side="left", padx=10)
 
     ventana.grid_columnconfigure(0, weight=1)
+    
+    
+    
+    
     
 def abrir_ventana_soporte():
     ventana = ctk.CTkToplevel()
