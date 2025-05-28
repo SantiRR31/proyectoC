@@ -32,6 +32,7 @@ def lanzar_ventana_principal():
     root.configure(fg_color=COLOR_FONDO)
     
     clave_cecati = tk.StringVar(value="22DBT0005P")
+    banco_caja = tk.StringVar(value="BANORTE")
 
     # ---------------- HEADER ----------------
     header = ctk.CTkFrame(root, height=60, fg_color=COLOR_FONDO, corner_radius=0)
@@ -94,7 +95,7 @@ def lanzar_ventana_principal():
         for widget in contenedor.winfo_children():
             widget.destroy()
         contenedor.update_idletasks()  # << fuerza refresco visual
-        mostrar_formulario_ingresos(contenedor)
+        mostrar_formulario_ingresos(contenedor, banco_caja)
 
     def abrir_inicio(contenedor):
         for widget in contenedor.winfo_children():
@@ -118,7 +119,7 @@ def lanzar_ventana_principal():
         for widget in contenedor.winfo_children():
             widget.destroy()
         contenedor.update_idletasks()
-        mostrar_ajustes(contenedor, clave_cecati)
+        mostrar_ajustes(contenedor, clave_cecati, banco_caja)
 
     def limpiar_contenido():
         for widget in frame_contenido.winfo_children():

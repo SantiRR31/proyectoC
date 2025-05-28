@@ -12,6 +12,7 @@ from tkcalendar import DateEntry
 from tkinter import messagebox
 from functions import genRegIngresos, funcions
 from tkcalendar import DateEntry
+from datetime import datetime
 
 
 
@@ -37,7 +38,7 @@ def obtener_fecha_actual():
     """Devuelve la fecha actual en formato 'DD-MM-AAAA'."""
     return datetime.datetime.now().strftime("%d-%m-%Y")
 
-def mostrar_formulario_ingresos(frame_padre):
+def mostrar_formulario_ingresos(frame_padre, banco_caja):
     for widget in frame_padre.winfo_children():
         widget.destroy()
 
@@ -78,9 +79,9 @@ def mostrar_formulario_ingresos(frame_padre):
     
     lbl_no_poliza = ctk.CTkLabel(entrada_frame, text="No. Póliza:", font=("Arial", 14))
     lbl_no_poliza.grid(row=0, column=2, padx=(10,5), pady=5, sticky="w")
-    num_polizas = [str(i) for i in range(1, 101)]
+    num_polizas = [str(i) for i in range(1, 32)]
     no_poliza = ctk.CTkOptionMenu(entrada_frame, values=num_polizas)
-    no_poliza.set("🔢 No. Póliza")  # Texto inicial
+    no_poliza.set("No. Póliza")  # Texto inicial
     no_poliza.grid(row=0, column=3, padx=(5,10), pady=5, sticky="ew")
 
     # Fila 2 - Banco y Cargo o Importe
@@ -88,6 +89,7 @@ def mostrar_formulario_ingresos(frame_padre):
     lbl_banco.grid(row=1, column=0, padx=(10,5), pady=5, sticky="w")
     banco_o_caja = ctk.CTkEntry(entrada_frame, placeholder_text="🏦 Banco o Caja")
     banco_o_caja.grid(row=1, column=1, padx=(5,10), pady=5, sticky="ew")
+    banco_o_caja.insert(0, banco_caja.get())
 
     lbl_cuanto_pago = ctk.CTkLabel(entrada_frame, text="Cargo/Importe:", font=("Arial", 14))
     lbl_cuanto_pago.grid(row=1, column=2, padx=(10,5), pady=5, sticky="w")
@@ -218,6 +220,10 @@ def mostrar_formulario_ingresos(frame_padre):
             cargo_importe = cuanto_pago.get()
             notaAdicional = nota.get()
             noPoliza = no_poliza.get()
+            fech_act = datetime.now()
+            mes = fech_act.strftime('%b').lower()
+            anio = fech_act.year
+            poliza_final = f"{noPoliza}/{mes}/{anio}"
             fecha_ingresada = fecha_policia.get_date()
             fecha1 = fecha_ingresada.strftime("%d")
             fecha2 = fecha_ingresada.strftime("%m") 
@@ -226,7 +232,7 @@ def mostrar_formulario_ingresos(frame_padre):
             hoja.range("A10").value = banco
             hoja.range("AS10").value = cargo_importe
             hoja.range("J40").value = notaAdicional
-            hoja.range("AT6").value = noPoliza
+            hoja.range("AT6").value = poliza_final
             hoja.range("AL6").value = fecha1
             hoja.range("AN6").value = fecha2
             hoja.range("AQ6").value = fecha3
@@ -241,8 +247,8 @@ def mostrar_formulario_ingresos(frame_padre):
                 fila_inicial += 1
 
             # Crear carpeta de destino
-            fecha_hoy = datetime.datetime.now().strftime("%d-%m-%Y")
-            nombre_archivo = f"Poliza_ingresos_{no_poliza.get()}.xlsx"
+            #fecha_hoy = datetime.datetime.now().strftime("%d-%m-%Y")
+            nombre_archivo = f"Poliza_ingresos_{no_poliza.get()}_{mes}.xlsx"
             carpetaBase = r"C:\Cecati122"
             carpeta_descargas = os.path.join(carpetaBase, "PolizasDeIngresos")
             os.makedirs(carpeta_descargas, exist_ok=True)
@@ -265,7 +271,14 @@ def mostrar_formulario_ingresos(frame_padre):
             cursor = conn.cursor()
 
             # --- Guardar datos en polizasIngresos ---
-            fecha = fecha_policia.get().strip()
+            fecha_cruda = fecha_policia.get().strip()
+            try:
+                fecha = datetime.strptime(fecha_cruda, '%d/%m/%y').strftime('%d/%m/%Y')
+            except ValueError:
+                messagebox.showerror("Error", "Formato de fecha inválido.")
+                return
+            #fecha = fecha_policia.get().strip()
+            
             no = no_poliza.get().strip()
             banco = banco_o_caja.get().strip()
             importe = cuanto_pago.get().strip()
@@ -276,7 +289,7 @@ def mostrar_formulario_ingresos(frame_padre):
                 return
 
             cursor.execute("""
-                INSERT INTO polizasIngresos (fecha, noPoliza, banco, importe, nota)
+                INSERT OR REPLACE INTO polizasIngresos (fecha, noPoliza, banco, importe, nota)
                 VALUES (?, ?, ?, ?, ?)
             """, (fecha, no, banco, float(importe), nota_texto))
 
