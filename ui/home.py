@@ -145,7 +145,7 @@ def lanzar_ventana_principal():
     # Funciones para cambiar contenido
     def abrir_formulario(contenedor):
         limpiar_contenido(contenedor)
-        mostrar_formulario_ingresos(contenedor)
+        mostrar_formulario_ingresos(contenedor, banco_caja)
 
     def abrir_inicio(contenedor):
         limpiar_contenido(contenedor)
