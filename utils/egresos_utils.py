@@ -76,6 +76,34 @@ def guardar_egresos(form, entradas):
     except Exception as e:
         print("Error al guardar:", e)
         messagebox.showerror("Error", f"No se pudo guardar la información.\n{e}")
+        
+        
+def guardar_pdf(form, entradas):
+    try:
+        app = xw.App(visible=False)
+        wb = app.books.open("assets/plantillas/egresos.xlsx")
+        hoja = wb.sheets["01 ene 2025"]
+
+        datos = obtener_valores_campos(form)
+        asignar_valores_en_hoja(hoja, datos)
+
+        if not insertar_entradas_en_hoja(hoja, entradas):
+            wb.close()
+            return
+
+        fecha_actual = obtener_fecha_actual().replace("/", "-")
+        nombre_archivo = f"Poliza_Egresos_{fecha_actual}.pdf"
+        ruta_descargas = os.path.expanduser("~/Documentos/Cecati122/PolizasDeEgresos")
+        os.makedirs(ruta_descargas, exist_ok=True)
+        ruta_pdf = os.path.join(ruta_descargas, nombre_archivo)
+
+        hoja.api.ExportAsFixedFormat(0, ruta_pdf)  # 0 = PDF
+        wb.close()
+        messagebox.showinfo("Éxito", f"PDF guardado en: {ruta_pdf}")
+    except Exception as e:
+        print("Error al exportar PDF:", e)
+        messagebox.showerror("Error", f"No se pudo exportar como PDF.\n{e}")
+
 
 
 #import customtkinter as ctk

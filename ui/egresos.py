@@ -5,41 +5,11 @@ import customtkinter as ctk
 import xlwings as xw
 from db.egresosDB import buscar_descripcion_db
 from tkcalendar import DateEntry
-from widgets.widgets import (
-    crear_label,
-    crear_entry,
-    crear_boton,
-    crear_boton_imagen
-)
-from utils.utils import (
-    convertir_a_mayusculas,
-    obtener_fecha_actual,
-    numero_a_letras_mxn,
-    abrir_carpeta,
-    solo_letras,
-    solo_numeros_decimales,
-    solo_numeros_y_letras,
-    )
-
-from utils.egresos_utils import descargar_con_animacion, guardar_egresos
+from widgets.widgets import *
+from utils.utils import *
+from utils.egresos_utils import descargar_con_animacion, guardar_egresos, guardar_pdf
 from datetime import datetime
-    
-from styles.styles import (
-    FUENTE_FORMULARIO_T,
-    FUENTE_FORMULARIO_S,
-    FONDO_CONTENEDORES,
-    ENTRADA_FRAME_C,
-    FUENTE_LABEL,
-    FUENTE_SECCION_TITULO,
-    FUENTE_VALIDACION,
-    btn_eliminar_style,
-    btn_agregar_style,
-    btn_guardar_style,
-    btn_descargar_style,
-    COLOR_VALIDACION_OK,
-    COLOR_VALIDACION_ERROR,
-    COLOR_VALIDACION_NEUTRO,
-)
+from styles.styles import *
 
 
 def mostrar_formulario_egresos(frame_padre):
@@ -50,33 +20,26 @@ def mostrar_formulario_egresos(frame_padre):
     ctk.CTkLabel(frame_padre, text="Póliza de Egresos", font=FUENTE_FORMULARIO_T).pack(pady=30)
 
     # Contenedor principal
-    contenedor_principal = ctk.CTkFrame(frame_padre, corner_radius=15)
+    contenedor_principal = ctk.CTkFrame(frame_padre, corner_radius=15, fg_color="transparent")
     contenedor_principal.pack(fill="both", expand=True) 
 
     # Scroll dentro del contenedor
-    contenedor_general = ctk.CTkScrollableFrame(contenedor_principal, corner_radius=15)
+    contenedor_general = ctk.CTkScrollableFrame(contenedor_principal, corner_radius=15, fg_color="transparent")
     contenedor_general.pack(fill="both", expand=True, padx=30, pady=(10, 0))
 
     for i in range(3):
         contenedor_general.grid_columnconfigure(i, weight=1,) 
 
     # Sección datos de la póliza
-    seccion_poliza = ctk.CTkFrame(contenedor_general, corner_radius=15)
+    seccion_poliza = ctk.CTkFrame(contenedor_general, corner_radius=15, fg_color="transparent")
     seccion_poliza.grid(row=0, column=0, columnspan=3, sticky="ew", pady=(10, 20))
 
-    entrada_frame = ctk.CTkFrame(seccion_poliza, fg_color=ENTRADA_FRAME_C, corner_radius=15)
+    entrada_frame = ctk.CTkFrame(seccion_poliza, corner_radius=15, fg_color="transparent")
     entrada_frame.pack(fill="x")
     entrada_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)
 
-    # Fecha y Número de Póliza
-    """ crear_label(entrada_frame, "Fecha", FUENTE_LABEL, row=0, column=0, padx=(10, 5), pady=5, sticky="w")
-    fecha_policia = crear_entry(entrada_frame, "Fecha Póliza...", 0, 1, padx=(5, 10), pady=5, sticky="ew")
-    fecha_policia.insert(0, obtener_fecha_actual())
-    fecha_policia.configure(state="readonly") """
-    
     
 
-# ...dentro de tu función...
     lbl_fecha = ctk.CTkLabel(entrada_frame, text="Fecha:", font=("Arial", 14))
     lbl_fecha.grid(row=0, column=0, padx=(10,5), pady=5, sticky="w")
 
@@ -158,10 +121,10 @@ def mostrar_formulario_egresos(frame_padre):
 
     
     # Sección filas adicionales
-    seccion_filas = ctk.CTkFrame(contenedor_general, fg_color=FONDO_CONTENEDORES, corner_radius=15)
+    seccion_filas = ctk.CTkFrame(contenedor_general, corner_radius=15, fg_color="transparent")
     seccion_filas.grid(row=10, column=0, columnspan=3, sticky="ew")
 
-    seccion_titulos_filas = ctk.CTkFrame(contenedor_general, corner_radius=15)
+    seccion_titulos_filas = ctk.CTkFrame(contenedor_general, corner_radius=15, fg_color="transparent")
     seccion_titulos_filas.grid(row=5, column=0, columnspan=3, sticky="ew", pady=(10, 5))
 
     # Column titles
@@ -173,7 +136,7 @@ def mostrar_formulario_egresos(frame_padre):
     seccion_titulos_filas.grid_columnconfigure((0, 1, 2), weight=1)
 
     # Sección filas
-    frame_filas = ctk.CTkFrame(seccion_filas, corner_radius=15)
+    frame_filas = ctk.CTkFrame(seccion_filas, corner_radius=15, fg_color="transparent")
     frame_filas.pack(fill="x")
 
     entradas = []
@@ -220,7 +183,7 @@ def mostrar_formulario_egresos(frame_padre):
     
 
     def agregar_fila(enfocar_nueva_clave=False):
-        fila_frame = ctk.CTkFrame(frame_filas, fg_color=FONDO_CONTENEDORES, corner_radius=15)
+        fila_frame = ctk.CTkFrame(frame_filas, corner_radius=15, fg_color="transparent")
         fila_frame.pack(fill="x", pady=5)
 
         entrada_clave = ctk.CTkEntry(fila_frame, placeholder_text="🔑 Clave")
@@ -282,7 +245,7 @@ def mostrar_formulario_egresos(frame_padre):
     
 
     # Botones inferiores
-    botones_frame = ctk.CTkFrame(contenedor_principal, fg_color=FONDO_CONTENEDORES, corner_radius=15)
+    botones_frame = ctk.CTkFrame(contenedor_principal, corner_radius=15, fg_color="transparent")
     botones_frame.pack(fill="x", pady=10, padx=20, anchor="e")
 
     ctk.CTkLabel(botones_frame, text="Total:", font=FUENTE_FORMULARIO_S).pack(side="left", padx=(0, 10))
@@ -294,17 +257,33 @@ def mostrar_formulario_egresos(frame_padre):
 
     crear_boton_imagen(botones_frame, "Buscar", "assets/look.png", btn_guardar_style, command=lambda: abrir_carpeta("~/Documentos/Cecati122/PolizasDeIngresos"), side="right", padx=10)
     btn_guardar = crear_boton_imagen(botones_frame, "Guardar", "assets/check.png", btn_guardar_style, None, side="right", padx=10)
+    
     btn_descargar = crear_boton_imagen(
     botones_frame,
     "Descargar",
     "assets/downlo.png",
     btn_descargar_style,
-    command=lambda: descargar_con_animacion(form, entradas),
+    command=None,
     side="right",
     padx=10
-    )
+)
 
-    
+# Enlazamos el clic al menú
+    btn_descargar.bind("<Button-1>", lambda e: mostrar_menu_descarga(e, form, entradas))
+    def mostrar_menu_descarga(event, form, entradas):
+        menu = tk.Menu(None, tearoff=0)
+        menu.add_command(label="Exportar como PDF", command=lambda: exportar_pdf(form, entradas))
+        menu.add_command(label="Exportar como Excel", command=lambda: exportar_excel(form, entradas))
+        menu.tk_popup(event.x_root, event.y_root)
+
+    import tkinter as tk  # Asegúrate de tener esto
+
+    def exportar_excel(form, entradas):
+        guardar_egresos(form, entradas)
+
+    def exportar_pdf(form, entradas):
+        guardar_pdf(form, entradas)
+
     def actualizar_estado_botones(event=None):
         if campos_obligatorios_vacios():
             btn_guardar.configure(state="disabled")

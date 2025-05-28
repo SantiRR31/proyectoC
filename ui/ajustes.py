@@ -1,73 +1,116 @@
 import tkinter as tk
+from tkinter import filedialog as fd
 import customtkinter as ctk
 from widgets.widgets import *
 from styles.styles import *
-
+import json
+from PIL import Image
 
 def mostrar_ajustes(frame_padre, clave_cecati, banco_caja):
     for widget in frame_padre.winfo_children():
         widget.destroy()
+        
+    carpeta_destino = tk.StringVar(value="~/Documentos/Cecati122/Polizas")
 
-    # Título
+    def selecionar_carpeta():
+        carpeta = fd.askdirectory(title="Seleccionar carpeta de destino")
+        if carpeta:
+            carpeta_destino.set(carpeta)
+            with open("config.json", "w") as f:
+                json.dump({"carpeta_destino": carpeta}, f)
+
+    # Título principal
     ctk.CTkLabel(
         frame_padre,
         text="Ajustes",
-        font=FUENTE_FORMULARIO_T
+        font=FUENTE_FORMULARIO_T,
+        text_color="#d31329"  # Material 3 primary
     ).pack(pady=(20, 10))
 
-    # Contenedor principal
-    contenedor_principal = ctk.CTkFrame(frame_padre, corner_radius=15)
-    contenedor_principal.pack(fill="both", expand=True, padx=20, pady=10)
+    # Card principal
+    contenedor_principal = ctk.CTkFrame(frame_padre, corner_radius=18, fg_color=("#faf7f6", "#191919"))
+    contenedor_principal.pack(fill="both", expand=True, padx=30, pady=20)
 
-    # Sección de entradas
-    seccion_items = ctk.CTkFrame(contenedor_principal, corner_radius=15)
-    seccion_items.pack(fill="x", padx=20, pady=(20, 10))
+    # Sección de datos institucionales
+    seccion_datos = ctk.CTkFrame(contenedor_principal, fg_color=("#faf7f6", "#191919"), corner_radius=12)
+    seccion_datos.pack(fill="x", padx=30, pady=(30, 15))
 
-    for label_text, var, comando in [
-        ("Clave CECATI:", clave_cecati, abrir_ventana_clave),
-        ("Banco/Caja:", banco_caja, abrir_ventana_banco)
-    ]:
-        entrada_frame = ctk.CTkFrame(seccion_items, fg_color=ENTRADA_FRAME_C, corner_radius=15)
-        entrada_frame.pack(fill="x", padx=10, pady=10)
-        entrada_frame.grid_columnconfigure((0, 1, 2), weight=1)
-
-        # Etiqueta
-        ctk.CTkLabel(entrada_frame, text=label_text, font=FUENTE_LABEL).grid(
-            row=0, column=0, padx=10, pady=10, sticky="w"
-        )
-
-        # Entrada de solo lectura
-        ctk.CTkEntry(entrada_frame, textvariable=var, state="readonly").grid(
-            row=0, column=1, padx=10, pady=10, sticky="we"
-        )
-
-        # Botón para cambiar
-        ctk.CTkButton(
-            entrada_frame,
-            text=f"Cambiar {label_text.split(':')[0]}",
-            width=120,
-            fg_color="#004b8f",
-            hover_color="#0065a5",
-            corner_radius=10,
-            command=lambda v=var, c=comando: c(frame_padre, v)
-        ).grid(row=0, column=2, padx=10, pady=10)
-
-    # Botón de ayuda centrado en la parte inferior
-    ctk.CTkButton(
-        frame_padre,
-        text="¿Ayuda?",
-        command=abrir_ventana_soporte
-    ).pack(pady=(5, 0))
-
-    # Créditos
     ctk.CTkLabel(
-        frame_padre,
+        seccion_datos,
+        text="Datos institucionales",
+        font=FUENTE_SUBMENU,
+        text_color="#d31329"
+    ).grid(row=0, column=0, columnspan=3, sticky="w", pady=(10, 5))
+
+    # Clave CECATI
+    ctk.CTkLabel(seccion_datos, text="Clave CECATI:", font=FUENTE_LABEL).grid(row=1, column=0, padx=10, pady=10, sticky="w")
+    ctk.CTkEntry(seccion_datos, textvariable=clave_cecati, state="readonly", width=180).grid(row=1, column=1, padx=10, pady=10, sticky="we")
+    ctk.CTkButton(
+        seccion_datos,
+        text="Cambiar",
+        width=90,
+        corner_radius=8,
+        command=lambda: abrir_ventana_clave(frame_padre, clave_cecati)
+    ).grid(row=1, column=2, padx=10, pady=10)
+
+    # Banco/Caja
+    ctk.CTkLabel(seccion_datos, text="Banco/Caja:", font=FUENTE_LABEL).grid(row=2, column=0, padx=10, pady=10, sticky="w")
+    ctk.CTkEntry(seccion_datos, textvariable=banco_caja, state="readonly", width=180).grid(row=2, column=1, padx=10, pady=10, sticky="we")
+    ctk.CTkButton(
+        seccion_datos,
+        text="Cambiar",
+        width=90,
+        corner_radius=8,
+        command=lambda: abrir_ventana_banco(frame_padre, banco_caja)
+    ).grid(row=2, column=2, padx=10, pady=10)
+
+    seccion_datos.grid_columnconfigure(1, weight=1)
+
+    # Separador visual
+    ctk.CTkFrame(contenedor_principal, height=2, fg_color=("#191919","#faf7f6")).pack(fill="x", padx=30, pady=10)
+
+    # Sección de carpeta de destino
+    seccion_carpeta = ctk.CTkFrame(contenedor_principal, fg_color= ("#faf7f6", "#191919") , corner_radius=12)
+    seccion_carpeta.pack(fill="x", padx=30, pady=(0, 15))
+
+    ctk.CTkLabel(
+        seccion_carpeta,
+        text="Carpeta de destino para archivos",
+        font=FUENTE_SUBMENU,
+        text_color="#d31329", 
+    ).grid(row=0, column=0, columnspan=3, sticky="w", pady=(10, 5))
+
+    ctk.CTkLabel(seccion_carpeta, text="Ruta:", font=FUENTE_LABEL).grid(row=1, column=0, padx=10, pady=10, sticky="w")
+    ctk.CTkEntry(seccion_carpeta, textvariable=carpeta_destino, state="readonly", width=300).grid(row=1, column=1, padx=10, pady=10, sticky="we")
+    ctk.CTkButton(
+        seccion_carpeta,
+        text="Seleccionar",
+        width=90,
+        corner_radius=8,
+        command=selecionar_carpeta
+    ).grid(row=1, column=2, padx=10, pady=10)
+
+    seccion_carpeta.grid_columnconfigure(1, weight=1)
+
+    # Botón de ayuda y créditos
+    ctk.CTkFrame(contenedor_principal, height=2, fg_color="#CAC4D0").pack(fill="x", padx=30, pady=10)
+    btn_ayuda = ctk.CTkButton(
+        contenedor_principal,
+        text="¿Ayuda?",
+        corner_radius=8,
+        command=abrir_ventana_soporte,
+        image=ctk.CTkImage(Image.open("assets/help.png"), size=(18, 18))
+    )
+    btn_ayuda.pack(pady=(10, 0))
+
+    ctk.CTkLabel(
+        contenedor_principal,
         text="Desarrollado por Ariel y Santiago - UTSJR © 2025",
         font=("Arial", 10),
-        text_color="gray"
+        text_color="#888"
     ).pack(side="bottom", pady=10)
-
-
+    
+    
 def abrir_ventana_clave(frame_padre, clave_cecati):
     ventana = ctk.CTkToplevel(frame_padre)
     ventana.title("Cambiar Clave CECATI")
@@ -222,7 +265,3 @@ def abrir_ventana_soporte():
 
     btn_cerrar = ctk.CTkButton(ventana, text="Cerrar", command=ventana.destroy)
     btn_cerrar.pack(pady=(0, 10))
-
-
-
-
