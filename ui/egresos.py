@@ -7,71 +7,161 @@ from db.egresosDB import buscar_descripcion_db
 from tkcalendar import DateEntry
 from widgets.widgets import *
 from utils.utils import *
-from utils.egresos_utils import descargar_con_animacion, guardar_egresos, guardar_pdf
+from utils.egresos_utils import guardar_egresos, guardar_pdf
 from datetime import datetime
 from styles.styles import *
 
-
 def mostrar_formulario_egresos(frame_padre):
+    # Limpiar frame anterior
     for widget in frame_padre.winfo_children():
         widget.destroy()
 
-    # Título principal
-    ctk.CTkLabel(frame_padre, text="Póliza de Egresos", font=FUENTE_FORMULARIO_T).pack(pady=30)
-
-    # Contenedor principal
-    contenedor_principal = ctk.CTkFrame(frame_padre, corner_radius=15, fg_color="transparent")
-    contenedor_principal.pack(fill="both", expand=True) 
-
-    # Scroll dentro del contenedor
-    contenedor_general = ctk.CTkScrollableFrame(contenedor_principal, corner_radius=15, fg_color="transparent")
-    contenedor_general.pack(fill="both", expand=True, padx=30, pady=(10, 0))
-
-    for i in range(3):
-        contenedor_general.grid_columnconfigure(i, weight=1,) 
-
-    # Sección datos de la póliza
-    seccion_poliza = ctk.CTkFrame(contenedor_general, corner_radius=15, fg_color="transparent")
-    seccion_poliza.grid(row=0, column=0, columnspan=3, sticky="ew", pady=(10, 20))
-
-    entrada_frame = ctk.CTkFrame(seccion_poliza, corner_radius=15, fg_color="transparent")
-    entrada_frame.pack(fill="x")
-    entrada_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)
-
+    # Configuración de estilos consistentes
+    ESTILO_FRAME = {
+        "corner_radius": 12,
+        "fg_color": ("#f9fafb", "#1c1c1c"),
+        ##"border_width": 1,
+        ##"border_color": ("#e5e7eb", "#374151")
+    }
     
+    ESTILO_ENTRADA = {
+        "height": 35,
+        "font": FUENTE_TEXTO,
+        "border_width": 1,
+        "border_color": ("#d1d5db", "#545454"),
+        "fg_color": ("#ffffff", "#212121"),
+        "text_color": ("#111827", "#f3f4f6")
+    }
+    
+    ESTILO_BOTON = {
+        #"font": FUENTE_BOTON,
+        "height": 35,
+        "corner_radius": 8
+    }
 
-    lbl_fecha = ctk.CTkLabel(entrada_frame, text="Fecha:", font=("Arial", 14))
-    lbl_fecha.grid(row=0, column=0, padx=(10,5), pady=5, sticky="w")
+    # Contenedor principal con scroll
+    contenedor_principal = ctk.CTkScrollableFrame(
+        frame_padre, 
+        fg_color="transparent"
+    )
+    contenedor_principal.pack(fill="both", expand=True, padx=20, pady=10)
+
+    # Título principal con sombra sutil
+    titulo_frame = ctk.CTkFrame(contenedor_principal, fg_color="transparent")
+    titulo_frame.pack(fill="x", pady=(0, 20))
+    
+    ctk.CTkLabel(
+        titulo_frame,
+        text="Póliza de Egresos",
+        font=FUENTE_TITULO,
+        text_color=TEXT_PRIMARY
+    ).pack(side="left")
+
+    # Sección de datos de la póliza
+    seccion_poliza = ctk.CTkFrame(contenedor_principal, **ESTILO_FRAME)
+    seccion_poliza.pack(fill="x", pady=(0, 20), padx=5)
+
+    # Haz todas las columnas responsivas
+    for i in range(4):
+        seccion_poliza.grid_columnconfigure(i, weight=1, uniform="poliza")
+
+    # Fila 1: Fecha y Número de Póliza
+    ctk.CTkLabel(
+        seccion_poliza,
+        text="Fecha:",
+        font=FUENTE_LABEL,
+        anchor="w"
+    ).grid(row=0, column=0, padx=(15, 5), pady=10, sticky="ew")
 
     fecha_policia = DateEntry(
-        entrada_frame,
-        date_pattern="dd/mm/yyyy",  # Ejemplo: 23/may/2025
-        font=("Arial", 14),
-        locale="es_MX"
+        seccion_poliza,
+        date_pattern="dd/mm/yyyy",
+        font=FUENTE_TEXTO,
+        locale="es_MX",
+        background="#3b82f6",
+        foreground="white",
+        borderwidth=1
     )
-    fecha_policia.grid(row=0, column=1, padx=(5,10), pady=5, sticky="ew")
+    fecha_policia.grid(row=0, column=1, padx=5, pady=10, sticky="ew")
 
-    crear_label(entrada_frame, "No. Póliza:", FUENTE_LABEL, row=0, column=2, padx=(10, 5), pady=5, sticky="w")
-    no_poliza = crear_entry(entrada_frame, "🔢 No. Póliza", 0, 3, padx=(5, 10), pady=5, sticky="ew")
+    ctk.CTkLabel(
+        seccion_poliza,
+        text="No. Póliza:",
+        font=FUENTE_LABEL,
+        anchor="w"
+    ).grid(row=0, column=2, padx=(15, 5), pady=10, sticky="ew")
 
-    # DATOS DEL CHEQUE
-    crear_label(entrada_frame, "DATOS DEL CHEQUE", FUENTE_SECCION_TITULO, row=1, column=0, columnspan=4, pady=(15, 5), sticky="n")
+    no_poliza = ctk.CTkEntry(
+        seccion_poliza,
+        placeholder_text="🔢 No. Póliza",
+        **ESTILO_ENTRADA
+    )
+    no_poliza.grid(row=0, column=3, padx=(5, 15), pady=10, sticky="ew")
 
-    crear_label(entrada_frame, "Nombre", FUENTE_LABEL, row=2, column=0, padx=(10, 5), pady=5, sticky="w")
-    vcmdo = entrada_frame.register(solo_letras)
-    nombre = crear_entry(entrada_frame, "👤 Nombre", 2, 1, padx=(5, 10), pady=5, sticky="ew")
+    # Separador visual
+    separador = ctk.CTkFrame(
+        seccion_poliza,
+        height=2,
+        fg_color=("#e5e7eb", "#191919")
+    )
+    separador.grid(row=1, column=0, columnspan=4, sticky="ew", pady=5)
+
+    # Fila 2: Datos del beneficiario
+    ctk.CTkLabel(
+        seccion_poliza,
+        text="DATOS DEL BENEFICIARIO",
+        font=FUENTE_SUBTITULO,
+        anchor="center"
+    ).grid(row=2, column=0, columnspan=4, pady=(10, 5), sticky="ew")
+
+    ctk.CTkLabel(
+        seccion_poliza,
+        text="Nombre:",
+        font=FUENTE_LABEL,
+        anchor="w"
+    ).grid(row=3, column=0, padx=(15, 5), pady=5, sticky="ew")
+
+    vcmdo = seccion_poliza.register(solo_letras)
+    nombre = ctk.CTkEntry(
+        seccion_poliza,
+        placeholder_text="👤 Nombre completo",
+        **ESTILO_ENTRADA
+    )
     nombre.configure(validate="key", validatecommand=(vcmdo, "%P"))
     nombre.bind("<KeyRelease>", lambda event: convertir_a_mayusculas(nombre, event))
+    nombre.grid(row=3, column=1, columnspan=3, padx=(5, 15), pady=5, sticky="ew")
 
-    crear_label(entrada_frame, "Cargo", FUENTE_LABEL, row=2, column=2, padx=(10, 5), pady=5, sticky="w")
-    cargo_entry = crear_entry(entrada_frame, "💰 Cargo", 2, 3, padx=(5, 10), pady=5, sticky="ew")
-    vcmd = entrada_frame.register(solo_numeros_decimales)
+# Fila 3: Monto y descripción
+    ctk.CTkLabel(
+        seccion_poliza,
+        text="Monto:",
+        font=FUENTE_LABEL,
+        anchor="w"
+    ).grid(row=4, column=0, padx=(15, 5), pady=5, sticky="ew")
+
+    cargo_entry = ctk.CTkEntry(
+        seccion_poliza,
+        placeholder_text="💰 Cantidad en números",
+        **ESTILO_ENTRADA
+    )
+    vcmd = seccion_poliza.register(solo_numeros_decimales)
     cargo_entry.configure(validate="key", validatecommand=(vcmd, "%P"))
+    cargo_entry.grid(row=4, column=1, padx=5, pady=5, sticky="ew")
 
-    # Cargo en texto
-    crear_label(entrada_frame, "Cargo en texto", FUENTE_SECCION_TITULO, row=3, column=0, columnspan=4, pady=(15, 5), sticky="n")
-    cargo_letras_entry = ctk.CTkEntry(entrada_frame, placeholder_text="💰 Cargo en letras", height=30, state="disabled")
-    cargo_letras_entry.grid(row=4, column=0, columnspan=4, padx=10, pady=(0, 10), sticky="ew")
+    ctk.CTkLabel(
+        seccion_poliza,
+        text="Monto en letras:",
+        font=FUENTE_LABEL,
+        anchor="w"
+    ).grid(row=4, column=2, padx=(15, 5), pady=5, sticky="ew")
+
+    cargo_letras_entry = ctk.CTkEntry(
+        seccion_poliza,
+        placeholder_text="💰 Cantidad en letras",
+        state="disabled",
+        **ESTILO_ENTRADA
+    )
+    cargo_letras_entry.grid(row=4, column=3, padx=(5, 15), pady=5, sticky="ew")
 
     def actualizar_cargo_letras(event=None):
         valor = cargo_entry.get().strip()
@@ -88,56 +178,84 @@ def mostrar_formulario_egresos(frame_padre):
 
     cargo_entry.bind("<KeyRelease>", actualizar_cargo_letras)
 
-# ---------------------------------------------RECIBÍ ------------------------------------------------
-    crear_label(entrada_frame, "Recibí:", FUENTE_LABEL, row=6, column=0, columnspan=4, pady=(10, 5), sticky="n")
+    # Sección de método de pago
+    metodo_pago_frame = ctk.CTkFrame(contenedor_principal, **ESTILO_FRAME)
+    metodo_pago_frame.pack(fill="x", pady=(0, 20), padx=5)
 
-    crear_label(entrada_frame, "Tipo de pago", FUENTE_LABEL, row=7, column=0, padx=(10, 5), pady=5, sticky="w")
-    tipo_pago = ctk.CTkOptionMenu(entrada_frame, values=["EFECTIVO", "CHEQUE", "TRANSF ELECTRONICA"], width=200)
-    tipo_pago.grid(row=7, column=1, padx=(5, 10), pady=5, sticky="ew")
+# Configura las columnas para que sean responsivas
+    for i in range(4):
+        metodo_pago_frame.grid_columnconfigure(i, weight=1, uniform="metodo_pago")
 
-    crear_label(entrada_frame, "Clave de Rastreo", FUENTE_LABEL, row=7, column=2, padx=(10, 5), pady=5, sticky="w")
-    vcmdo = entrada_frame.register(solo_numeros_y_letras)
-    clave_rastreo = crear_entry(entrada_frame, "🔑 Clave de rastreo", 7, 3, padx=(5, 10), pady=5, sticky="ew")
+    ctk.CTkLabel(
+        metodo_pago_frame,
+        text="MÉTODO DE PAGO",
+        font=FUENTE_SUBTITULO
+    ).grid(row=0, column=0, columnspan=4, pady=(5, 10), sticky="ew")
+
+    # Elementos de método de pago
+    ctk.CTkLabel(
+        metodo_pago_frame,
+        text="Tipo de pago:",
+        font=FUENTE_LABEL,
+        anchor="w"
+    ).grid(row=1, column=0, padx=(15, 5), pady=5, sticky="ew")
+
+    tipo_pago = ctk.CTkOptionMenu(
+        metodo_pago_frame,
+        values=["EFECTIVO", "CHEQUE", "TRANSF. ELECTRÓNICA"],
+        font=FUENTE_TEXTO,
+        dropdown_font=FUENTE_TEXTO,
+        width=200
+    )
+    tipo_pago.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
+
+    ctk.CTkLabel(
+        metodo_pago_frame,
+        text="Clave/Referencia:",
+        font=FUENTE_LABEL,
+        anchor="w"
+    ).grid(row=1, column=2, padx=(15, 5), pady=5, sticky="ew")
+
+    clave_rastreo = ctk.CTkEntry(
+        metodo_pago_frame,
+        placeholder_text="🔑 Clave de rastreo",
+        **ESTILO_ENTRADA
+    )
     clave_rastreo.configure(validate="key", validatecommand=(vcmdo, "%P"))
     clave_rastreo.bind("<KeyRelease>", lambda event: convertir_a_mayusculas(clave_rastreo, event))
+    clave_rastreo.grid(row=1, column=3, padx=(5, 15), pady=5, sticky="ew")
+    # Sección de conceptos
+    conceptos_frame = ctk.CTkFrame(contenedor_principal, **ESTILO_FRAME)
+    conceptos_frame.pack(fill="x", pady=(0, 20), padx=5)
 
-    crear_label(entrada_frame, "Denominación:", FUENTE_LABEL, row=8, column=0, padx=(10, 5), pady=25, sticky="w")
-    denominacion_entrada = crear_entry(entrada_frame, "💵 Denominación", 8, 1, padx=(5, 10), pady=5, sticky="ew")
-    denominacion_entrada.bind("<KeyRelease>", lambda event: convertir_a_mayusculas(denominacion_entrada, event))
+    ctk.CTkLabel(
+        conceptos_frame,
+        text="CONCEPTOS",
+        font=FUENTE_SUBTITULO
+    ).grid(row=0, column=0, columnspan=4, pady=(5, 10))
 
-    crear_label(entrada_frame, "OBSERVACIONES:", FUENTE_LABEL, row=9, column=0, columnspan=4, pady=(10, 5), sticky="n")
-    observaciones_entry = ctk.CTkEntry(entrada_frame, placeholder_text="👀 OBSERVACIONES", height=40)
-    observaciones_entry.grid(row=9, column=0, columnspan=4, padx=10, pady=(0, 10), sticky="ew")
-    observaciones_entry.bind("<KeyRelease>", lambda event: convertir_a_mayusculas(observaciones_entry, event))
+    # Encabezados de tabla
+    encabezados = ["Clave", "Descripción", "Importe"]
+    for col, texto in enumerate(encabezados):
+        ctk.CTkLabel(
+            conceptos_frame,
+            text=texto,
+            font=FUENTE_LABEL,
+            anchor="w"
+        ).grid(row=1, column=col, padx=10, pady=(0, 5), sticky="ew")
 
-    # ---------------------------------------------
-    # ENLACES DE FOCUS CON ENTER
-    nombre.bind("<Return>", lambda e: cargo_entry.focus_set())
-    cargo_entry.bind("<Return>", lambda e: tipo_pago.focus_set())
-    tipo_pago.bind("<Return>", lambda e: clave_rastreo.focus_set())
-    clave_rastreo.bind("<Return>", lambda e: denominacion_entrada.focus_set())
-    denominacion_entrada.bind("<Return>", lambda e: observaciones_entry.focus_set())
-    observaciones_entry.bind("<Return>", lambda e: nombre.focus_set())  
-
+    # Frame para las filas de conceptos (scrollable)
+    filas_frame = ctk.CTkScrollableFrame(
+        conceptos_frame,
+        height=150,
+        fg_color="transparent"
+    )
+    filas_frame.grid(row=2, column=0, columnspan=4, sticky="nsew")
     
-    # Sección filas adicionales
-    seccion_filas = ctk.CTkFrame(contenedor_general, corner_radius=15, fg_color="transparent")
-    seccion_filas.grid(row=10, column=0, columnspan=3, sticky="ew")
-
-    seccion_titulos_filas = ctk.CTkFrame(contenedor_general, corner_radius=15, fg_color="transparent")
-    seccion_titulos_filas.grid(row=5, column=0, columnspan=3, sticky="ew", pady=(10, 5))
-
-    # Column titles
-    crear_label(seccion_titulos_filas, "Clave", FUENTE_SECCION_TITULO, row=0, column=0, padx=10, sticky="w")
-    crear_label(seccion_titulos_filas, "Denominación", FUENTE_SECCION_TITULO, row=0, column=1, padx=10, sticky="w")
-    
-    
-    crear_label(seccion_titulos_filas, "Cargo", FUENTE_SECCION_TITULO, row=0, column=2, padx=10, sticky="w")
-    seccion_titulos_filas.grid_columnconfigure((0, 1, 2), weight=1)
-
-    # Sección filas
-    frame_filas = ctk.CTkFrame(seccion_filas, corner_radius=15, fg_color="transparent")
-    frame_filas.pack(fill="x")
+    conceptos_frame.columnconfigure(0, weight=1)
+    conceptos_frame.columnconfigure(1, weight=1)
+    conceptos_frame.columnconfigure(2, weight=1)
+    conceptos_frame.columnconfigure(3, weight=0) 
 
     entradas = []
 
@@ -154,80 +272,175 @@ def mostrar_formulario_egresos(frame_padre):
             suma_total = sum(float(entrada[2].get()) for entrada in entradas if entrada[2].get().strip())
             total.configure(state="normal")
             total.delete(0, tk.END)
-            total.insert(0, f"{suma_total:.2f}")
+            total.insert(0, f"${suma_total:,.2f}")
             total.configure(state="readonly")
 
             importe_valor = cargo_entry.get().strip()
             if importe_valor:
                 importe_float = float(importe_valor)
                 if abs(importe_float - suma_total) < 0.01:
-                    validacion_totales.configure(text="✅", text_color=COLOR_VALIDACION_OK)
+                    validacion_totales.configure(text="✓", text_color="#10b981")
                 else:
-                    validacion_totales.configure(text="❌", text_color=COLOR_VALIDACION_ERROR)
+                    validacion_totales.configure(text="✗", text_color="#ef4444")
             else:
-                validacion_totales.configure(text="❌", text_color=COLOR_VALIDACION_NEUTRO)
+                validacion_totales.configure(text="?", text_color="#6b7280")
         except ValueError:
             pass
- 
-
-    def campos_obligatorios_vacios():
-        campos = [
-            nombre,
-            cargo_entry,
-            clave_rastreo,
-            denominacion_entrada,
-            observaciones_entry
-        ]
-        return any(campo.get().strip() == "" for campo in campos)
-
-    
 
     def agregar_fila(enfocar_nueva_clave=False):
-        fila_frame = ctk.CTkFrame(frame_filas, corner_radius=15, fg_color="transparent")
-        fila_frame.pack(fill="x", pady=5)
+        fila_idx = len(entradas)
+        fila_frame = ctk.CTkFrame(filas_frame, fg_color="transparent")
+        fila_frame.pack(fill="x", pady=2)
 
-        entrada_clave = ctk.CTkEntry(fila_frame, placeholder_text="🔑 Clave")
-        entrada_clave.grid(row=0, column=0, padx=10, sticky="ew")
-
-        entrada_resultado = ctk.CTkEntry(fila_frame, placeholder_text="Denominación", state="disabled")
-        entrada_resultado.grid(row=0, column=1, padx=10, sticky="ew")
-
-        entrada_abono = ctk.CTkEntry(fila_frame, placeholder_text="💰 Cargo")
-        vcmd = fila_frame.register(solo_numeros_decimales)
-        entrada_abono.grid(row=0, column=2, padx=10, sticky="ew")
-        entrada_abono.bind("<KeyRelease>", lambda event: actualizar_total())
-        entrada_abono.configure(validate="key", validatecommand=(vcmd, "%P"))
+        fila_frame.columnconfigure(0, weight=2)  # Clave
+        fila_frame.columnconfigure(1, weight=4)  # Descripción
+        fila_frame.columnconfigure(2, weight=2)  # Importe
+        fila_frame.columnconfigure(3, weight=0)
         
+        
+        # Entrada clave
+        entrada_clave = ctk.CTkEntry(
+            fila_frame,
+            placeholder_text="🔑 Clave presupuestal",
+            width=120,
+            **ESTILO_ENTRADA
+        )
+        entrada_clave.grid(row=0, column=0, padx=5, pady=2, sticky="ew")
 
-        entrada_clave.bind("<FocusOut>", lambda event: llenar_denominacion(event, entrada_clave, entrada_resultado))
-        entrada_clave.bind("<Return>", lambda event: entrada_abono.focus_set())
-        entrada_abono.bind("<Return>", lambda event: agregar_fila(enfocar_nueva_clave=True))
+        # Entrada descripción
+        entrada_desc = ctk.CTkEntry(
+            fila_frame,
+            placeholder_text="Descripción",
+            state="disabled",
+            **ESTILO_ENTRADA
+        )
+        entrada_desc.grid(row=0, column=1, padx=5, pady=2, sticky="ew")
 
+        # Entrada importe
+        entrada_importe = ctk.CTkEntry(
+            fila_frame,
+            placeholder_text="💰 Importe",
+            **ESTILO_ENTRADA
+        )
+        vcmd = fila_frame.register(solo_numeros_decimales)
+        entrada_importe.configure(validate="key", validatecommand=(vcmd, "%P"))
+        entrada_importe.bind("<KeyRelease>", lambda event: actualizar_total())
+        entrada_importe.grid(row=0, column=2, padx=5, pady=2, sticky="ew")
+
+        # Botón eliminar
         btn_eliminar = ctk.CTkButton(
             fila_frame,
-            text="❌",
-            **btn_eliminar_style,
-            command=lambda: (fila_frame.destroy(), entradas.remove((entrada_clave, entrada_resultado, entrada_abono)), actualizar_total())
+            text="✕",
+            width=30,
+            height=30,
+            fg_color="#ef4444",
+            hover_color="#dc2626",
+            command=lambda: (fila_frame.destroy(), entradas.remove((entrada_clave, entrada_desc, entrada_importe)), actualizar_total())
         )
-        btn_eliminar.grid(row=0, column=3, padx=5)
+        btn_eliminar.grid(row=0, column=3, padx=5, pady=2)
 
-        fila_frame.grid_columnconfigure((0, 1, 2), weight=1)
-        entradas.append((entrada_clave, entrada_resultado, entrada_abono))
+        # Configurar eventos
+        entrada_clave.bind("<FocusOut>", lambda event: llenar_denominacion(event, entrada_clave, entrada_desc))
+        entrada_clave.bind("<Return>", lambda event: entrada_importe.focus_set())
+        entrada_importe.bind("<Return>", lambda event: agregar_fila(enfocar_nueva_clave=True))
+
+        entradas.append((entrada_clave, entrada_desc, entrada_importe))
 
         if enfocar_nueva_clave:
             entrada_clave.focus_set()
 
+    # Agregar primera fila por defecto
     agregar_fila()
-    
+
+    # Botón para agregar más filas
     ctk.CTkButton(
-        seccion_filas,
-        text="➕ Agregar",
-        command=agregar_fila,
-        **btn_agregar_style
-    ).pack(pady=10)
+        conceptos_frame,
+        text="➕ Agregar concepto",
+        **ESTILO_BOTON,
+        fg_color="#3b82f6",
+        hover_color="#2563eb",
+        command=agregar_fila
+    ).grid(row=3, column=0, columnspan=4, pady=10)
 
+    # Sección de observaciones
+    observaciones_frame = ctk.CTkFrame(contenedor_principal, **ESTILO_FRAME)
+    observaciones_frame.pack(fill="x", pady=(0, 20), padx=5)
 
-# campos
+    ctk.CTkLabel(
+        observaciones_frame,
+        text="OBSERVACIONES",
+        font=FUENTE_SUBTITULO
+    ).pack(pady=(5, 10))
+
+    observaciones_entry = ctk.CTkEntry(
+        observaciones_frame,
+        placeholder_text="Escriba aquí cualquier observación adicional...",
+        #height=40,
+        **ESTILO_ENTRADA
+    )
+    observaciones_entry.pack(fill="x", padx=10, pady=(0, 10))
+    observaciones_entry.bind("<KeyRelease>", lambda event: convertir_a_mayusculas(observaciones_entry, event))
+
+    # Barra de acciones inferiores
+    acciones_frame = ctk.CTkFrame(contenedor_principal, fg_color="transparent")
+    acciones_frame.pack(fill="x", pady=(10, 0))
+
+    # Total y validación
+    ctk.CTkLabel(
+        acciones_frame,
+        text="Total:",
+        font=FUENTE_LABEL
+    ).pack(side="left", padx=(0, 10))
+
+    total = ctk.CTkEntry(
+        acciones_frame,
+        width=150,
+        state="readonly",
+        font=FUENTE_TEXTO,
+        justify="right"
+    )
+    total.pack(side="left", padx=(0, 10))
+
+    validacion_totales = ctk.CTkLabel(
+        acciones_frame,
+        text="?",
+        font=("Arial", 16, "bold"),
+        text_color="#6b7280"
+    )
+    validacion_totales.pack(side="left", padx=(0, 20))
+
+    # Botones de acción
+    btn_guardar = ctk.CTkButton(
+        acciones_frame,
+        text="💾 Guardar",
+        **ESTILO_BOTON,
+        fg_color="#10b981",
+        hover_color="#059669",
+        command=lambda: guardar_egresos(form, entradas)
+    )
+    btn_guardar.pack(side="right", padx=5)
+
+    btn_descargar = ctk.CTkButton(
+        acciones_frame,
+        text="📥 Descargar",
+        **ESTILO_BOTON,
+        fg_color="#3b82f6",
+        hover_color="#2563eb",
+        command=lambda: mostrar_menu_descarga(None, form, entradas)
+    )
+    btn_descargar.pack(side="right", padx=5)
+
+    btn_buscar = ctk.CTkButton(
+        acciones_frame,
+        text="🔍 Buscar",
+        **ESTILO_BOTON,
+        fg_color="#6b7280",
+        hover_color="#4b5563",
+        command=lambda: abrir_carpeta("~/Documentos/Cecati122/PolizasDeIngresos")
+    )
+    btn_buscar.pack(side="right", padx=5)
+
+    # Diccionario con los campos del formulario
     form = {
         "fecha": fecha_policia,
         "no_poliza": no_poliza,
@@ -236,53 +449,36 @@ def mostrar_formulario_egresos(frame_padre):
         "cargo_letras": cargo_letras_entry,
         "tipo_pago": tipo_pago,
         "clave_rastreo": clave_rastreo,
-        "denominacion": denominacion_entrada,
         "observaciones": observaciones_entry,
     }
 
-
-# En algún botón o evento
-    
-
-    # Botones inferiores
-    botones_frame = ctk.CTkFrame(contenedor_principal, corner_radius=15, fg_color="transparent")
-    botones_frame.pack(fill="x", pady=10, padx=20, anchor="e")
-
-    ctk.CTkLabel(botones_frame, text="Total:", font=FUENTE_FORMULARIO_S).pack(side="left", padx=(0, 10))
-    total = ctk.CTkEntry(botones_frame, placeholder_text="💰 Total", state="readonly")
-    total.pack(side="left", padx=(0, 10), fill="x", expand=False)
-
-    validacion_totales = ctk.CTkLabel(botones_frame, text="❌", font=FUENTE_VALIDACION)
-    validacion_totales.pack(side="left", padx=(0, 10))
-
-    crear_boton_imagen(botones_frame, "Buscar", "assets/look.png", btn_guardar_style, command=lambda: abrir_carpeta("~/Documentos/Cecati122/PolizasDeIngresos"), side="right", padx=10)
-    btn_guardar = crear_boton_imagen(botones_frame, "Guardar", "assets/check.png", btn_guardar_style, None, side="right", padx=10)
-    
-    btn_descargar = crear_boton_imagen(
-    botones_frame,
-    "Descargar",
-    "assets/downlo.png",
-    btn_descargar_style,
-    command=None,
-    side="right",
-    padx=10
-)
-
-# Enlazamos el clic al menú
-    btn_descargar.bind("<Button-1>", lambda e: mostrar_menu_descarga(e, form, entradas))
+    # Función para mostrar menú de descarga
     def mostrar_menu_descarga(event, form, entradas):
         menu = tk.Menu(None, tearoff=0)
-        menu.add_command(label="Exportar como PDF", command=lambda: exportar_pdf(form, entradas))
-        menu.add_command(label="Exportar como Excel", command=lambda: exportar_excel(form, entradas))
-        menu.tk_popup(event.x_root, event.y_root)
+        menu.add_command(
+            label="Exportar como PDF",
+            command=lambda: guardar_pdf(form, entradas))
+        menu.add_command(
+            label="Exportar como Excel",
+            command=lambda: guardar_egresos(form, entradas))
+        
+        # Posicionar el menú cerca del botón
+        try:
+            x = btn_descargar.winfo_rootx()
+            y = btn_descargar.winfo_rooty() + btn_descargar.winfo_height()
+            menu.tk_popup(x, y)
+        finally:
+            menu.grab_release()
 
-    import tkinter as tk  # Asegúrate de tener esto
-
-    def exportar_excel(form, entradas):
-        guardar_egresos(form, entradas)
-
-    def exportar_pdf(form, entradas):
-        guardar_pdf(form, entradas)
+    # Función para validar campos obligatorios
+    def campos_obligatorios_vacios():
+        campos = [
+            nombre,
+            cargo_entry,
+            clave_rastreo,
+            observaciones_entry
+        ]
+        return any(campo.get().strip() == "" for campo in campos)
 
     def actualizar_estado_botones(event=None):
         if campos_obligatorios_vacios():
@@ -291,7 +487,11 @@ def mostrar_formulario_egresos(frame_padre):
         else:
             btn_guardar.configure(state="normal")
             btn_descargar.configure(state="normal")
-        for campo in [nombre, cargo_entry, clave_rastreo, denominacion_entrada, observaciones_entry]:
-            campo.bind("<KeyRelease>", actualizar_estado_botones)
-            
-            #actualizar_estado_botones()
+
+    # Configurar eventos para validación en tiempo real
+    for campo in [nombre, cargo_entry, clave_rastreo, observaciones_entry]:
+        campo.bind("<KeyRelease>", actualizar_estado_botones)
+
+    # Validación inicial
+    actualizar_estado_botones()
+    actualizar_total()

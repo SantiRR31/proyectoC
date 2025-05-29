@@ -16,25 +16,6 @@ from datetime import datetime
 import psutil, time
 
 
-
-from styles.styles import (
-    FUENTE_FORMULARIO_T,
-    FUENTE_FORMULARIO_S,
-    FONDO_CONTENEDORES,
-    ENTRADA_FRAME_C,
-    FUENTE_LABEL,
-    FUENTE_SECCION_TITULO,
-    FUENTE_VALIDACION,
-    btn_eliminar_style,
-    btn_agregar_style,
-    btn_guardar_style,
-    btn_descargar_style,
-    COLOR_VALIDACION_OK,
-    COLOR_VALIDACION_ERROR,
-    COLOR_VALIDACION_NEUTRO,
-)
-
-
 def obtener_fecha_actual():
     """Devuelve la fecha actual en formato 'DD-MM-AAAA'."""
     return datetime.datetime.now().strftime("%d-%m-%Y")
