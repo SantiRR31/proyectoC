@@ -13,6 +13,7 @@ from tkinter import messagebox
 from functions import genRegIngresos, funcions
 from tkcalendar import DateEntry
 from datetime import datetime
+import psutil, time
 
 
 
@@ -70,7 +71,7 @@ def mostrar_formulario_ingresos(frame_padre, banco_caja):
     entrada_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)
     
     # Fila 1 - Fecha y Número de Póliza
-    lbl_fecha = ctk.CTkLabel(entrada_frame, text="Fecha:", font=("Arial", 14))
+    lbl_fecha = ctk.CTkLabel(entrada_frame, text="Fecha del voucher:", font=("Arial", 14))
     lbl_fecha.grid(row=0, column=0, padx=(10,5), pady=5, sticky="w")
     fecha_policia = DateEntry(entrada_frame, placeholder_text="📅 Fecha de ingreso")
     fecha_policia.grid(row=0, column=1, padx=(5,10), pady=5, sticky="ew")
@@ -209,61 +210,159 @@ def mostrar_formulario_ingresos(frame_padre, banco_caja):
     
 
     def guardar_Ingresos():
+        app = None
+        wb = None
         try:
-            # Abrimos Excel de forma controlada
-            app = xw.App(visible=False)
-            wb = app.books.open("assets/plantillaIngresos.xlsx")
-            hoja = wb.sheets["Plantilla Ingresos"]
-
-            # Tomamos los valores de los Entry
+            # Obtener valores de la interfaz
             banco = banco_o_caja.get()
             cargo_importe = cuanto_pago.get()
             notaAdicional = nota.get()
             noPoliza = no_poliza.get()
+    
+            # Manejo de fechas
+            fecha_ingresada = fecha_policia.get_date()
+            fecha1 = fecha_ingresada.day
+            fecha2 = fecha_ingresada.month
+            fecha3 = fecha_ingresada.year
+    
+            # Obtener mes/año actual
             fech_act = datetime.now()
             mes = fech_act.strftime('%b').lower()
             anio = fech_act.year
             poliza_final = f"{noPoliza}/{mes}/{anio}"
-            fecha_ingresada = fecha_policia.get_date()
-            fecha1 = fecha_ingresada.strftime("%d")
-            fecha2 = fecha_ingresada.strftime("%m") 
-            fecha3 = fecha_ingresada.strftime("%y")
-
-            hoja.range("A10").value = banco
-            hoja.range("AS10").value = cargo_importe
-            hoja.range("J40").value = notaAdicional
-            hoja.range("AT6").value = poliza_final
-            hoja.range("AL6").value = fecha1
-            hoja.range("AN6").value = fecha2
-            hoja.range("AQ6").value = fecha3
-            
-            # Entradas dinámicas
+        
+            # Configurar rutas PRIMERO (antes de abrir Excel)
+            carpetaBase = r"C:\Cecati122"
+            carpeta_descargas = os.path.join(carpetaBase, "PolizasDeIngresos")
+            os.makedirs(carpeta_descargas, exist_ok=True)
+            nombre_archivo = f"Poliza_ingresos_{mes}_{anio}.xlsx"
+            ruta_completa = os.path.join(carpeta_descargas, nombre_archivo)
+        
+            app = xw.App(visible=False)  # Iniciar Excel primero
+        
+            retries = 0
+            max_retries = 3
+            while retries < max_retries:
+                try:
+                    if os.path.exists(ruta_completa):
+                        wb = app.books.open(ruta_completa)
+                    else:
+                        wb = app.books.open("assets/plantillaIngresos.xlsx")
+                    break
+                except Exception as e:
+                    retries += 1
+                    if retries == max_retries:
+                        # Limpiar procesos de Excel antes de reintentar
+                        for proc in psutil.process_iter():
+                            if "EXCEL.EXE" in proc.name().upper():
+                                proc.kill()
+                        time.sleep(1)
+                        if os.path.exists(ruta_completa):
+                            wb = app.books.open(ruta_completa)
+                        else:
+                            wb = app.books.open("assets/plantillaIngresos.xlsx")
+                        break
+                    time.sleep(2)  # Esperar 2 segundos antes de reintentar
+    
+            # Identificar plantilla
+            if os.path.exists(ruta_completa):
+                plantilla = wb.sheets["Plantilla Ingresos"]
+            else:
+                plantilla = wb.sheets["Plantilla Ingresos"]
+                # Crear copia temporal
+                hoja_temp = plantilla.copy(after=plantilla)
+                hoja_temp.name = "Temp"
+                plantilla.visible = False
+    
+            # ►►► GENERAR NOMBRE DE HOJA SEGURO ◄◄◄
+            base_name = f"Pz {noPoliza}"[:20]
+            timestamp_suffix = datetime.now().strftime('%H%M')
+            existing_names = [s.name for s in wb.sheets]
+        
+            if any(name.startswith(base_name) for name in existing_names):
+                nombre_hoja = f"{base_name}_{timestamp_suffix}"[:31]
+            else:
+                nombre_hoja = base_name[:31]
+        
+            if os.path.exists(ruta_completa):
+                nueva_hoja = plantilla.copy(after=plantilla)
+            else:
+                nueva_hoja = wb.sheets["Temp"]
+        
+            nueva_hoja.name = nombre_hoja
+            nueva_hoja.visible = True  # Asegurar visibilidad
+            nueva_hoja.activate()      # Activar la hoja
+            hoja_activa = nueva_hoja
+    
+            # ESCRITURA DE DATOS
+            hoja_activa.range("A10").value = banco
+            hoja_activa.range("AS10").value = float(cargo_importe)
+            hoja_activa.range("J40").value = notaAdicional
+            hoja_activa.range("AT6").value = poliza_final
+            hoja_activa.range("AL6").value = fecha1
+            hoja_activa.range("AN6").value = fecha2
+            hoja_activa.range("AQ6").value = fecha3
+    
+            # ENTRADAS DINÁMICAS
             fila_inicial = 15
             for entrada_clave, _, entrada_abono in entradas:
                 clave = entrada_clave.get()
                 abono = entrada_abono.get()
-                hoja.range(f"B{fila_inicial}").value = clave
-                hoja.range(f"AT{fila_inicial}").value = float(abono) if abono else 0.0
-                fila_inicial += 1
-
-            # Crear carpeta de destino
-            #fecha_hoy = datetime.datetime.now().strftime("%d-%m-%Y")
-            nombre_archivo = f"Poliza_ingresos_{no_poliza.get()}_{mes}.xlsx"
-            carpetaBase = r"C:\Cecati122"
-            carpeta_descargas = os.path.join(carpetaBase, "PolizasDeIngresos")
-            os.makedirs(carpeta_descargas, exist_ok=True)
-            ruta_completa = os.path.join(carpeta_descargas, nombre_archivo)
-
-            # Guardamos el archivo
+                if clave or abono:
+                    hoja_activa.range(f"B{fila_inicial}").value = clave
+                    hoja_activa.range(f"AT{fila_inicial}").value = float(abono) if abono else 0.0
+                    fila_inicial += 1
+    
+            # GUARDADO Y CIERRE SEGURO
             wb.save(ruta_completa)
-            messagebox.showinfo("Éxito", f"Archivo guardado en: {ruta_completa}")
-
-            # Cerrar libro y Excel
             wb.close()
             app.quit()
+        
+            success_msg = (
+                "Póliza guardada exitosamente!\n"
+                f"Archivo: {nombre_archivo}\n"
+                f"Ubicación: {carpeta_descargas}\n"
+                f"Hoja creada: {nombre_hoja}\n\n"
+                f"N° Póliza: {noPoliza} | Importe: ${cargo_importe}"
+            )
+            messagebox.showinfo("Operación Exitosa", success_msg)
 
         except Exception as e:
-            messagebox.showerror("Error al guardar", f"Ocurrió un error:\n{e}")
+            error_type = type(e).__name__
+            error_msg = (
+                f"Error ({error_type}): {str(e)}\n\n"
+                "Posibles soluciones:\n"
+                "1. Cierre todas las instancias de Excel\n"
+                "2. Verifique permisos de escritura en:\n"
+                f"   > {carpeta_descargas}\n"
+                "3. Revise que los datos tengan formato válido\n"
+                "4. Confirme que la plantilla exista en:\n"
+                "   > assets/plantillaIngresos.xlsx"
+            )
+            messagebox.showerror("Error Crítico", error_msg)
+        
+        finally:
+            try:
+                if wb is not None:
+                    wb.close()
+            except:
+                pass
+        
+            try:
+                if app is not None:
+                    app.quit()
+                    app.kill()
+            except:
+                pass
+        
+            # Limpieza adicional de procesos
+            for proc in psutil.process_iter():
+                if "EXCEL.EXE" in proc.name().upper():
+                    try:
+                        proc.kill()
+                    except:
+                        pass
+
             
     def guardar_datos_en_db():
         try:
