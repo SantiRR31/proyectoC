@@ -2,28 +2,8 @@ import tkinter as tk
 import customtkinter as ctk
 from functions.funcions import obtener_fecha_actual, buscar_denominacion_db
 from db.egresosDB import buscar_descripcion_db
-from widgets.widgets import (
-    crear_label,
-    crear_entry,
-    crear_boton,
-    crear_boton_imagen
-)
-from styles.styles import (
-    FUENTE_FORMULARIO_T,
-    FUENTE_FORMULARIO_S,
-    FONDO_CONTENEDORES,
-    ENTRADA_FRAME_C,
-    FUENTE_LABEL,
-    FUENTE_SECCION_TITULO,
-    FUENTE_VALIDACION,
-    btn_eliminar_style,
-    btn_agregar_style,
-    btn_guardar_style,
-    btn_descargar_style,
-    COLOR_VALIDACION_OK,
-    COLOR_VALIDACION_ERROR,
-    COLOR_VALIDACION_NEUTRO,
-)
+from widgets.widgets import *
+from styles.styles import *
 
 #Entradas de arriba del documento
 #clave_cecati = '22DBT0005P'
