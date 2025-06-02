@@ -1,7 +1,6 @@
 import tkinter as tk
 import customtkinter as ctk
 import sqlite3
-import datetime
 from PIL import Image
 from customtkinter import CTkImage
 from utils.utils import convertir_a_mayusculas
@@ -11,38 +10,39 @@ import os
 from tkcalendar import DateEntry
 from tkinter import messagebox
 from functions import genRegIngresos, funcions
-from tkcalendar import DateEntry
 from datetime import datetime
 import psutil, time
+import json
+import os 
+CONFIG_PATH = "config.json"
 
-
-
-from styles.styles import (
-    FUENTE_FORMULARIO_T,
-    FUENTE_FORMULARIO_S,
-    FONDO_CONTENEDORES,
-    ENTRADA_FRAME_C,
-    FUENTE_LABEL,
-    FUENTE_SECCION_TITULO,
-    FUENTE_VALIDACION,
-    btn_eliminar_style,
-    btn_agregar_style,
-    btn_guardar_style,
-    btn_descargar_style,
-    COLOR_VALIDACION_OK,
-    COLOR_VALIDACION_ERROR,
-    COLOR_VALIDACION_NEUTRO,
-)
-
+def cargar_configuracion():
+    default_config = {
+        "banco_caja": "BANNORTE"
+    }
+    config = {}
+    if os.path.exists(CONFIG_PATH):
+        with open(CONFIG_PATH, 'r') as file:
+            try:
+                config = json.load(file)
+            except Exception:
+                config = {}
+    for key, value in default_config.items():
+        if key not in config:
+            config[key] = value
+    return config 
+                
 
 def obtener_fecha_actual():
     """Devuelve la fecha actual en formato 'DD-MM-AAAA'."""
     return datetime.datetime.now().strftime("%d-%m-%Y")
 
-def mostrar_formulario_ingresos(frame_padre, banco_caja):
+def mostrar_formulario_ingresos(frame_padre):
     for widget in frame_padre.winfo_children():
         widget.destroy()
-
+        
+    config = cargar_configuracion()
+    # --- TÍTULO ---
     titulo = ctk.CTkLabel(frame_padre, text="Póliza de Ingresos", font=("Arial", 28, "bold"))
     titulo.pack(pady=30)
 
@@ -90,7 +90,7 @@ def mostrar_formulario_ingresos(frame_padre, banco_caja):
     lbl_banco.grid(row=1, column=0, padx=(10,5), pady=5, sticky="w")
     banco_o_caja = ctk.CTkEntry(entrada_frame, placeholder_text="🏦 Banco o Caja")
     banco_o_caja.grid(row=1, column=1, padx=(5,10), pady=5, sticky="ew")
-    banco_o_caja.insert(0, banco_caja.get())
+    banco_o_caja.insert(0, config.get("banco_caja", "BANNORTE"))  # Cargar valor por defecto
 
     lbl_cuanto_pago = ctk.CTkLabel(entrada_frame, text="Cargo/Importe:", font=("Arial", 14))
     lbl_cuanto_pago.grid(row=1, column=2, padx=(10,5), pady=5, sticky="w")

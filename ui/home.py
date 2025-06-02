@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 import customtkinter as ctk
 from styles.styles import *
@@ -8,30 +9,76 @@ from ui.infRealIngresos import mostrar_informe_real_ingresos
 from ui.ajustes import mostrar_ajustes
 from PIL import Image, ImageTk
 from customtkinter import CTkImage, CTkFont
+import json
+from utils.config_utils import actualizar_config
+CONFIG_PATH = "config.json"
+
+def guardar_estado_ventana(root):
+    actualizar_config("geometry", root.geometry())
+    actualizar_config("state", root.state())
+    actualizar_config("appearance_mode", ctk.get_appearance_mode())
+    actualizar_config("appearance_mode", ctk.get_appearance_mode())
+    actualizar_config("color_theme", "blue")  # O el tema que elija el usuario
+
+def cargar_estado_ventana(root):
+    if os.path.exists(CONFIG_PATH):
+        try:
+            with open(CONFIG_PATH) as f:
+                config = json.load(f)
+            if "geometry" in config:
+                root.geometry(config["geometry"])
+            if "state" in config and config["state"] not in ("normal", "zoomed"):
+                root.state(config["state"])
+        except Exception:
+            pass
+        
+def cargar_config():
+    # Valores por defecto
+    defaults = {
+        "carpeta_destino": "~/Documentos/Cecati122/Polizas",
+        "clave_cecati": "22DBT0005P",
+        "banco_caja": "BANORTE",
+        "geometry": "1280x720+100+100",
+        "state": "normal",
+        "appearance_mode": "dark",
+        "color_theme": "blue"
+    }
+    config = {}
+    if os.path.exists(CONFIG_PATH):
+        with open(CONFIG_PATH, "r") as f:
+            try:
+                config = json.load(f)
+            except Exception:
+                config = {}
+    # Asegura que todas las claves existan
+    for key, value in defaults.items():
+        if key not in config:
+            config[key] = value
+    return config
 
 
+config = cargar_config()
+ctk.set_appearance_mode(config.get("appearance_mode", "dark"))
+ctk.set_default_color_theme(config.get("color_theme", "blue"))
+        
+        
 def lanzar_ventana_principal():
-    # Configuración inicial con tema moderno
-    ctk.set_appearance_mode("dark")
-    ctk.set_default_color_theme("blue")
+    # Configuración inicial
+    #ctk.set_appearance_mode("dark")
+    #ctk.set_default_color_theme("blue")
 
     root = ctk.CTk()
     root.iconbitmap("assets/cecati-122.ico")
     root.title("Sistema de Gestión CECATI 122")
-    #root.geometry("1280x720")
-    #root.minsize(1024, 720)
     
     
-    clave_cecati = tk.StringVar(value="22DBT0005P")
-    banco_caja = tk.StringVar(value="BANORTE")
-
-    # ---------------- HEADER MODERNO ----------------
+    # ---------------- HEADER ----------------
     header = ctk.CTkFrame(
         root, 
         height=70, 
-        fg_color=("#faf7f6", "#191919"), 
+        fg_color= COLOR_CONT_PRIMARIO, 
     )
-    header.pack(fill="x", pady=(0, 2))  # Pequeño margen inferior
+    header.pack(fill="x", pady=(0, 2))
     
     
     
@@ -43,7 +90,7 @@ def lanzar_ventana_principal():
         header, 
         text="Usuario: Admin", 
         font=CTkFont("Arial", 12),
-        text_color=("#94a3b8", "#cbd5e1")
+        text_color=COLOR_TEXTO_SEMIVISIBLE
     )
     user_info.pack(side="right", padx=20)
 
@@ -89,8 +136,8 @@ def lanzar_ventana_principal():
             corner_radius=8,
             height=40,
             fg_color=COLOR_INACTIVO,
-            text_color=("#121212", "#f1f5f9"),
-            hover_color=("#d21329", "#d21329")
+            text_color=COLOR_TEXTO,
+            hover_color= COLOR_PRIMARIO
         )
         btn.pack(fill="x", padx=12, pady=4)
         return btn
@@ -99,7 +146,7 @@ def lanzar_ventana_principal():
     sidebar = ctk.CTkFrame(
         main_container, 
         width=240, 
-        fg_color=("#faf7f6", "#191919"), 
+        fg_color=COLOR_CONT_PRIMARIO, 
        
     )
     sidebar.grid(row=0, column=0, sticky="nsew")
@@ -116,21 +163,21 @@ def lanzar_ventana_principal():
         sidebar, 
         text="MENÚ PRINCIPAL", 
         font=CTkFont("Arial", 12, "bold"), 
-        text_color=("#94a3b8", "#cbd5e1")
+        text_color=COLOR_TEXTO_SEMIVISIBLE
     )
     sidebar_title.pack(pady=(0, 10))
     
     separator = ctk.CTkFrame(
         sidebar, 
         height=1, 
-        fg_color=("#334155", "#475569")
+        fg_color=COLOR_TEXTO_APARTADO
     )
     separator.pack(fill="x", pady=5, padx=15)
 
     # ---------------- CONTENIDO PRINCIPAL ----------------
     content_frame = ctk.CTkFrame(
         main_container, 
-        fg_color=("#ddd9d9", "#1c1c1c")
+        fg_color=COLOR_CONT_SECUNDARIO
     )
     content_frame.grid(row=0, column=1, sticky="nsew")
 
@@ -138,14 +185,14 @@ def lanzar_ventana_principal():
     frame_contenido = ctk.CTkFrame(
         content_frame, 
        
-        fg_color=("#faf7f6", "#191919"),
+        fg_color=COLOR_CONT_PRIMARIO,
     )
     frame_contenido.pack(fill="both", expand=True, padx=20, pady=20)
 
     # Funciones para cambiar contenido
     def abrir_formulario(contenedor):
         limpiar_contenido(contenedor)
-        mostrar_formulario_ingresos(contenedor, banco_caja)
+        mostrar_formulario_ingresos(contenedor)
 
     def abrir_inicio(contenedor):
         limpiar_contenido(contenedor)
@@ -157,11 +204,11 @@ def lanzar_ventana_principal():
         
     def abrir_informe_real_ingresos(contenedor):
         limpiar_contenido(contenedor)
-        mostrar_informe_real_ingresos(contenedor, clave_cecati)
+        mostrar_informe_real_ingresos(contenedor)
 
     def abrir_ajustes(contenedor):
         limpiar_contenido(contenedor)
-        mostrar_ajustes(contenedor, clave_cecati, banco_caja)
+        mostrar_ajustes(contenedor)
 
     def limpiar_contenido(contenedor):
         for widget in contenedor.winfo_children():
@@ -181,7 +228,7 @@ def lanzar_ventana_principal():
         sidebar, 
         text="PÓLIZAS", 
         font=CTkFont("Arial", 11, "bold"), 
-        text_color=("#64748b", "#94a3b8")
+        text_color= COLOR_TEXTO_APARTADO_SECUNDARIO
     ).pack(pady=(15, 5), anchor="w", padx=20)
     
     separator = ctk.CTkFrame(
@@ -215,7 +262,7 @@ def lanzar_ventana_principal():
     separator = ctk.CTkFrame(
         sidebar, 
         height=1, 
-        fg_color=("#334155", "#475569")
+        fg_color=COLOR_TEXTO_APARTADO
     )
     separator.pack(fill="x", pady=2, padx=15)
     
@@ -231,13 +278,13 @@ def lanzar_ventana_principal():
         sidebar, 
         text="INFORMES", 
         font=CTkFont("Arial", 11, "bold"), 
-        text_color=("#64748b", "#94a3b8")
+        text_color=COLOR_TEXTO_APARTADO_SECUNDARIO
     ).pack(pady=(15, 5), anchor="w", padx=20)
     
     separator = ctk.CTkFrame(
         sidebar, 
         height=1, 
-        fg_color=("#334155", "#475569")
+        fg_color=COLOR_TEXTO_APARTADO
     )
     separator.pack(fill="x", pady=2, padx=15)
     
@@ -267,10 +314,12 @@ def lanzar_ventana_principal():
             ctk.set_appearance_mode("light")
             imagenes["tema"] = CTkImage(Image.open("assets/sun 2.png"), size=(20, 20))
             btn_tema.configure(text="Modo Claro", image=imagenes["tema"])
+            actualizar_config("appearance_mode", "light")
         else:
             ctk.set_appearance_mode("dark")
             imagenes["tema"] = CTkImage(Image.open("assets/moon 2.png"), size=(20, 20))
             btn_tema.configure(text="Modo Oscuro", image=imagenes["tema"])
+            actualizar_config("appearance_mode", "dark")
 
     imagenes = {
         "tema": CTkImage(Image.open("assets/moon 2.png"), size=(20, 20))
@@ -295,11 +344,14 @@ def lanzar_ventana_principal():
         sidebar, 
         "Salir", 
         "assets/output.png", 
-        root.quit
+        lambda: (guardar_estado_ventana(root), root.destroy())
     )
-
+    
+    
     # Cargar pantalla inicial
     abrir_inicio(frame_contenido)
     cambiar_boton_activo(btn_inicio_sidebar)
-
+    
+    root.after(0, lambda: cargar_estado_ventana(root))
+    root.protocol("WM_DELETE_WINDOW", lambda: (guardar_estado_ventana(root), root.destroy()))
     root.mainloop()
