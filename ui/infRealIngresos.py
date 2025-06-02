@@ -4,6 +4,9 @@ from functions.funcions import obtener_fecha_actual, buscar_denominacion_db
 from db.egresosDB import buscar_descripcion_db
 from widgets.widgets import *
 from styles.styles import *
+import json
+import os
+CONFIG_PATH = "config.json"
 
 #Entradas de arriba del documento
 #clave_cecati = '22DBT0005P'
@@ -11,9 +14,27 @@ n_cuenta_cheques = 1056897860
 fecha_elaboracion = obtener_fecha_actual()
 #periodo_informe = False
 
-def mostrar_informe_real_ingresos(frame_padre, clave_cecati):
+def cargar_configuracion():
+    default_config = {
+        'clave_cecati': '22DBT0005P'
+    }
+    config = {}
+    if os.path.exists(CONFIG_PATH):
+        with open(CONFIG_PATH, 'r') as file:
+            try:
+                config = json.load(file)
+            except Exception:
+                config = {}
+    for key, value in default_config.items():
+        if key not in config:
+            config[key] = value
+    return config
+
+def mostrar_informe_real_ingresos(frame_padre):
     for widget in frame_padre.winfo_children():
         widget.destroy()
+        
+    config = cargar_configuracion()
         
     # Título principal
     ctk.CTkLabel(frame_padre, text="Informe Real de Ingresos", font=FUENTE_FORMULARIO_T).pack(pady=30)
@@ -40,8 +61,8 @@ def mostrar_informe_real_ingresos(frame_padre, clave_cecati):
     
     # Denominación
     crear_label(entrada_frame, "Clave Cecati:", FUENTE_LABEL, row=6, column=0, padx=(10, 5), pady=25, sticky="w")
-    clav_cecati = crear_entry(entrada_frame, clave_cecati.get(), 6, 1, padx=(5, 10), pady=5, sticky="ew")
-    clav_cecati.insert(0, clave_cecati.get())
+    clav_cecati = crear_entry(entrada_frame, config.get("clave_cecati", '22DBT0005P'), 6, 1, padx=(5, 10), pady=5, sticky="ew")
+    clav_cecati.insert(0, config.get("clave_cecati", '22DBT0005P'))
     
     # Cargo
     crear_label(entrada_frame, "No. Cuenta Cheques:", FUENTE_LABEL, row=6, column=2, padx=(10, 5), pady=5, sticky="w")
