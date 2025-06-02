@@ -10,12 +10,8 @@ from ui.ajustes import mostrar_ajustes
 from PIL import Image, ImageTk
 from customtkinter import CTkImage, CTkFont
 import json
-CONFIG_PATH = "config.json"
-
-
 from utils.config_utils import actualizar_config
-
-
+CONFIG_PATH = "config.json"
 
 def guardar_estado_ventana(root):
     actualizar_config("geometry", root.geometry())
@@ -196,7 +192,7 @@ def lanzar_ventana_principal():
     # Funciones para cambiar contenido
     def abrir_formulario(contenedor):
         limpiar_contenido(contenedor)
-        mostrar_formulario_ingresos(contenedor, banco_caja)
+        mostrar_formulario_ingresos(contenedor)
 
     def abrir_inicio(contenedor):
         limpiar_contenido(contenedor)
@@ -208,7 +204,7 @@ def lanzar_ventana_principal():
         
     def abrir_informe_real_ingresos(contenedor):
         limpiar_contenido(contenedor)
-        mostrar_informe_real_ingresos(contenedor, clave_cecati)
+        mostrar_informe_real_ingresos(contenedor)
 
     def abrir_ajustes(contenedor):
         limpiar_contenido(contenedor)
