@@ -357,11 +357,14 @@ def mostrar_formulario_ingresos(frame_padre):
         
             # Limpieza adicional de procesos
             for proc in psutil.process_iter():
-                if "EXCEL.EXE" in proc.name().upper():
-                    try:
-                        proc.kill()
-                    except:
-                        pass
+                try:
+                    if "EXCEL.EXE" in proc.name().upper():
+                        try:
+                            proc.kill()
+                        except:
+                            pass
+                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                    pass
 
             
     def guardar_datos_en_db():
