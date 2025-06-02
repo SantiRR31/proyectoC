@@ -1,9 +1,47 @@
-# --- COLORES MODO CLARO / OSCURO (tuplas: claro, oscuro) ---
+#--- Fuentes --------
+FUENTE_TEXTO = ("Arial", 14, "bold")
+FUENTE_SUBTITULO = ("Arial", 12)
+
+
+COLOR_TEXTO_SEMIVISIBLE = ("#94a3b8", "#cbd5e1")
+COLOR_TEXTO = ("#121212", "#f1f5f9")
+COLOR_TEXTO_APARTADO = ("#334155", "#475569")
+COLOR_TEXTO_APARTADO_SECUNDARIO = ("#64748b", "#94a3b8")
+
+
+
+
+#--- Colores --------
+
+COLOR_PRIMARIO = ("#cc3d42", "#cc3d42")
+COLOR_CONT_PRIMARIO = ("#faf7f6", "#191919")
+COLOR_CONT_SECUNDARIO = ("#ddd9d9", "#1c1c1c")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 COLOR_FONDO = ("#cc3d42", "#cc3d42")
 BG_COLOR = ("#f9f9f9", "#121212")
 SURFACE_COLOR = ("#ffffff", "#1e1e1e")
 
-TEXT_PRIMARY = ("#1a1a1a", "#ffffff")
+TEXT_PRIMARY = ("#d21329")
 TEXT_SECONDARY = ("#4d4d4d", "#cccccc")
 TEXT_DISABLED = ("#a3a3a3", "#6b6b6b")
 
