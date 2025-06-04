@@ -61,7 +61,7 @@ COLOR_ACTIVO = "#5b44e0"
 COLOR_INACTIVO = "transparent"
 FONDO_CONTENEDORES = "transparent"
 COLOR_SEPARADOR = SEPARATOR
-COLOR_TEXTO = "white"
+COLOR_TEXTO = ("#121212", "#e6e9f0")
 ENTRADA_FRAME_C = FONDO_CONTENEDORES  # igual que fondo de contenedores
 
 NAVBAR_COLOR = "#e6e9f0"
@@ -76,11 +76,26 @@ FUENTE_SECCION_TITULO = ("Arial", 14, "bold")
 FUENTE_LABEL = ("Arial", 14)
 FUENTE_SUBMENU = ("Arial", 12)
 FUENTE_FORMULARIO_S = ("Arial", 16)
+FUENTE_BOTON = ("Arial", 14)
 
 # --- TAMAÑOS Y RADIOS ---
 RADIO_BOTON = 5
 RADIO_CONTENEDORES = 15
 RADIO_BOTON_AGREGAR = 32
+
+
+
+
+#-- ESTILOS DE ENTRADAS ---
+ESTILO_ENTRADA = {
+    "font": ("Arial", 14),
+    "text_color": COLOR_TEXTO,
+    "fg_color": FONDO_CONTENEDORES,
+    "border_color": BORDER_COLOR,
+    "corner_radius": RADIO_CONTENEDORES,
+    "height": 40,
+    "width": 200
+}
 
 # --- ESTILOS DE BOTONES ---
 btn_sidebar_style = {
@@ -148,4 +163,27 @@ btn_descargar_style = {
     "fg_color": "#008d62",
     "hover_color": "#2ca880",
     "corner_radius": RADIO_BOTON_AGREGAR
+}
+
+# Configuración de estilos consistentes
+ESTILO_FRAME = {
+    "corner_radius": 12,
+    "fg_color": ("#f9fafb", "#1c1c1c"),
+    ##"border_width": 1,
+    ##"border_color": ("#e5e7eb", "#374151")
+}
+    
+ESTILO_ENTRADA = {
+    "height": 35,
+    "font": FUENTE_TEXTO,
+    "border_width": 1,
+    "border_color": ("#d1d5db", "#545454"),
+    "fg_color": ("#ffffff", "#212121"),
+    "text_color": ("#111827", "#f3f4f6")
+}
+    
+ESTILO_BOTON = {
+    #"font": FUENTE_BOTON,
+    "height": 35,
+    "corner_radius": 8
 }

@@ -12,26 +12,9 @@ from tkinter import messagebox
 from functions import genRegIngresos, funcions
 from datetime import datetime
 import psutil, time
-import json
-import os 
-CONFIG_PATH = "config.json"
+from utils.config_utils import cargar_config
 
-def cargar_configuracion():
-    default_config = {
-        "banco_caja": "BANNORTE"
-    }
-    config = {}
-    if os.path.exists(CONFIG_PATH):
-        with open(CONFIG_PATH, 'r') as file:
-            try:
-                config = json.load(file)
-            except Exception:
-                config = {}
-    for key, value in default_config.items():
-        if key not in config:
-            config[key] = value
-    return config 
-                
+CONFIG_PATH = "config.json"
 
 def obtener_fecha_actual():
     """Devuelve la fecha actual en formato 'DD-MM-AAAA'."""
@@ -41,7 +24,7 @@ def mostrar_formulario_ingresos(frame_padre):
     for widget in frame_padre.winfo_children():
         widget.destroy()
         
-    config = cargar_configuracion()
+    config = cargar_config()
     # --- TÍTULO ---
     titulo = ctk.CTkLabel(frame_padre, text="Póliza de Ingresos", font=("Arial", 28, "bold"))
     titulo.pack(pady=30)

@@ -3,11 +3,11 @@ import tkinter as tk
 from tkinter import messagebox
 import customtkinter as ctk
 import xlwings as xw
-from db.egresosDB import buscar_descripcion_db
+from db.egresosDB import *
 from tkcalendar import DateEntry
 from widgets.widgets import *
 from utils.utils import *
-from utils.egresos_utils import guardar_egresos, guardar_pdf
+from utils.egresos_utils import *
 from datetime import datetime
 from styles.styles import *
 
@@ -15,29 +15,6 @@ def mostrar_formulario_egresos(frame_padre):
     # Limpiar frame anterior
     for widget in frame_padre.winfo_children():
         widget.destroy()
-
-    # Configuración de estilos consistentes
-    ESTILO_FRAME = {
-        "corner_radius": 12,
-        "fg_color": ("#f9fafb", "#1c1c1c"),
-        ##"border_width": 1,
-        ##"border_color": ("#e5e7eb", "#374151")
-    }
-    
-    ESTILO_ENTRADA = {
-        "height": 35,
-        "font": FUENTE_TEXTO,
-        "border_width": 1,
-        "border_color": ("#d1d5db", "#545454"),
-        "fg_color": ("#ffffff", "#212121"),
-        "text_color": ("#111827", "#f3f4f6")
-    }
-    
-    ESTILO_BOTON = {
-        #"font": FUENTE_BOTON,
-        "height": 35,
-        "corner_radius": 8
-    }
 
     # Contenedor principal con scroll
     contenedor_principal = ctk.CTkScrollableFrame(
@@ -224,7 +201,14 @@ def mostrar_formulario_egresos(frame_padre):
     clave_rastreo.configure(validate="key", validatecommand=(vcmdo, "%P"))
     clave_rastreo.bind("<KeyRelease>", lambda event: convertir_a_mayusculas(clave_rastreo, event))
     clave_rastreo.grid(row=1, column=3, padx=(5, 15), pady=5, sticky="ew")
-    # Sección de conceptos
+    
+    
+    
+    #-----------------------------------------------------------# Sección de conceptos -------------------------------------------------------------------------------------------
+    
+    
+    
+    
     conceptos_frame = ctk.CTkFrame(contenedor_principal, **ESTILO_FRAME)
     conceptos_frame.pack(fill="x", pady=(0, 20), padx=5)
 
@@ -244,20 +228,35 @@ def mostrar_formulario_egresos(frame_padre):
             anchor="w"
         ).grid(row=1, column=col, padx=10, pady=(0, 5), sticky="ew")
 
-    # Frame para las filas de conceptos (scrollable)
+    # Reemplaza la creación de filas_frame con esto:
     filas_frame = ctk.CTkScrollableFrame(
         conceptos_frame,
-        height=150,
-        fg_color="transparent"
+        height=180,
+        fg_color="transparent",
+        #scrollbar_fg_color="transparent"
+        #fg_color="transparent",
+        scrollbar_fg_color=("#e5e7eb", "#374151"),
+        scrollbar_button_color=("#9ca3af", "#4b5563"),
+        scrollbar_button_hover_color=("#6b7280", "#374151")
     )
-    filas_frame.grid(row=2, column=0, columnspan=4, sticky="nsew")
-    
-    conceptos_frame.columnconfigure(0, weight=1)
-    conceptos_frame.columnconfigure(1, weight=1)
-    conceptos_frame.columnconfigure(2, weight=1)
-    conceptos_frame.columnconfigure(3, weight=0) 
+
+    # Configuración de grid
+    filas_frame.grid(row=2, column=0, columnspan=4, sticky="nsew", pady=(0, 10))
+
+    # Bloqueo de eventos de scroll
+    filas_frame.bind("<Enter>", lambda e: filas_frame.focus_set())
+    for event in ["<MouseWheel>", "<Button-4>", "<Button-5>"]:
+        filas_frame.bind(event, lambda e: "break")
+
+    # Configuración de pesos
+    conceptos_frame.grid_rowconfigure(2, weight=1)
+    for i in range(4):
+        conceptos_frame.grid_columnconfigure(i, weight=1 if i < 3 else 0)
+
+
 
     entradas = []
+       
 
     def llenar_denominacion(event, entrada_clave, entrada_resultado):
         clave = entrada_clave.get()
@@ -266,6 +265,24 @@ def mostrar_formulario_egresos(frame_padre):
         entrada_resultado.delete(0, tk.END)
         entrada_resultado.insert(0, denominacion)
         entrada_resultado.configure(state="readonly")
+        
+        
+    def llenar_por_clave(event, entrada_clave, entrada_desc):
+        clave = entrada_clave.get().strip()
+        if clave:
+            descripcion = buscar_descripcion_db(clave)
+            entrada_desc.configurate(state= "normal")
+            entrada_desc.delete(0, tk.end)
+            entrada_desc.insert(0, descripcion)
+            entrada_desc.configure(state="readonly")
+    
+    def llenar_por_descripcion(event, entrada_desc, entrada_clave):
+        descripcion = entrada_desc.get().strip()
+        if descripcion:
+            clave = buscar_clave_por_descripcion(descripcion)
+            entrada_clave.delete(0, tk.END)
+            entrada_clave.insert(0, clave)
+            
 
     def actualizar_total():
         try:
@@ -274,44 +291,104 @@ def mostrar_formulario_egresos(frame_padre):
             total.delete(0, tk.END)
             total.insert(0, f"${suma_total:,.2f}")
             total.configure(state="readonly")
-
+        
+        # Validación visual mejorada
             importe_valor = cargo_entry.get().strip()
             if importe_valor:
                 importe_float = float(importe_valor)
-                if abs(importe_float - suma_total) < 0.01:
-                    validacion_totales.configure(text="✓", text_color="#10b981")
+                diferencia = abs(importe_float - suma_total)
+            
+                if diferencia < 0.01:
+                    validacion_totales.configure(
+                        text="✓ Totales coinciden",
+                        text_color="#10b981",
+                        font=("Arial", 10, "bold")
+                    )
                 else:
-                    validacion_totales.configure(text="✗", text_color="#ef4444")
+                    validacion_totales.configure(
+                        text=f"✗ Diferencias (${diferencia:,.2f})",
+                        text_color="#ef4444",
+                        font=("Arial", 10, "bold")
+                    )
             else:
-                validacion_totales.configure(text="?", text_color="#6b7280")
+                validacion_totales.configure(
+                    text="⚠ Ingrese monto total",
+                    text_color="#f59e0b",
+                    font=("Arial", 10)
+                )
         except ValueError:
-            pass
+            validacion_totales.configure(
+                text="⚠ Valores no válidos",
+                text_color="#f59e0b",
+                font=("Arial", 10)
+            )
+    
+    def mostrar_sugerencias(event, entrada_desc, entrada_clave, lista_sugerencias):
+        texto = entrada_desc.get().strip()
+        coincidencias = buscar_claves_por_texto(texto)
+        lista_sugerencias.delete(0, tk.END)
+    
+        if coincidencias:
+            for clave, descripcion in coincidencias:
+                lista_sugerencias.insert(tk.END, f"{clave} - {descripcion}")
+        else:
+            lista_sugerencias.insert(tk.END, "No se encontraron coincidencias")
+    
+    # Mostrar lista justo debajo de la entrada
+        lista_sugerencias.place(in_=entrada_desc, relx=0, rely=1.0, relwidth=1.0)
+
+    
+    def seleccionar_sugerencia(event, entrada_clave, entrada_desc, lista_sugerencias):
+        seleccion = lista_sugerencias.get(tk.ACTIVE)
+        if " - " in seleccion:
+            clave, descripcion = seleccion.split(" - ", 1)
+            entrada_clave.delete(0, tk.END)
+            entrada_clave.insert(0, clave)
+            entrada_desc.delete(0, tk.END)
+            entrada_desc.insert(0, descripcion)
+        lista_sugerencias.place_forget()
+       
 
     def agregar_fila(enfocar_nueva_clave=False):
         fila_idx = len(entradas)
-        fila_frame = ctk.CTkFrame(filas_frame, fg_color="transparent")
-        fila_frame.pack(fill="x", pady=2)
+        
+        fila_frame = ctk.CTkFrame(
+            filas_frame, 
+            fg_color=("#ffffff", "#1f2937"),
+            border_width=1,
+            border_color=("#e5e7eb", "#374151"),
+            corner_radius=6
+            )
+        fila_frame.pack(fill="x", pady=2, padx=2)
+        
+        
+         # Efecto hover
+        def on_enter(e):
+            fila_frame.configure(fg_color=("#f3f4f6", "#111827"))
+        def on_leave(e):
+            fila_frame.configure(fg_color=("#ffffff", "#1f2937"))
+        fila_frame.bind("<Enter>", on_enter)
+        fila_frame.bind("<Leave>", on_leave)
 
-        fila_frame.columnconfigure(0, weight=2)  # Clave
-        fila_frame.columnconfigure(1, weight=4)  # Descripción
-        fila_frame.columnconfigure(2, weight=2)  # Importe
+        fila_frame.columnconfigure(0, weight=2, uniform="fila")
+        fila_frame.columnconfigure(1, weight=4, uniform="fila")
+        fila_frame.columnconfigure(2, weight=2, uniform="fila")
         fila_frame.columnconfigure(3, weight=0)
         
         
         # Entrada clave
         entrada_clave = ctk.CTkEntry(
             fila_frame,
-            placeholder_text="🔑 Clave presupuestal",
+            placeholder_text="Ej. 4100",
             width=120,
             **ESTILO_ENTRADA
         )
-        entrada_clave.grid(row=0, column=0, padx=5, pady=2, sticky="ew")
+        entrada_clave.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
 
         # Entrada descripción
         entrada_desc = ctk.CTkEntry(
             fila_frame,
             placeholder_text="Descripción",
-            state="disabled",
             **ESTILO_ENTRADA
         )
         entrada_desc.grid(row=0, column=1, padx=5, pady=2, sticky="ew")
@@ -322,10 +399,28 @@ def mostrar_formulario_egresos(frame_padre):
             placeholder_text="💰 Importe",
             **ESTILO_ENTRADA
         )
+        lista_sugerencias = tk.Listbox(
+            conceptos_frame,
+            height=4,
+            bg="#ffffff",
+            fg="#111827",
+            selectbackground="#3b82f6",
+            font=("Arial", 10),
+            relief="flat"
+        )
+        lista_sugerencias.bind("<<ListboxSelect>>", lambda e: seleccionar_sugerencia(e, entrada_clave, entrada_desc, lista_sugerencias))
+        entrada_desc.bind("<KeyRelease>", lambda e: mostrar_sugerencias(e, entrada_desc, entrada_clave, lista_sugerencias))
+
+        
         vcmd = fila_frame.register(solo_numeros_decimales)
         entrada_importe.configure(validate="key", validatecommand=(vcmd, "%P"))
         entrada_importe.bind("<KeyRelease>", lambda event: actualizar_total())
         entrada_importe.grid(row=0, column=2, padx=5, pady=2, sticky="ew")
+        entrada_clave.bind("<FocusOut>", lambda event: llenar_por_clave(event, entrada_clave, entrada_desc))
+        entrada_desc.bind("<FocusOut>", lambda event: llenar_por_descripcion(event, entrada_desc, entrada_clave))
+        entrada_clave.bind("<Return>", lambda event: entrada_importe.focus_set())
+        entrada_importe.bind("<Return>", lambda event: agregar_fila(enfocar_nueva_clave=True))
+
 
         # Botón eliminar
         btn_eliminar = ctk.CTkButton(
@@ -361,7 +456,33 @@ def mostrar_formulario_egresos(frame_padre):
         hover_color="#2563eb",
         command=agregar_fila
     ).grid(row=3, column=0, columnspan=4, pady=10)
+    
+     # Sección de observaciones
+    denominacion_frame = ctk.CTkFrame(contenedor_principal, **ESTILO_FRAME)
+    denominacion_frame.pack(fill="x", pady=(0, 20), padx=5)
 
+    ctk.CTkLabel(
+        denominacion_frame,
+        text="DENOMINACION",
+        font=FUENTE_SUBTITULO
+    ).pack(pady=(5, 10))
+
+    denominacion_entry = ctk.CTkEntry(
+        denominacion_frame,
+        placeholder_text="Escriba aquí cualquier observación adicional...",
+        #height=40,
+        **ESTILO_ENTRADA
+    )
+    denominacion_entry.pack(fill="x", padx=10, pady=(0, 10))
+    denominacion_entry.bind("<KeyRelease>", lambda event: convertir_a_mayusculas(denominacion_entry, event))
+
+
+
+
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+ 
     # Sección de observaciones
     observaciones_frame = ctk.CTkFrame(contenedor_principal, **ESTILO_FRAME)
     observaciones_frame.pack(fill="x", pady=(0, 20), padx=5)
@@ -382,7 +503,9 @@ def mostrar_formulario_egresos(frame_padre):
     observaciones_entry.bind("<KeyRelease>", lambda event: convertir_a_mayusculas(observaciones_entry, event))
 
     # Barra de acciones inferiores
-    acciones_frame = ctk.CTkFrame(contenedor_principal, fg_color="transparent")
+    acciones_frame = ctk.CTkFrame(
+        contenedor_principal, 
+        fg_color="transparent")
     acciones_frame.pack(fill="x", pady=(10, 0))
 
     # Total y validación
@@ -416,7 +539,14 @@ def mostrar_formulario_egresos(frame_padre):
         **ESTILO_BOTON,
         fg_color="#10b981",
         hover_color="#059669",
-        command=lambda: guardar_egresos(form, entradas)
+        command=lambda: ejecutar_con_loading(
+        guardar_egresos,           # función a ejecutar
+        btn_guardar,               # botón guardar
+        btn_descargar,             # botón descargar
+        contenedor_principal,      # contenedor principal
+        limpiar_formulario,        # función para limpiar el formulario
+        form, entradas             # argumentos para guardar_egresos
+    )
     )
     btn_guardar.pack(side="right", padx=5)
 
@@ -426,7 +556,7 @@ def mostrar_formulario_egresos(frame_padre):
         **ESTILO_BOTON,
         fg_color="#3b82f6",
         hover_color="#2563eb",
-        command=lambda: mostrar_menu_descarga(None, form, entradas)
+        command=lambda: mostrar_menu_descarga(form, entradas)
     )
     btn_descargar.pack(side="right", padx=5)
 
@@ -450,19 +580,38 @@ def mostrar_formulario_egresos(frame_padre):
         "tipo_pago": tipo_pago,
         "clave_rastreo": clave_rastreo,
         "observaciones": observaciones_entry,
+        "denominacion": denominacion_entry,
     }
 
     # Función para mostrar menú de descarga
-    def mostrar_menu_descarga(event, form, entradas):
+   # Supón que tienes estas referencias en tu función principal:
+# btn_guardar, btn_descargar, contenedor_principal, form, entradas, mostrar_formulario_egresos, frame_padre
+
+    def mostrar_menu_descarga(form, entradas):
         menu = tk.Menu(None, tearoff=0)
         menu.add_command(
             label="Exportar como PDF",
-            command=lambda: guardar_pdf(form, entradas))
+            command=lambda: ejecutar_con_loading(
+                guardar_pdf,
+                btn_guardar,
+                btn_descargar,
+                contenedor_principal,
+                lambda: limpiar_formulario(contenedor_principal, mostrar_formulario_egresos, frame_padre),
+                form, entradas
+            )
+        )
         menu.add_command(
             label="Exportar como Excel",
-            command=lambda: guardar_egresos(form, entradas))
-        
-        # Posicionar el menú cerca del botón
+            command=lambda: ejecutar_con_loading(
+                guardar_egresos,
+                btn_guardar,
+                btn_descargar,
+                contenedor_principal,
+                lambda: limpiar_formulario(contenedor_principal, mostrar_formulario_egresos, frame_padre),
+                form, entradas
+            )
+        )
+    # Posicionar el menú cerca del botón
         try:
             x = btn_descargar.winfo_rootx()
             y = btn_descargar.winfo_rooty() + btn_descargar.winfo_height()
@@ -495,3 +644,9 @@ def mostrar_formulario_egresos(frame_padre):
     # Validación inicial
     actualizar_estado_botones()
     actualizar_total()
+    
+    
+    ## Funciones 
+    
+    
+    

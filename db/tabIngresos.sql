@@ -1,3 +1,10 @@
+
+
+
+
+
+
+
 CREATE TABLE polizasIngresos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     fecha TEXT,

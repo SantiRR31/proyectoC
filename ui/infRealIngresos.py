@@ -4,8 +4,7 @@ from functions.funcions import obtener_fecha_actual, buscar_denominacion_db
 from db.egresosDB import buscar_descripcion_db
 from widgets.widgets import *
 from styles.styles import *
-import json
-import os
+from utils.config_utils import cargar_config
 CONFIG_PATH = "config.json"
 
 #Entradas de arriba del documento
@@ -14,27 +13,12 @@ n_cuenta_cheques = 1056897860
 fecha_elaboracion = obtener_fecha_actual()
 #periodo_informe = False
 
-def cargar_configuracion():
-    default_config = {
-        'clave_cecati': '22DBT0005P'
-    }
-    config = {}
-    if os.path.exists(CONFIG_PATH):
-        with open(CONFIG_PATH, 'r') as file:
-            try:
-                config = json.load(file)
-            except Exception:
-                config = {}
-    for key, value in default_config.items():
-        if key not in config:
-            config[key] = value
-    return config
 
 def mostrar_informe_real_ingresos(frame_padre):
     for widget in frame_padre.winfo_children():
         widget.destroy()
         
-    config = cargar_configuracion()
+    config = cargar_config()
         
     # Título principal
     ctk.CTkLabel(frame_padre, text="Informe Real de Ingresos", font=FUENTE_FORMULARIO_T).pack(pady=30)

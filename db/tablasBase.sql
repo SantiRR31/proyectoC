@@ -29,6 +29,3 @@ INSERT INTO partidasIngresos (partida, denominacion) VALUES
 ("D009", "Otros");
 
 SELECT * FROM partidasIngresos;
-
-
-
