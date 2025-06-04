@@ -396,6 +396,10 @@ def mostrar_formulario_ingresos(frame_padre):
         except Exception as e:
             messagebox.showerror("Error al guardar", f"Ocurrió un error: {e}")
 
+    # si queremos fucionar los votones de guardar y de descargar
+    def guardar_descargar():
+        guardar_datos_en_db()
+        guardar_Ingresos()
     
 
     btn_agregar_fila = ctk.CTkButton(seccion_filas, text="➕ Agregar", command=agregar_fila, corner_radius=32,

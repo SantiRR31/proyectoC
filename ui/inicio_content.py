@@ -4,6 +4,7 @@ from styles.styles import *
 from PIL import Image
 from customtkinter import CTkImage
 import datetime
+from functions.funcions import gen_inf_consolidado, confirmar_y_generar
 
 def mostrar_inicio(contenedor):
     # Configuración del contenedor principal con gradiente sutil
@@ -112,6 +113,21 @@ def mostrar_inicio(contenedor):
         tarjeta = crear_tarjeta_moderna(tarjetas_frame, nombre, icono, color)
         tarjeta.grid(row=0, column=i, padx=15, pady=10, sticky="nsew")
         tarjetas_frame.grid_columnconfigure(i, weight=1)
+        
+    # NUEVA FILA CENTRADA CON ELEMENTO ADICIONAL
+    # Contenedor para centrar el nuevo elemento
+    center_frame = ctk.CTkFrame(tarjetas_frame, fg_color="transparent")
+    center_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", pady=(20, 0))
+    
+    # Nuevo elemento similar a las tarjetas
+    nueva_tarjeta = crear_tarjeta_moderna(
+        center_frame,
+        "Informe Consolidado de Ingresos",
+        "assets/excel.png",
+        ("#8b5cf6", "#7c3aed"),
+        command=confirmar_y_generar
+    )
+    nueva_tarjeta.pack(anchor="center")  # Centrado horizontal
 
     # Área informativa con pestañas
     tabview = ctk.CTkTabview(
@@ -178,11 +194,11 @@ def mostrar_inicio(contenedor):
     )
     recordatorios_content.pack(pady=20, padx=10)
 
-def crear_tarjeta_moderna(master, texto, icono_path, color):
+def crear_tarjeta_moderna(master, texto, icono_path, color, command=None):
     frame = ctk.CTkFrame(
         master, 
         width=180, 
-        height=180, 
+        height=200,  # Aumentado para espacio del botón
         fg_color=("#ffffff", "#1c1c1c"),
         border_color=color,
         border_width=2,
@@ -203,7 +219,6 @@ def crear_tarjeta_moderna(master, texto, icono_path, color):
         icono_label.pack(pady=(15, 10))
     except Exception as e:
         print(f"No se pudo cargar el ícono {icono_path}: {e}")
-        # Icono alternativo
         icono_label = ctk.CTkLabel(
             content_frame, 
             text="📊",
@@ -218,16 +233,49 @@ def crear_tarjeta_moderna(master, texto, icono_path, color):
         font=("Arial", 16, "bold"), 
         text_color=("#111827", "#f9fafb")
     )
-    texto_label.pack(pady=(0, 15))
+    texto_label.pack(pady=(0, 10))
     
-    # Efecto hover
+    # BOTÓN ESTILIZADO AÑADIDO AQUÍ
+    boton = ctk.CTkButton(
+        content_frame,
+        text="Generar",
+        width=100,
+        height=28,
+        fg_color=color,
+        hover_color=ajustar_color(color, -25),
+        text_color="white",
+        font=("Arial", 12, "bold"),
+        corner_radius=8,
+        border_width=0, 
+        command=command
+    )
+    boton.pack(pady=(0, 5))
+    
+    # Efecto hover para toda la tarjeta
     def on_enter(e):
         frame.configure(fg_color=("#f9fafb", "#334155"))
+        boton.configure(fg_color=ajustar_color(color, 15))
     
     def on_leave(e):
         frame.configure(fg_color=("#ffffff", "#1c1c1c"))
+        boton.configure(fg_color=color)
     
     frame.bind("<Enter>", on_enter)
     frame.bind("<Leave>", on_leave)
     
     return frame
+
+# Función para ajustar colores (añadir al mismo archivo o en styles.py)
+def ajustar_color(color, delta):
+    """Ajusta el brillo de un color hexadecimal"""
+    if isinstance(color, tuple):
+        return tuple(ajustar_color(c, delta) for c in color)
+    
+    color = color.lstrip('#')
+    r, g, b = tuple(int(color[i:i+2], 16) for i in (0, 2, 4))
+    
+    r = max(0, min(255, r + delta))
+    g = max(0, min(255, g + delta))
+    b = max(0, min(255, b + delta))
+    
+    return f"#{r:02x}{g:02x}{b:02x}"
