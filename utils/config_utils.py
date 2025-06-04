@@ -3,19 +3,28 @@ import json
 
 CONFIG_PATH = "config.json"
 
+DEFAULT_CONFIG = {
+    "carpeta_destino": "~/Documentos/Cecati122/Polizas",
+    "clave_cecati": "22DBT0005P",
+    "banco_caja": "BANORTE",
+    "geometry": "1280x720+100+100",
+    "state": "normal",
+    "appearance_mode": "dark",
+    "color_theme": "blue"
+}
+
 def cargar_config():
+    config = {}
     if os.path.exists(CONFIG_PATH):
         with open(CONFIG_PATH, "r") as f:
             try:
-                return json.load(f)
+                config = json.load(f)
             except Exception:
-                pass
-    # Valores por defecto
-    return {
-        "carpeta_destino": "~/Documentos/Cecati122/Polizas",
-        "clave_cecati": "22DBT0005P",
-        "banco_caja": "BANORTE"
-    }
+                config = {}
+    for key, value in DEFAULT_CONFIG.items():
+        if key not in config:
+            config[key] = value
+    return config
 
 def guardar_config(config):
     with open(CONFIG_PATH, "w") as f:

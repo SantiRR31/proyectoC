@@ -6,9 +6,30 @@ def buscar_descripcion_db(clave):
     if conn is None:
         return "Error de conexión"
     cursor = conn.cursor()
-    cursor.execute('SELECT "DESCRIPCIÓN" FROM PARTIDAS_EGRESOS WHERE "CLAVE CUCoP" = ?', (clave,))
+    cursor.execute('SELECT "DESCRIPCIÓN" FROM partidasEgresos WHERE "CLAVE CUCoP" = ?', (clave,))
     resultado = cursor.fetchone()
     conn.close()
     return resultado[0] if resultado else "No encontrada"
 
 #
+
+def buscar_clave_por_descripcion(descripcion):
+    conn = conectar()
+    if conn is None:
+        return ["Error de conexión"]
+    cursor = conn.cursor()
+    cursor.execute('SELECT "CLAVE CUCoP", "DESCRIPCIÓN" FROM partidasEgresos WHERE "DESCRIPCIÓN" LIKE ?', (f"%{descripcion}%",))
+    resultados = cursor.fetchall()
+    conn.close()
+    return [fila[0] for fila in resultados] if resultados else ["No encontrada"]
+
+
+def buscar_claves_por_texto(texto):
+    conn = conectar()
+    if conn is None:
+        return []
+    cursor = conn.cursor()
+    cursor.execute('SELECT "CLAVE CUCoP", "DESCRIPCIÓN" FROM partidasEgresos WHERE "DESCRIPCIÓN" LIKE ?', (f"%{texto}%",))
+    resultados = cursor.fetchall()
+    conn.close()
+    return resultados

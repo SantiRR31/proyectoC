@@ -3,6 +3,7 @@ import xlwings as xw
 from tkinter import messagebox
 from utils.utils import obtener_fecha_actual
 import customtkinter as ctk
+import math
 
 def obtener_valores_campos(form):
     return {
@@ -112,48 +113,80 @@ class AnimacionDescarga(ctk.CTkToplevel):
     def __init__(self, master=None):
         super().__init__(master)
         self.title("Descargando...")
-        self.geometry("300x300")
+        self.geometry("260x180")
         self.resizable(False, False)
+        self.configure(fg_color="#191919")
+        self.overrideredirect(True)  # Sin barra de título
 
-        self.paper = ctk.CTkLabel(self, text="||||\n||||\n||||", 
-                                  fg_color="#EEF0FD", text_color="#D3D4EC",
-                                  corner_radius=5, width=80, height=60,
-                                  anchor="n", font=("Courier", 12))
-        self.paper.place(x=110, y=200)
+        self.canvas = ctk.CTkCanvas(self, width=80, height=80, bg="#191919", highlightthickness=0)
+        self.canvas.place(relx=0.5, rely=0.35, anchor="center")
 
-        self.keyboard = ctk.CTkFrame(self, width=120, height=60, fg_color="#275EFE", corner_radius=10)
-        self.keyboard.place(x=90, y=240)
+        self.texto = ctk.CTkLabel(self, text="Descargando", font=("Arial", 16, "bold"), text_color="#3b82f6", fg_color="transparent")
+        self.texto.place(relx=0.5, rely=0.7, anchor="center")
 
-        self.keys = []
-        key_positions = [(10,10), (30,10), (50,10), (70,10), (90,10),
-                         (20,30), (40,30), (60,30), (80,30)]
+        self.puntos = 0
+        self.angulo = 0
+        self.animar()
 
-        for x, y in key_positions:
-            key = ctk.CTkLabel(self.keyboard, width=10, height=5, text="", fg_color="white", corner_radius=2)
-            key.place(x=x, y=y)
-            self.keys.append(key)
+    def animar(self):
+        self.canvas.delete("all")
+        # Dibuja un círculo giratorio (spinner)
+        radio = 30
+        cx, cy = 40, 40
+        for i in range(12):
+            ang = math.radians(self.angulo + i * 30)
+            x = cx + radio * math.cos(ang)
+            y = cy + radio * math.sin(ang)
+            color = "#3b82f6" if i == 0 else "#64748b"
+            self.canvas.create_oval(x-5, y-5, x+5, y+5, fill=color, outline=color)
+        self.angulo = (self.angulo + 30) % 360
 
-        self.paper_y = 200
-        self.direction = -1
-        self.key_index = 0
-        self.animate()
+        # Texto animado "Descargando..."
+        puntos = "." * (self.puntos % 4)
+        self.texto.configure(text=f"Descargando{puntos}")
+        self.puntos += 1
 
-    def animate(self):
-        self.paper_y += self.direction * 1
-        if self.paper_y < 120 or self.paper_y > 200:
-            self.direction *= -1
-        self.paper.place_configure(y=self.paper_y)
-
-        for i, key in enumerate(self.keys):
-            key.configure(fg_color="white" if i == self.key_index else "#275EFE")
-        self.key_index = (self.key_index + 1) % len(self.keys)
-
-        self.after(100, self.animate)
+        self.after(120, self.animar)
 
 
 
 
-def descargar_con_animacion(form, entradas):
-    animacion = AnimacionDescarga()
-    animacion.after(10000, animacion.destroy)  # Cierra después de 3 segundos
-    guardar_egresos(form, entradas)  # Ejecuta tu lógica real
+def ejecutar_con_loading(funcion, btn_guardar, btn_descargar, contenedor_principal, limpiar_formulario, *args):
+    btn_guardar.configure(state="disabled", text="Guardando...")
+    btn_descargar.configure(state="disabled", text="Descargando...")
+
+    # Mostrar animación visual
+    anim = AnimacionDescarga(contenedor_principal)
+    anim.grab_set()  # Hace modal la ventana de animación
+
+    def ejecutar():
+        try:
+            resultado = funcion(*args)
+            if resultado:
+                messagebox.showinfo("Éxito", "Poliza Guardada correctamente")
+            respuesta = messagebox.askyesno(
+                "Nuevo documento",
+                "¿Desea crear una nueva póliza?"
+            )
+            if respuesta:
+                limpiar_formulario()
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo guardar la información.\n{e}")
+        finally:
+            anim.destroy()  # Cierra la animación
+            btn_guardar.configure(state="normal", text="💾 Guardar")
+            btn_descargar.configure(state="normal", text="📥 Descargar")
+    contenedor_principal.after(100, ejecutar)
+    
+def limpiar_formulario(contenedor_principal, mostrar_formulario_egresos, frame_padre):
+    respuesta = messagebox.askyesno(
+        "Limpiar formulario",
+        "¿Está seguro de limpiar el formulario?\nEsta acción no se puede deshacer.",
+        icon="warning"
+    )
+    if respuesta:
+        for widget in contenedor_principal.winfo_children():
+            widget.destroy()
+        mostrar_formulario_egresos(frame_padre)
+            
+    
