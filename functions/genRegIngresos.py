@@ -71,13 +71,23 @@ def generar_reporte_xlwings():
         col_inicio = 4
         max_cols = 6
         columna_j = 10
+        fila_formula = 41
+        rango_inicio = 10
+        rango_fin= 40
         
         num_claves = len(claves_mes)
         
         if num_claves > max_cols:
             col_a_insertar = num_claves - max_cols
-            for _ in range (col_a_insertar):
+            for offset in range (col_a_insertar):
                 sht.range((1, columna_j)).api.EntireColumn.Insert()
+                
+                col_destino = columna_j + offset 
+                letra_col = xw.utils.col_name(col_destino)
+                
+                formula = f"=SUMA({letra_col}{rango_inicio}:{letra_col}{rango_fin})"
+                
+                sht.range((fila_formula, col_destino)).formula = formula
                 
         for idx, clave in enumerate(claves_mes):
             sht.range((8, col_inicio + idx)).value = clave
