@@ -5,6 +5,10 @@ from PIL import Image
 from customtkinter import CTkImage
 import datetime
 from functions.funcions import gen_inf_consolidado, confirmar_y_generar
+import requests
+from io import BytesIO
+import threading
+
 
 def mostrar_inicio(contenedor):
     # Configuración del contenedor principal con gradiente sutil
@@ -78,6 +82,116 @@ def mostrar_inicio(contenedor):
         hora_label.after(1000, actualizar_hora)
     
     actualizar_hora()
+    
+    clima_frame = ctk.CTkFrame(top_info_frame, fg_color=("#f3f4f6", "#1f2937"), corner_radius=10)
+    clima_frame.pack(side="left", padx=10)
+    
+    clima_content = ctk.CTkFrame(clima_frame, fg_color="transparent")
+    clima_content.pack(pady=8, padx=8)
+    
+    # Crear los labels globales
+    clima_icon_label = ctk.CTkLabel(
+        clima_content,
+        text="",
+        width=40,
+        height=40
+    )
+    clima_icon_label.pack(side="left", padx=(0, 8))
+
+    clima_text_label = ctk.CTkLabel(
+        clima_content,
+        text="Cargando clima...",
+        font=("Arial", 12),
+        text_color=("#111827", "#f9fafb"),
+        justify="left"
+    )
+    clima_text_label.pack(side="left")
+
+    # 👉 Esta función SÓLO obtiene datos. No toca la interfaz.
+    def obtener_clima_datos():
+        ciudad = 'Tequisquiapan'
+        API_KEY = '9ae8be36b9f6bc68596b1954437135de'
+        url = f'https://api.openweathermap.org/data/2.5/weather?q={ciudad}&appid={API_KEY}&units=metric&lang=es'
+        try:
+            respuesta = requests.get(url, timeout=10)
+            datos = respuesta.json()
+
+            if datos.get("main"):
+                temperatura = datos["main"]["temp"]
+                descripcion = datos["weather"][0]["description"]
+                humedad = datos["main"]["humidity"]
+                viento = datos["wind"]["speed"]
+                icono = datos["weather"][0]["icon"]
+
+                # Cargar la imagen del icono
+                icon_url = f"http://openweathermap.org/img/wn/{icono}@2x.png"
+                icon_response = requests.get(icon_url)
+                imagen = Image.open(BytesIO(icon_response.content))
+                imagen = imagen.resize((40, 40), Image.Resampling.LANCZOS)
+
+                return {
+                    "ciudad": ciudad,
+                    "temperatura": temperatura,
+                    "descripcion": descripcion,
+                    "humedad": humedad,
+                    "viento": viento,
+                    "imagen": imagen
+                }
+        except:
+            return None
+
+    # 👉 Esta función SÍ actualiza la interfaz, con los datos ya obtenidos
+    def actualizar_gui_con_clima(datos):
+        if datos:
+            texto = (
+                f"{datos['ciudad']}: {datos['temperatura']}°C, {datos['descripcion']}\n"
+                f"Humedad: {datos['humedad']}% | Viento: {datos['viento']} m/s"
+            )
+            clima_text_label.configure(text=texto)
+    
+            icono_img = ctk.CTkImage(datos["imagen"], size=(40, 40))
+            clima_icon_label.configure(image=icono_img)
+            clima_icon_label.image = icono_img  # Referencia para que no se borre
+        else:
+            clima_text_label.configure(text="Clima no disponible")
+
+    def obtener_clima_seguro():
+        try:
+            datos = obtener_clima_datos()
+        except Exception as e:
+            print(f"Error: {e}")
+            datos = None
+
+        def actualizar_si_existe():
+            if clima_frame.winfo_exists():
+                actualizar_gui_con_clima(datos)
+
+        try:
+            clima_frame.after(0, actualizar_si_existe)
+        except RuntimeError:
+            print("No se pudo actualizar la GUI: clima_frame ya no existe.")
+
+
+
+    def actualizar_clima(inicial=False):
+        # ⚠️ Si ya cerraste la ventana, no lances más hilos
+        if not clima_frame.winfo_exists():
+            return
+
+        # ✔️ Lanza un hilo solo si el frame todavía existe
+        threading.Thread(target=obtener_clima_seguro, daemon=True).start()
+
+        # ⚠️ Programa siguiente actualización solo si la ventana existe
+        if inicial:
+            clima_frame.after(2000, lambda: actualizar_clima())
+        else:
+            clima_frame.after(1800000, lambda: actualizar_clima())
+
+
+    # En el lugar donde inicias el clima:
+    actualizar_clima(inicial=True)  # Iniciar el ciclo
+
+
 
     # Widget de estado del sistema
     estado_frame = ctk.CTkFrame(top_info_frame, fg_color=("#f3f4f6", "#1f2937"), corner_radius=10)
