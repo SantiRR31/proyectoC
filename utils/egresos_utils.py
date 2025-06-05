@@ -1,3 +1,4 @@
+from datetime import time
 import os
 import xlwings as xw
 from tkinter import messagebox
@@ -189,4 +190,15 @@ def limpiar_formulario(contenedor_principal, mostrar_formulario_egresos, frame_p
             widget.destroy()
         mostrar_formulario_egresos(frame_padre)
             
+            
+def animar_confirmacion(widget):
+        """Animación de confirmación mejorada"""
+        color_original = widget.cget("fg_color")
+        try:
+            widget.configure(fg_color="#10b981")
+            time.sleep(0.3)
+            if widget.winfo_exists():
+                widget.configure(fg_color=color_original)
+        except:
+            pass
     

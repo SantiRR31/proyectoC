@@ -1,4 +1,5 @@
 import os
+import threading
 import tkinter as tk
 from tkinter import messagebox
 import customtkinter as ctk
@@ -217,7 +218,8 @@ def mostrar_formulario_egresos(frame_padre):
         text="CONCEPTOS",
         font=FUENTE_SUBTITULO
     ).grid(row=0, column=0, columnspan=4, pady=(5, 10))
-
+    
+    
     # Encabezados de tabla
     encabezados = ["Clave", "Descripción", "Importe"]
     for col, texto in enumerate(encabezados):
@@ -231,32 +233,38 @@ def mostrar_formulario_egresos(frame_padre):
     # Reemplaza la creación de filas_frame con esto:
     filas_frame = ctk.CTkScrollableFrame(
         conceptos_frame,
-        height=180,
+        height=200,  # Aumentado para mejor visibilidad
         fg_color="transparent",
-        #scrollbar_fg_color="transparent"
-        #fg_color="transparent",
         scrollbar_fg_color=("#e5e7eb", "#374151"),
         scrollbar_button_color=("#9ca3af", "#4b5563"),
-        scrollbar_button_hover_color=("#6b7280", "#374151")
+        scrollbar_button_hover_color=("#6b7280", "#374151"),
+        corner_radius=8
     )
-
-    # Configuración de grid
     filas_frame.grid(row=2, column=0, columnspan=4, sticky="nsew", pady=(0, 10))
+    
+    
+    def configurar_scroll(widget):
+        """Configura el scroll del widget"""
+        def _on_mousewheel(event):
+            if widget.winfo_exists():
+                widget._parent_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        
+        widget.bind("<MouseWheel>", _on_mousewheel)
+        widget.bind("<Button-4>", lambda e: widget._parent_canvas.yview_scroll(-1, "units"))
+        widget.bind("<Button-5>", lambda e: widget._parent_canvas.yview_scroll(1, "units"))
+    
+    configurar_scroll(filas_frame)
 
-    # Bloqueo de eventos de scroll
-    filas_frame.bind("<Enter>", lambda e: filas_frame.focus_set())
-    for event in ["<MouseWheel>", "<Button-4>", "<Button-5>"]:
-        filas_frame.bind(event, lambda e: "break")
 
     # Configuración de pesos
     conceptos_frame.grid_rowconfigure(2, weight=1)
-    for i in range(4):
-        conceptos_frame.grid_columnconfigure(i, weight=1 if i < 3 else 0)
+    conceptos_frame.grid_columnconfigure(0, weight=2)  # Clave
+    conceptos_frame.grid_columnconfigure(1, weight=4)  # Descripción
+    conceptos_frame.grid_columnconfigure(2, weight=2)  # Importe
+    conceptos_frame.grid_columnconfigure(3, weight=0)  # Botones
 
-
-
-    entradas = []
-       
+    entradas = []      
+    
 
     def llenar_denominacion(event, entrada_clave, entrada_resultado):
         clave = entrada_clave.get()
@@ -266,24 +274,26 @@ def mostrar_formulario_egresos(frame_padre):
         entrada_resultado.insert(0, denominacion)
         entrada_resultado.configure(state="readonly")
         
-        
     def llenar_por_clave(event, entrada_clave, entrada_desc):
         clave = entrada_clave.get().strip()
         if clave:
-            descripcion = buscar_descripcion_db(clave)
-            entrada_desc.configurate(state= "normal")
-            entrada_desc.delete(0, tk.end)
-            entrada_desc.insert(0, descripcion)
-            entrada_desc.configure(state="readonly")
+            try:
+                descripcion = buscar_descripcion_db(clave)
+                if descripcion and descripcion != "No encontrado":
+                    entrada_desc.configurate(state= "normal")
+                    entrada_desc.delete(0, tk.end)
+                    entrada_desc.insert(0, descripcion)
+                    entrada_desc.configure(state="readonly")
+                    threading.Thread(target=lambda: animar_confirmacion(entrada_desc), daemon=True).start()
+            except Exception as e:
+                print(f"Error al buscar descripción: {e}")
     
-    def llenar_por_descripcion(event, entrada_desc, entrada_clave):
+    """def llenar_por_descripcion(event, entrada_desc, entrada_clave):
         descripcion = entrada_desc.get().strip()
         if descripcion:
             clave = buscar_clave_por_descripcion(descripcion)
             entrada_clave.delete(0, tk.END)
-            entrada_clave.insert(0, clave)
-            
-
+            entrada_clave.insert(0, clave) """
     def actualizar_total():
         try:
             suma_total = sum(float(entrada[2].get()) for entrada in entradas if entrada[2].get().strip())
@@ -322,32 +332,108 @@ def mostrar_formulario_egresos(frame_padre):
                 text_color="#f59e0b",
                 font=("Arial", 10)
             )
-    
+            
+
     def mostrar_sugerencias(event, entrada_desc, entrada_clave, lista_sugerencias):
         texto = entrada_desc.get().strip()
-        coincidencias = buscar_claves_por_texto(texto)
-        lista_sugerencias.delete(0, tk.END)
-    
-        if coincidencias:
-            for clave, descripcion in coincidencias:
-                lista_sugerencias.insert(tk.END, f"{clave} - {descripcion}")
-        else:
-            lista_sugerencias.insert(tk.END, "No se encontraron coincidencias")
-    
-    # Mostrar lista justo debajo de la entrada
-        lista_sugerencias.place(in_=entrada_desc, relx=0, rely=1.0, relwidth=1.0)
+        if not texto:
+            lista_sugerencias.place_forget()
+            return
 
-    
+        coincidencias = buscar_clave_por_descripcion(texto)
+        lista_sugerencias.delete(0, tk.END)
+
+        if coincidencias:
+            for item in coincidencias:
+                texto_mostrado = f'{item["clave"]} - {item["descripcion"][:50]}... (Partida: {item["partida"]})'
+                lista_sugerencias.insert(tk.END, texto_mostrado)
+
+            lista_sugerencias.place(
+                in_=entrada_desc,
+                relx=0,
+                rely=1.0,
+                relwidth=1.0,
+                bordermode="outside",
+            )
+            lista_sugerencias.lift()
+            # Guardamos las coincidencias para uso posterior
+            lista_sugerencias.coins = coincidencias
+        else:
+            lista_sugerencias.place_forget()
+
+        
     def seleccionar_sugerencia(event, entrada_clave, entrada_desc, lista_sugerencias):
-        seleccion = lista_sugerencias.get(tk.ACTIVE)
-        if " - " in seleccion:
-            clave, descripcion = seleccion.split(" - ", 1)
-            entrada_clave.delete(0, tk.END)
-            entrada_clave.insert(0, clave)
-            entrada_desc.delete(0, tk.END)
-            entrada_desc.insert(0, descripcion)
+        seleccion = lista_sugerencias.curselection()
+        if not seleccion:
+            return
+
+        idx = seleccion[0]
+        seleccionado = lista_sugerencias.coins[idx]
+
+        entrada_clave.delete(0, tk.END)
+        entrada_clave.insert(0, seleccionado["clave"])
+
+        entrada_desc.configure(state="normal")
+        entrada_desc.delete(0, tk.END)
+        entrada_desc.insert(0, seleccionado["descripcion"])
+        entrada_desc.configure(state="readonly")
+
         lista_sugerencias.place_forget()
+
+    # Enfocar siguiente campo
+        for entrada in entradas:
+            if entrada[1] == entrada_desc:
+                entrada[2].focus_set()
+                break
+
+
        
+    def configurar_lista_sugerencias(entrada_desc, entrada_clave, ):
+        lista_sugerencias = tk.Listbox(
+            conceptos_frame,  # Usar el frame principal como padre
+            height=6,
+            bg="#ffffff",
+            fg="#111827",
+            selectbackground="#3b82f6",
+            selectforeground="#ffffff",
+            font=("Arial", 10),
+            highlightthickness=1,
+            highlightcolor="#3b82f6",
+            activestyle="dotbox",
+            relief="solid",
+            borderwidth=1
+        )
+        
+        # Eventos mejorados
+        lista_sugerencias.bind("<Double-Button-1>", 
+            lambda e: seleccionar_sugerencia(e, entrada_clave, entrada_desc, lista_sugerencias))
+        lista_sugerencias.bind("<Return>", 
+            lambda e: seleccionar_sugerencia(e, entrada_clave, entrada_desc, lista_sugerencias))
+        
+        # Throttled search - evitar búsquedas excesivas
+        search_timer = None
+        def throttled_search(event):
+            nonlocal search_timer
+            if search_timer:
+                entrada_desc.after_cancel(search_timer)
+            search_timer = entrada_desc.after(300, lambda: mostrar_sugerencias(event, entrada_desc, entrada_clave, lista_sugerencias))
+        
+        entrada_desc.bind("<KeyRelease>", throttled_search)
+        
+        # Mejor manejo de focus
+        def hide_on_focus_out(event):
+            # Delay para permitir selección con mouse
+            def hide_delayed():
+                try:
+                    if lista_sugerencias.winfo_exists():
+                        lista_sugerencias.place_forget()
+                except tk.TclError:
+                    pass
+            entrada_desc.after(200, hide_delayed)
+        
+        entrada_desc.bind("<FocusOut>", hide_on_focus_out)
+        
+        return lista_sugerencias
 
     def agregar_fila(enfocar_nueva_clave=False):
         fila_idx = len(entradas)
@@ -359,8 +445,7 @@ def mostrar_formulario_egresos(frame_padre):
             border_color=("#e5e7eb", "#374151"),
             corner_radius=6
             )
-        fila_frame.pack(fill="x", pady=2, padx=2)
-        
+        fila_frame.pack(fill="x", pady=2, padx=2)     
         
          # Efecto hover
         def on_enter(e):
@@ -373,8 +458,7 @@ def mostrar_formulario_egresos(frame_padre):
         fila_frame.columnconfigure(0, weight=2, uniform="fila")
         fila_frame.columnconfigure(1, weight=4, uniform="fila")
         fila_frame.columnconfigure(2, weight=2, uniform="fila")
-        fila_frame.columnconfigure(3, weight=0)
-        
+        fila_frame.columnconfigure(3, weight=0) 
         
         # Entrada clave
         entrada_clave = ctk.CTkEntry(
@@ -392,6 +476,8 @@ def mostrar_formulario_egresos(frame_padre):
             **ESTILO_ENTRADA
         )
         entrada_desc.grid(row=0, column=1, padx=5, pady=2, sticky="ew")
+        
+        lista_sugerencias = configurar_lista_sugerencias(entrada_desc, entrada_clave)
 
         # Entrada importe
         entrada_importe = ctk.CTkEntry(
@@ -399,28 +485,18 @@ def mostrar_formulario_egresos(frame_padre):
             placeholder_text="💰 Importe",
             **ESTILO_ENTRADA
         )
-        lista_sugerencias = tk.Listbox(
-            conceptos_frame,
-            height=4,
-            bg="#ffffff",
-            fg="#111827",
-            selectbackground="#3b82f6",
-            font=("Arial", 10),
-            relief="flat"
-        )
+        
         lista_sugerencias.bind("<<ListboxSelect>>", lambda e: seleccionar_sugerencia(e, entrada_clave, entrada_desc, lista_sugerencias))
         entrada_desc.bind("<KeyRelease>", lambda e: mostrar_sugerencias(e, entrada_desc, entrada_clave, lista_sugerencias))
-
         
         vcmd = fila_frame.register(solo_numeros_decimales)
         entrada_importe.configure(validate="key", validatecommand=(vcmd, "%P"))
         entrada_importe.bind("<KeyRelease>", lambda event: actualizar_total())
         entrada_importe.grid(row=0, column=2, padx=5, pady=2, sticky="ew")
         entrada_clave.bind("<FocusOut>", lambda event: llenar_por_clave(event, entrada_clave, entrada_desc))
-        entrada_desc.bind("<FocusOut>", lambda event: llenar_por_descripcion(event, entrada_desc, entrada_clave))
+        #entrada_desc.bind("<FocusOut>", lambda event: llenar_por_descripcion(event, entrada_desc, entrada_clave))
         entrada_clave.bind("<Return>", lambda event: entrada_importe.focus_set())
         entrada_importe.bind("<Return>", lambda event: agregar_fila(enfocar_nueva_clave=True))
-
 
         # Botón eliminar
         btn_eliminar = ctk.CTkButton(
@@ -476,13 +552,7 @@ def mostrar_formulario_egresos(frame_padre):
     denominacion_entry.pack(fill="x", padx=10, pady=(0, 10))
     denominacion_entry.bind("<KeyRelease>", lambda event: convertir_a_mayusculas(denominacion_entry, event))
 
-
-
-
-
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
- 
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 
     # Sección de observaciones
     observaciones_frame = ctk.CTkFrame(contenedor_principal, **ESTILO_FRAME)
     observaciones_frame.pack(fill="x", pady=(0, 20), padx=5)
@@ -562,7 +632,7 @@ def mostrar_formulario_egresos(frame_padre):
 
     btn_buscar = ctk.CTkButton(
         acciones_frame,
-        text="🔍 Buscar",
+        text=" Abrir Carpeta",
         **ESTILO_BOTON,
         fg_color="#6b7280",
         hover_color="#4b5563",
@@ -637,16 +707,10 @@ def mostrar_formulario_egresos(frame_padre):
             btn_guardar.configure(state="normal")
             btn_descargar.configure(state="normal")
 
-    # Configurar eventos para validación en tiempo real
     for campo in [nombre, cargo_entry, clave_rastreo, observaciones_entry]:
         campo.bind("<KeyRelease>", actualizar_estado_botones)
-
-    # Validación inicial
     actualizar_estado_botones()
-    actualizar_total()
-    
-    
-    ## Funciones 
+    actualizar_total() 
     
     
     
