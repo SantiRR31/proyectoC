@@ -19,31 +19,23 @@ create table if not exists detallePolizaEgreso (
 
 );
 
-CREATE TABLE IF NOT EXISTS materiales (
-    clave TEXT PRIMARY KEY,
-    nivel INTEGER,
-    grupo TEXT,
-    subgrupo TEXT,
-    descripcion TEXT,
-    cabm TEXT,
-    unidad_medida TEXT
-);
+
 -- Renombre la tabla 
-ALTER TABLE PARTIDAS_EGRESOS RENAME TO partidasEgresos_old;
+ALTER TABLE partidasEgresos_old RENAME TO partidasEgresos_old;
 -- ver el sql usado para crear la tabla 
 SELECT sql FROM sqlite_master WHERE type='table' AND name='partidasEgresos';
 -- Ver las tablas existentes
 .tables
 -- 
-select * from partidasEgresos_old;
+select * from partidasEgresos;
 
 CREATE TABLE partidasEgresos (
     "CABM ACTUALIZADO" TEXT PRIMARY KEY,
-    "TIPO" REAL,
-    "PARTIDA ESPECÍFICA" REAL,
-    "CLAVE CUCoP" REAL UNIQUE,
+    "TIPO" INTEGER,
+    "PARTIDA ESPECÍFICA" INTEGER,
+    "CLAVE CUCoP" INTEGER UNIQUE,
     "DESCRIPCIÓN" TEXT,
-    "NIVEL" REAL,
+    "NIVEL" INTEGER,
     "CABM ANTERIOR" TEXT,
     "UNIDAD  DE MEDIDA (sugerida)" TEXT
 );
@@ -107,5 +99,18 @@ select * from partidasEgresos
 drop table partidasEgresos
 
 select * from partidasEgresos
+
+
+
+SELECT 
+    "DESCRIPCIÓN",
+    COUNT(*) AS cantidad
+FROM 
+    partidasEgresos
+GROUP BY 
+    "DESCRIPCIÓN"
+HAVING 
+    COUNT(*) > 1;
+
 
 

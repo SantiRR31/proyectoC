@@ -16,12 +16,22 @@ def buscar_descripcion_db(clave):
 def buscar_clave_por_descripcion(descripcion):
     conn = conectar()
     if conn is None:
-        return ["Error de conexión"]
+        return []
     cursor = conn.cursor()
-    cursor.execute('SELECT "CLAVE CUCoP", "DESCRIPCIÓN" FROM partidasEgresos WHERE "DESCRIPCIÓN" LIKE ?', (f"%{descripcion}%",))
+    cursor.execute(
+        'SELECT "CLAVE CUCoP", "DESCRIPCIÓN", "PARTIDA ESPECÍFICA" FROM partidasEgresos WHERE "DESCRIPCIÓN" LIKE ?',
+        (f"%{descripcion}%",)
+    )
     resultados = cursor.fetchall()
     conn.close()
-    return [fila[0] for fila in resultados] if resultados else ["No encontrada"]
+    # Devuelve lista de diccionarios
+    return [
+        {"clave": fila[0], "descripcion": fila[1], "partida": fila[2]}
+        for fila in resultados
+    ]
+
+
+
 
 
 def buscar_claves_por_texto(texto):
