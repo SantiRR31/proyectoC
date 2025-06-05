@@ -8,6 +8,9 @@ from functions.funcions import gen_inf_consolidado, confirmar_y_generar
 import requests
 from io import BytesIO
 import threading
+from dotenv import load_dotenv
+import os
+
 
 
 def mostrar_inicio(contenedor):
@@ -110,7 +113,8 @@ def mostrar_inicio(contenedor):
     # 👉 Esta función SÓLO obtiene datos. No toca la interfaz.
     def obtener_clima_datos():
         ciudad = 'Tequisquiapan'
-        API_KEY = '9ae8be36b9f6bc68596b1954437135de'
+        load_dotenv()  # Cargar variables de entorno desde .env
+        API_KEY = os.getenv("API_KEY")
         url = f'https://api.openweathermap.org/data/2.5/weather?q={ciudad}&appid={API_KEY}&units=metric&lang=es'
         try:
             respuesta = requests.get(url, timeout=10)
