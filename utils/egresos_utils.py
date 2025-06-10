@@ -1,4 +1,5 @@
 from datetime import time
+from datetime import datetime
 import os
 import xlwings as xw
 from tkinter import messagebox
@@ -6,6 +7,53 @@ from utils.utils import obtener_fecha_actual
 from utils.rutas import ruta_absoluta
 import customtkinter as ctk
 import math
+from db.egresosDB import *
+from models.egresomodelos import *
+
+
+def capturar_poliza(form,entradas):
+        poliza_id = form["poliza_id"].get()
+        fecha = form["fecha"].get()
+        nombre = form["nombre"].get()
+        monto = form["cargo"].get()
+        montoletr = form["cargo_letras"].get()
+        tipo_pago = form["tipo_pago"].get()
+        clave_ref = form["clave_rastreo"].get()
+        denominacion = form["denominacion"].get()
+        observaciones = form["observaciones"].get()
+        
+        poliza = PolizaEgreso(
+            poliza_id,
+            fecha,  
+            monto,
+            montoletr,
+            nombre, 
+            tipo_pago,
+            clave_ref,
+            denominacion,
+            observaciones
+        )
+
+        for entrada_clave, entrada_desc, entrada_importe in entradas:
+            clave = entrada_clave.get().strip()
+            #print(f"Advertencia: clave VALOR '{clave}'")
+            descripcion = entrada_desc.get()
+            partida_especifica = obtener_partida_especifica_por_clave(int(clave))
+            cargo = float(entrada_importe.get())
+            if clave and descripcion and cargo:
+                concepto = ConceptoEgreso(clave, descripcion, partida_especifica, cargo)
+                poliza.agregar_concepto(concepto)
+                
+        return poliza 
+
+
+def validar_campos_obligatorios_obj(poliza):
+    faltantes = poliza.campos_faltantes()
+    if faltantes:
+        mensaje = "Por favor complete los siguientes campos obligatorios:\n\n" + "\n".join(faltantes)
+        messagebox.showerror("Campos incompletos", mensaje)
+        return False
+    return True
 
 def obtener_valores_campos(form):
     return {
@@ -20,50 +68,44 @@ def obtener_valores_campos(form):
         "observaciones": form["observaciones"].get(),
     }
 
-def asignar_valores_en_hoja(hoja, datos):
+def asignar_valores_en_hoja(hoja, poliza):
     campos_a_celdas = {
         "fecha": "AQ8",
-        "no_poliza": "AX5",
+        "poliza_id": "AX5",
         "nombre": "A9",
-        "cargo": "AO9",
-        "cargo_letras": "A10",
+        "monto": "AO9",
+        "montoletr": "A10",
         "tipo_pago": "T12",
-        "clave_rastreo": "A13",
+        "clave_ref": "A13",
         "denominacion": "A44",
         "observaciones": "A47",
     }
 
     for campo, celda in campos_a_celdas.items():
-        valor = datos[campo]
+        valor = getattr(poliza, campo, "")
         if campo == "clave_rastreo":
             valor = f"CLAVE DE RASTREO {valor}"
         hoja.range(celda).value = valor
 
-def insertar_entradas_en_hoja(hoja, entradas, fila_inicial=18):
-    for i, (entrada_clave, entrada_resultado, entrada_abono) in enumerate(entradas):
-        clave = entrada_clave.get()
-        denominacion = entrada_resultado.get()
-        cargo = entrada_abono.get()
-
-        if clave and denominacion and cargo:
-            hoja.range(f"B{fila_inicial}").value = clave
-            hoja.range(f"AV{fila_inicial}").value = float(cargo)
+def insertar_entradas_en_hoja(hoja, conceptos, fila_inicial=18):
+    for concepto in conceptos:
+        if concepto.partida_especifica and concepto.cargo:
+            hoja.range(f"B{fila_inicial}").value = concepto.partida_especifica
+            hoja.range(f"AV{fila_inicial}").value = float(concepto.cargo)
             fila_inicial += 1
         else:
             messagebox.showerror("Error", "Faltan datos. Verifica que todos los campos estén completos.")
             return False
     return True
 
-def guardar_egresos(form, entradas):
+def guardar_egresos(poliza):
     try:
         app = xw.App(visible=False)
         wb = app.books.open(ruta_absoluta("assets/plantillas/egresos.xlsx"))
         hoja = wb.sheets["01 ene 2025"]
+        asignar_valores_en_hoja(hoja, poliza)
 
-        datos = obtener_valores_campos(form)
-        asignar_valores_en_hoja(hoja, datos)
-
-        if not insertar_entradas_en_hoja(hoja, entradas):
+        if not insertar_entradas_en_hoja(hoja, poliza.conceptos):
             wb.close()
             return
 
@@ -79,18 +121,18 @@ def guardar_egresos(form, entradas):
     except Exception as e:
         print("Error al guardar:", e)
         messagebox.showerror("Error", f"No se pudo guardar la información.\n{e}")
-        
-        
-def guardar_pdf(form, entradas):
+                
+def guardar_pdf(poliza):
     try:
+        if not validar_campos_obligatorios_obj(poliza):
+            return
         app = xw.App(visible=False)
         wb = app.books.open(ruta_absoluta("assets/plantillas/egresos.xlsx"))
         hoja = wb.sheets["01 ene 2025"]
+        
+        asignar_valores_en_hoja(hoja, poliza)
 
-        datos = obtener_valores_campos(form)
-        asignar_valores_en_hoja(hoja, datos)
-
-        if not insertar_entradas_en_hoja(hoja, entradas):
+        if not insertar_entradas_en_hoja(hoja, poliza.conceptos):
             wb.close()
             return
 
@@ -107,10 +149,6 @@ def guardar_pdf(form, entradas):
         print("Error al exportar PDF:", e)
         messagebox.showerror("Error", f"No se pudo exportar como PDF.\n{e}")
 
-
-
-#import customtkinter as ctk
-
 class AnimacionDescarga(ctk.CTkToplevel):
     def __init__(self, master=None):
         super().__init__(master)
@@ -125,6 +163,16 @@ class AnimacionDescarga(ctk.CTkToplevel):
 
         self.texto = ctk.CTkLabel(self, text="Descargando", font=("Arial", 16, "bold"), text_color="#3b82f6", fg_color="transparent")
         self.texto.place(relx=0.5, rely=0.7, anchor="center")
+                # Centrar respecto a la ventana principal (master)
+        if master is not None:
+            self.update_idletasks()
+            pantalla_w = self.winfo_screenwidth()
+            pantalla_h = self.winfo_screenheight()
+            win_w = 260
+            win_h = 180
+            x = (pantalla_w // 2) - (win_w // 2)
+            y = (pantalla_h // 2) - (win_h // 2) - 30  # pequeño ajuste visual
+            self.geometry(f"{win_w}x{win_h}+{x}+{y}")
 
         self.puntos = 0
         self.angulo = 0
@@ -132,7 +180,7 @@ class AnimacionDescarga(ctk.CTkToplevel):
 
     def animar(self):
         self.canvas.delete("all")
-        # Dibuja un círculo giratorio (spinner)
+        # Dibuja un círculo giratorio 
         radio = 30
         cx, cy = 40, 40
         for i in range(12):
@@ -149,9 +197,6 @@ class AnimacionDescarga(ctk.CTkToplevel):
         self.puntos += 1
 
         self.after(120, self.animar)
-
-
-
 
 def ejecutar_con_loading(funcion, btn_guardar, btn_descargar, contenedor_principal, limpiar_formulario, *args):
     btn_guardar.configure(state="disabled", text="Guardando...")
@@ -202,4 +247,15 @@ def animar_confirmacion(widget):
                 widget.configure(fg_color=color_original)
         except:
             pass
-    
+
+def generar_no_poliza(numero, fecha):
+    # numero: consecutivo (ejemplo: 1, 2, 3)
+    # fecha: objeto datetime o string 'YYYY-MM-DD'
+    if isinstance(fecha, str):
+        fecha = datetime.strptime(fecha, "%Y-%m-%d")
+    mes = fecha.strftime("%b").lower()  # 'jun'
+    anio = fecha.strftime("%y")         # '25'
+    return f"{str(numero).zfill(3)}-{mes}-{anio}"
+
+# Ejemplo:
+no_poliza = generar_no_poliza(1, "2025-06-10")  # '001-jun-25'

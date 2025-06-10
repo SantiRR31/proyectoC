@@ -11,6 +11,7 @@ from utils.utils import *
 from utils.egresos_utils import *
 from datetime import datetime
 from styles.styles import *
+from models.egresomodelos import *
 
 def mostrar_formulario_egresos(frame_padre):
     # Limpiar frame anterior
@@ -83,6 +84,10 @@ def mostrar_formulario_egresos(frame_padre):
         fg_color=("#e5e7eb", "#191919")
     )
     separador.grid(row=1, column=0, columnspan=4, sticky="ew", pady=5)
+    
+    
+    
+#    -------------------------------------------------------------------------------------------------------
 
     # Fila 2: Datos del beneficiario
     ctk.CTkLabel(
@@ -272,28 +277,28 @@ def mostrar_formulario_egresos(frame_padre):
         entrada_resultado.configure(state="normal")
         entrada_resultado.delete(0, tk.END)
         entrada_resultado.insert(0, denominacion)
-        entrada_resultado.configure(state="readonly")
+        #entrada_resultado.configure(state="readonly")
         
     def llenar_por_clave(event, entrada_clave, entrada_desc):
         clave = entrada_clave.get().strip()
         if clave:
             try:
                 descripcion = buscar_descripcion_db(clave)
-                if descripcion and descripcion != "No encontrado":
-                    entrada_desc.configurate(state= "normal")
-                    entrada_desc.delete(0, tk.end)
+                if descripcion and descripcion.strip().lower() != "No encontrada":
+                    entrada_desc.configure(state="normal", fg_color= "transparent")
+                    entrada_desc.delete(0, tk.END)
                     entrada_desc.insert(0, descripcion)
-                    entrada_desc.configure(state="readonly")
-                    threading.Thread(target=lambda: animar_confirmacion(entrada_desc), daemon=True).start()
+                    #threading.Thread(target=lambda: animar_confirmacion(entrada_desc), daemon=True).start()
+                else:
+                    entrada_desc.configure(state="normal")
+                    entrada_desc.delete(0, tk.END)
+                    entrada_desc.insert(0, "No encontrada")
+                    entrada_desc.configure(fg_color="#ef8989")
+ # rojo claro (bg)
             except Exception as e:
                 print(f"Error al buscar descripción: {e}")
-    
-    """def llenar_por_descripcion(event, entrada_desc, entrada_clave):
-        descripcion = entrada_desc.get().strip()
-        if descripcion:
-            clave = buscar_clave_por_descripcion(descripcion)
-            entrada_clave.delete(0, tk.END)
-            entrada_clave.insert(0, clave) """
+            
+            
     def actualizar_total():
         try:
             suma_total = sum(float(entrada[2].get()) for entrada in entradas if entrada[2].get().strip())
@@ -301,91 +306,79 @@ def mostrar_formulario_egresos(frame_padre):
             total.delete(0, tk.END)
             total.insert(0, f"${suma_total:,.2f}")
             total.configure(state="readonly")
-        
-        # Validación visual mejorada
+
             importe_valor = cargo_entry.get().strip()
             if importe_valor:
                 importe_float = float(importe_valor)
                 diferencia = abs(importe_float - suma_total)
-            
+
                 if diferencia < 0.01:
-                    validacion_totales.configure(
-                        text="✓ Totales coinciden",
-                        text_color="#10b981",
-                        font=("Arial", 10, "bold")
-                    )
+                    validacion_totales.configure(text="✓ Totales coinciden", text_color="#10b981", font=("Arial", 10, "bold"))
                 else:
-                    validacion_totales.configure(
-                        text=f"✗ Diferencias (${diferencia:,.2f})",
-                        text_color="#ef4444",
-                        font=("Arial", 10, "bold")
-                    )
+                    validacion_totales.configure(text=f"✗ Diferencias (${diferencia:,.2f})", text_color="#ef4444", font=("Arial", 10, "bold"))
             else:
-                validacion_totales.configure(
-                    text="⚠ Ingrese monto total",
-                    text_color="#f59e0b",
-                    font=("Arial", 10)
-                )
+                validacion_totales.configure(text="⚠ Ingrese monto total", text_color="#f59e0b", font=("Arial", 10))
         except ValueError:
-            validacion_totales.configure(
-                text="⚠ Valores no válidos",
-                text_color="#f59e0b",
-                font=("Arial", 10)
-            )
-            
+            validacion_totales.configure(text="⚠ Valores no válidos", text_color="#f59e0b", font=("Arial", 10))        
 
     def mostrar_sugerencias(event, entrada_desc, entrada_clave, lista_sugerencias):
+        tecla = event.keysym
+        if tecla in ("Up", "Down", "Return", "Escape"):
+            return
         texto = entrada_desc.get().strip()
-        if not texto:
+        if len(texto) < 2:
             lista_sugerencias.place_forget()
             return
+        
+        
+        try:
+            coincidencias = buscar_clave_por_descripcion(texto)
+            lista_sugerencias.delete(0, tk.END)
 
-        coincidencias = buscar_clave_por_descripcion(texto)
-        lista_sugerencias.delete(0, tk.END)
+            if coincidencias:
+                for item in coincidencias[:10]:
+                    texto_mostrado = f'{item ["clave"]} - {item["descripcion"][:50]}... (Partida: {item ["partida"]})'
+                    lista_sugerencias.insert(tk.END, texto_mostrado)
 
-        if coincidencias:
-            for item in coincidencias:
-                texto_mostrado = f'{item["clave"]} - {item["descripcion"][:50]}... (Partida: {item["partida"]})'
-                lista_sugerencias.insert(tk.END, texto_mostrado)
-
-            lista_sugerencias.place(
-                in_=entrada_desc,
-                relx=0,
-                rely=1.0,
-                relwidth=1.0,
-                bordermode="outside",
-            )
-            lista_sugerencias.lift()
+                lista_sugerencias.place(
+                    in_=entrada_desc,
+                    relx=0,
+                    rely=1.0,
+                    relwidth=1.0,
+                    bordermode="outside",
+                )
+                lista_sugerencias.lift()
             # Guardamos las coincidencias para uso posterior
-            lista_sugerencias.coins = coincidencias
-        else:
+                lista_sugerencias.coins = coincidencias
+            else:
+                lista_sugerencias.place_forget()
+        except Exception as e:
+            print(f"Error en sujerencias:{e} ")
             lista_sugerencias.place_forget()
 
         
     def seleccionar_sugerencia(event, entrada_clave, entrada_desc, lista_sugerencias):
         seleccion = lista_sugerencias.curselection()
-        if not seleccion:
-            return
+        try:
+            if not seleccion:
+                return
+            idx = seleccion[0]
+            seleccionado = lista_sugerencias.coins[idx]
+            entrada_clave.delete(0, tk.END)
+            entrada_clave.insert(0, seleccionado["clave"])
+            entrada_desc.configure(state="normal")
+            entrada_desc.delete(0, tk.END)
+            entrada_desc.insert(0, seleccionado["descripcion"])
+            entrada_desc.configure(state="readonly")
+            lista_sugerencias.place_forget()
 
-        idx = seleccion[0]
-        seleccionado = lista_sugerencias.coins[idx]
-
-        entrada_clave.delete(0, tk.END)
-        entrada_clave.insert(0, seleccionado["clave"])
-
-        entrada_desc.configure(state="normal")
-        entrada_desc.delete(0, tk.END)
-        entrada_desc.insert(0, seleccionado["descripcion"])
-        entrada_desc.configure(state="readonly")
-
-        lista_sugerencias.place_forget()
-
-    # Enfocar siguiente campo
-        for entrada in entradas:
-            if entrada[1] == entrada_desc:
-                entrada[2].focus_set()
-                break
-
+        # Enfocar siguiente campo
+            for entrada in entradas:
+                if entrada[1] == entrada_desc:
+                    entrada[2].focus_set()
+                    break
+        except Exception as e:
+            print(f"Error al selceccionar sugerencia:{e}")
 
        
     def configurar_lista_sugerencias(entrada_desc, entrada_clave, ):
@@ -433,25 +426,54 @@ def mostrar_formulario_egresos(frame_padre):
         
         entrada_desc.bind("<FocusOut>", hide_on_focus_out)
         
-        return lista_sugerencias
+        
+        def mover_seleccion(event,direccion):
+            if not lista_sugerencias.winfo_ismapped():
+                return
+        
+            size = lista_sugerencias.size()
+            if size ==0:
+                return
+        
+            seleccion = lista_sugerencias.curselection()
+            if seleccion:
+                idx = seleccion[0]
+            else:
+                idx = -1
+        
+            if direccion == "abajo":
+                nuevo_idx = min(idx +1, size -1 )
+            else:
+                nuevo_idx = max(idx -1, 0)
+            
+            lista_sugerencias.selection_clear(0, tk.END)
+            lista_sugerencias.selection_set(nuevo_idx)
+            lista_sugerencias.activate(nuevo_idx)
+            lista_sugerencias.see(nuevo_idx)  # Asegura que se vea si hay scroll
+            return "break"  # Evita que se escriba ↑ o ↓ en el campo
 
+        entrada_desc.bind("<Down>", lambda e: mover_seleccion(e, "abajo"))
+        entrada_desc.bind("<Up>", lambda e: mover_seleccion(e, "arriba")) 
+        
+        return lista_sugerencias
+    
     def agregar_fila(enfocar_nueva_clave=False):
         fila_idx = len(entradas)
         
         fila_frame = ctk.CTkFrame(
             filas_frame, 
-            fg_color=("#ffffff", "#1f2937"),
+            fg_color=("#ffffff", "#1c1c1c"),
             border_width=1,
-            border_color=("#e5e7eb", "#374151"),
+            #border_color=("#e5e7eb", "#374151"),
             corner_radius=6
             )
         fila_frame.pack(fill="x", pady=2, padx=2)     
         
          # Efecto hover
         def on_enter(e):
-            fila_frame.configure(fg_color=("#f3f4f6", "#111827"))
+            fila_frame.configure(fg_color=("#f3f4f6", "#262626"))
         def on_leave(e):
-            fila_frame.configure(fg_color=("#ffffff", "#1f2937"))
+            fila_frame.configure(fg_color=("#ffffff", "#1c1c1c"))
         fila_frame.bind("<Enter>", on_enter)
         fila_frame.bind("<Leave>", on_leave)
 
@@ -487,16 +509,17 @@ def mostrar_formulario_egresos(frame_padre):
         )
         
         lista_sugerencias.bind("<<ListboxSelect>>", lambda e: seleccionar_sugerencia(e, entrada_clave, entrada_desc, lista_sugerencias))
-        entrada_desc.bind("<KeyRelease>", lambda e: mostrar_sugerencias(e, entrada_desc, entrada_clave, lista_sugerencias))
+        #entrada_desc.bind("<KeyRelease>", lambda e: mostrar_sugerencias(e, entrada_desc, entrada_clave, lista_sugerencias))
         
         vcmd = fila_frame.register(solo_numeros_decimales)
         entrada_importe.configure(validate="key", validatecommand=(vcmd, "%P"))
         entrada_importe.bind("<KeyRelease>", lambda event: actualizar_total())
         entrada_importe.grid(row=0, column=2, padx=5, pady=2, sticky="ew")
         entrada_clave.bind("<FocusOut>", lambda event: llenar_por_clave(event, entrada_clave, entrada_desc))
-        #entrada_desc.bind("<FocusOut>", lambda event: llenar_por_descripcion(event, entrada_desc, entrada_clave))
         entrada_clave.bind("<Return>", lambda event: entrada_importe.focus_set())
         entrada_importe.bind("<Return>", lambda event: agregar_fila(enfocar_nueva_clave=True))
+        entrada_desc.bind("<Return>", lambda e: seleccionar_sugerencia(e, entrada_clave, entrada_desc, lista_sugerencias))
+
 
         # Botón eliminar
         btn_eliminar = ctk.CTkButton(
@@ -513,7 +536,6 @@ def mostrar_formulario_egresos(frame_padre):
         # Configurar eventos
         entrada_clave.bind("<FocusOut>", lambda event: llenar_denominacion(event, entrada_clave, entrada_desc))
         entrada_clave.bind("<Return>", lambda event: entrada_importe.focus_set())
-        entrada_importe.bind("<Return>", lambda event: agregar_fila(enfocar_nueva_clave=True))
 
         entradas.append((entrada_clave, entrada_desc, entrada_importe))
 
@@ -615,7 +637,7 @@ def mostrar_formulario_egresos(frame_padre):
         btn_descargar,             # botón descargar
         contenedor_principal,      # contenedor principal
         limpiar_formulario,        # función para limpiar el formulario
-        form, entradas             # argumentos para guardar_egresos
+        poliza = capturar_poliza(form, entradas)             # argumentos para guardar_egresos
     )
     )
     btn_guardar.pack(side="right", padx=5)
@@ -642,8 +664,8 @@ def mostrar_formulario_egresos(frame_padre):
 
     # Diccionario con los campos del formulario
     form = {
+        "poliza_id": no_poliza,
         "fecha": fecha_policia,
-        "no_poliza": no_poliza,
         "nombre": nombre,
         "cargo": cargo_entry,
         "cargo_letras": cargo_letras_entry,
@@ -651,14 +673,11 @@ def mostrar_formulario_egresos(frame_padre):
         "clave_rastreo": clave_rastreo,
         "observaciones": observaciones_entry,
         "denominacion": denominacion_entry,
-    }
-
-    # Función para mostrar menú de descarga
-   # Supón que tienes estas referencias en tu función principal:
-# btn_guardar, btn_descargar, contenedor_principal, form, entradas, mostrar_formulario_egresos, frame_padre
-
+    }      
+         
     def mostrar_menu_descarga(form, entradas):
         menu = tk.Menu(None, tearoff=0)
+        poliza = capturar_poliza(form, entradas)
         menu.add_command(
             label="Exportar como PDF",
             command=lambda: ejecutar_con_loading(
@@ -667,7 +686,7 @@ def mostrar_formulario_egresos(frame_padre):
                 btn_descargar,
                 contenedor_principal,
                 lambda: limpiar_formulario(contenedor_principal, mostrar_formulario_egresos, frame_padre),
-                form, entradas
+                poliza
             )
         )
         menu.add_command(
