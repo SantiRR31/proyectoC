@@ -7,6 +7,7 @@ import json
 from PIL import Image
 import os
 from utils.config_utils import cargar_config, actualizar_config
+from utils.rutas import ruta_absoluta
 
 CONFIG_PATH = "config.json"
 
@@ -136,7 +137,7 @@ def mostrar_ajustes(frame_contenido):
         text="¿Ayuda?",
         corner_radius=8,
         command=abrir_ventana_soporte,
-        image=ctk.CTkImage(Image.open("assets/help.png"), size=(18, 18))
+        image = ctk.CTkImage(Image.open(ruta_absoluta("assets/help.png")), size=(18, 18))
     )
     btn_ayuda.pack(pady=(10, 0))
 

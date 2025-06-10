@@ -9,7 +9,6 @@ from datetime import datetime
 from tkinter import messagebox
 
 
-
 def obtener_fecha_actual():
     """Devuelve la fecha actual en formato 'DD-MM-AAAA'."""
     return datetime.now().strftime("%d-%m-%Y")

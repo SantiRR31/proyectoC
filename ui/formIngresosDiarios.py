@@ -13,6 +13,7 @@ from functions import genRegIngresos, funcions
 from datetime import datetime
 import psutil, time
 from utils.config_utils import cargar_config
+from utils.rutas import ruta_absoluta
 
 CONFIG_PATH = "config.json"
 
@@ -56,7 +57,7 @@ def mostrar_formulario_ingresos(frame_padre):
     # Fila 1 - Fecha y Número de Póliza
     lbl_fecha = ctk.CTkLabel(entrada_frame, text="Fecha del voucher:", font=("Arial", 14))
     lbl_fecha.grid(row=0, column=0, padx=(10,5), pady=5, sticky="w")
-    fecha_policia = DateEntry(entrada_frame, placeholder_text="📅 Fecha de ingreso")
+    fecha_policia = DateEntry(entrada_frame, placeholder_text="📅 Fecha de ingreso", font=("Helvetica", 14))
     fecha_policia.grid(row=0, column=1, padx=(5,10), pady=5, sticky="ew")
     #fecha_policia.insert(0, obtener_fecha_actual())
     #fecha_policia.configure(state="readonly")
@@ -230,7 +231,8 @@ def mostrar_formulario_ingresos(frame_padre):
                     if os.path.exists(ruta_completa):
                         wb = app.books.open(ruta_completa)
                     else:
-                        wb = app.books.open("assets/plantillaIngresos.xlsx")
+                        wb = app.books.open(ruta_absoluta("assets/plantillaIngresos.xlsx"))
+
                     break
                 except Exception as e:
                     retries += 1
@@ -243,7 +245,7 @@ def mostrar_formulario_ingresos(frame_padre):
                         if os.path.exists(ruta_completa):
                             wb = app.books.open(ruta_completa)
                         else:
-                            wb = app.books.open("assets/plantillaIngresos.xlsx")
+                            wb = app.books.open(ruta_absoluta("assets/plantillaIngresos.xlsx"))
                         break
                     time.sleep(2)  # Esperar 2 segundos antes de reintentar
     
@@ -286,15 +288,29 @@ def mostrar_formulario_ingresos(frame_padre):
             hoja_activa.range("AN6").value = fecha2
             hoja_activa.range("AQ6").value = fecha3
     
+            suma_por_clave = {}
+            
             # ENTRADAS DINÁMICAS
-            fila_inicial = 15
             for entrada_clave, _, entrada_abono in entradas:
                 clave = entrada_clave.get()
                 abono = entrada_abono.get()
-                if clave or abono:
-                    hoja_activa.range(f"B{fila_inicial}").value = clave
-                    hoja_activa.range(f"AT{fila_inicial}").value = float(abono) if abono else 0.0
-                    fila_inicial += 1
+                
+                if clave:
+                    try:
+                        abono_val = float(abono)
+                    except (ValueError, TypeError):
+                        abono_val = 0.0
+                    
+                    if clave in suma_por_clave:
+                        suma_por_clave[clave] += abono_val
+                    else:
+                        suma_por_clave[clave] = abono_val
+                
+            fila_inicial = 15
+            for clave, total_abono in suma_por_clave.items():
+                hoja_activa.range(f"B{fila_inicial}").value = clave
+                hoja_activa.range(f"AT{fila_inicial}").value = total_abono
+                fila_inicial += 1
     
             # GUARDADO Y CIERRE SEGURO
             wb.save(ruta_completa)
@@ -423,7 +439,7 @@ def mostrar_formulario_ingresos(frame_padre):
     btn_guardar = crear_boton_imagen(botones_frame, "Guardar", "assets/check.png", btn_guardar_style, None, side="right", padx=10)
     btn_descargar = crear_boton_imagen(botones_frame, "Descargar", "assets/downlo.png", btn_descargar_style, None, side="right", padx=10) """
 
-    imgGenerarReporte = Image.open("assets/generate.png")
+    imgGenerarReporte = Image.open(ruta_absoluta("assets/generate.png"))
     btn_generar_reporte = ctk.CTkButton(
         botones_frame,
         text="Generar Reporte Mensual",
@@ -436,7 +452,7 @@ def mostrar_formulario_ingresos(frame_padre):
     )
     btn_generar_reporte.pack(side="right", padx=10)
     
-    imgVerDescargas = Image.open("assets/look.png")
+    imgVerDescargas = Image.open(ruta_absoluta("assets/look.png"))
     btn_ver_descargas = ctk.CTkButton(
         botones_frame,
         text="Ver Descargas",
@@ -449,7 +465,7 @@ def mostrar_formulario_ingresos(frame_padre):
     )
     btn_ver_descargas.pack(side="right", padx=10)
     
-    imgBtnGuardar = Image.open("assets/check.png")
+    imgBtnGuardar = Image.open(ruta_absoluta("assets/check.png"))
     btn_guardar = ctk.CTkButton(
         botones_frame, 
         text="Guardar", 
@@ -462,7 +478,7 @@ def mostrar_formulario_ingresos(frame_padre):
     )
     btn_guardar.pack(side="right", padx=10)
 
-    imgBtnDescargar = Image.open("assets/downlo.png")
+    imgBtnDescargar = Image.open(ruta_absoluta("assets/downlo.png"))
     btn_descargar = ctk.CTkButton(
         botones_frame,
         text="Descargar",

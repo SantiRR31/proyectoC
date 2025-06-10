@@ -11,6 +11,7 @@ from PIL import Image, ImageTk
 from customtkinter import CTkImage, CTkFont
 import json
 from utils.config_utils import actualizar_config
+from utils.rutas import ruta_absoluta
 CONFIG_PATH = "config.json"
 
 def guardar_estado_ventana(root):
@@ -68,7 +69,7 @@ def lanzar_ventana_principal():
     #ctk.set_default_color_theme("blue")
 
     root = ctk.CTk()
-    root.iconbitmap("assets/cecati-122.ico")
+    root.iconbitmap(ruta_absoluta("assets/cecati-122.ico"))
     root.title("Sistema de Gestión CECATI 122")
     
     
@@ -155,7 +156,7 @@ def lanzar_ventana_principal():
     sidebar_logo = ctk.CTkLabel(
         sidebar, 
         text="", 
-        image=CTkImage(Image.open("assets/cecati-122.ico"), size=(40, 40))
+        image=CTkImage(Image.open(ruta_absoluta("assets/cecati-122.ico"))),
     )
     sidebar_logo.pack(pady=(20, 10))
 
@@ -219,7 +220,7 @@ def lanzar_ventana_principal():
     btn_inicio_sidebar = create_sidebar_btn(
         sidebar, 
         "Inicio", 
-        "assets/house.png", 
+        ruta_absoluta("assets/house.png"), 
         lambda: abrir_inicio(frame_contenido)
     )
     
@@ -241,13 +242,13 @@ def lanzar_ventana_principal():
     btn_ingresos_sidebar = create_sidebar_btn(
         sidebar, 
         "Ingresos", 
-        "assets/coin.png", 
+        ruta_absoluta("assets/coin.png"),  
         lambda: abrir_formulario(frame_contenido)
     )
     btn_clientes_sidebar = create_sidebar_btn(
         sidebar, 
         "Egresos", 
-        "assets/wallet.png", 
+        ruta_absoluta("assets/wallet.png"),  
         lambda: abrir_formulario_egresos(frame_contenido)
     )
     
@@ -269,7 +270,7 @@ def lanzar_ventana_principal():
     btn_reportes_sidebar = create_sidebar_btn(
         sidebar, 
         "Reportes", 
-        "assets/bar.png", 
+        ruta_absoluta("assets/bar.png"), 
         lambda: None
     )
     
@@ -291,7 +292,7 @@ def lanzar_ventana_principal():
     btn_inf_real_sidebar = create_sidebar_btn(
         sidebar, 
         "Informe Real", 
-        "assets/notepad.png", 
+        ruta_absoluta("assets/notepad.png"),  
         lambda: abrir_informe_real_ingresos(frame_contenido)
     )
 
@@ -303,7 +304,7 @@ def lanzar_ventana_principal():
     btn_config = create_sidebar_btn(
         sidebar, 
         "Ajustes", 
-        "assets/settings 2.png", 
+        ruta_absoluta("assets/settings 2.png"),
         lambda: abrir_ajustes(frame_contenido)
     )
     
@@ -312,17 +313,17 @@ def lanzar_ventana_principal():
         current_mode = ctk.get_appearance_mode()
         if current_mode == "Dark":
             ctk.set_appearance_mode("light")
-            imagenes["tema"] = CTkImage(Image.open("assets/sun 2.png"), size=(20, 20))
+            imagenes["tema"] = CTkImage(Image.open(ruta_absoluta("assets/sun 2.png")), size=(20, 20))
             btn_tema.configure(text="Modo Claro", image=imagenes["tema"])
             actualizar_config("appearance_mode", "light")
         else:
             ctk.set_appearance_mode("dark")
-            imagenes["tema"] = CTkImage(Image.open("assets/moon 2.png"), size=(20, 20))
+            imagenes["tema"] = CTkImage(Image.open(ruta_absoluta("assets/moon 2.png")), size=(20, 20))
             btn_tema.configure(text="Modo Oscuro", image=imagenes["tema"])
             actualizar_config("appearance_mode", "dark")
 
     imagenes = {
-        "tema": CTkImage(Image.open("assets/moon 2.png"), size=(20, 20))
+    "tema": CTkImage(Image.open(ruta_absoluta("assets/moon 2.png")), size=(20, 20))
     }
     
     btn_tema = ctk.CTkButton(
@@ -343,7 +344,7 @@ def lanzar_ventana_principal():
     btn_salir_sidebar = create_sidebar_btn(
         sidebar, 
         "Salir", 
-        "assets/output.png", 
+        ruta_absoluta("assets/output.png"),
         lambda: (guardar_estado_ventana(root), root.destroy())
     )
     

@@ -3,6 +3,7 @@ import os
 import xlwings as xw
 from tkinter import messagebox
 from utils.utils import obtener_fecha_actual
+from utils.rutas import ruta_absoluta
 import customtkinter as ctk
 import math
 
@@ -56,7 +57,7 @@ def insertar_entradas_en_hoja(hoja, entradas, fila_inicial=18):
 def guardar_egresos(form, entradas):
     try:
         app = xw.App(visible=False)
-        wb = app.books.open("assets/plantillas/egresos.xlsx")
+        wb = app.books.open(ruta_absoluta("assets/plantillas/egresos.xlsx"))
         hoja = wb.sheets["01 ene 2025"]
 
         datos = obtener_valores_campos(form)
@@ -83,7 +84,7 @@ def guardar_egresos(form, entradas):
 def guardar_pdf(form, entradas):
     try:
         app = xw.App(visible=False)
-        wb = app.books.open("assets/plantillas/egresos.xlsx")
+        wb = app.books.open(ruta_absoluta("assets/plantillas/egresos.xlsx"))
         hoja = wb.sheets["01 ene 2025"]
 
         datos = obtener_valores_campos(form)
