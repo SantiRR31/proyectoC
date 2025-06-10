@@ -8,6 +8,9 @@ from functions.funcions import gen_inf_consolidado, confirmar_y_generar
 import requests
 from io import BytesIO
 import threading
+from dotenv import load_dotenv
+import os
+
 
 
 def mostrar_inicio(contenedor):
@@ -110,7 +113,8 @@ def mostrar_inicio(contenedor):
     # 👉 Esta función SÓLO obtiene datos. No toca la interfaz.
     def obtener_clima_datos():
         ciudad = 'Tequisquiapan'
-        API_KEY = '9ae8be36b9f6bc68596b1954437135de'
+        load_dotenv()  # Cargar variables de entorno desde .env
+        API_KEY = os.getenv("API_KEY")
         url = f'https://api.openweathermap.org/data/2.5/weather?q={ciudad}&appid={API_KEY}&units=metric&lang=es'
         try:
             respuesta = requests.get(url, timeout=10)
@@ -218,13 +222,13 @@ def mostrar_inicio(contenedor):
     tarjetas_frame.pack(fill="x", pady=20)
 
     # Tarjetas con efecto hover y sombra
-    for i, (nombre, icono, color) in enumerate([
-        ("Ingresos", "assets/coin.png", ("#10b981", "#059669")),
-        ("Egresos", "assets/wallet.png", ("#ef4444", "#dc2626")),
-        ("Reportes", "assets/iconuse.png", ("#3b82f6", "#2563eb")),
-        ("Informes", "assets/web.png", ("#8b5cf6", "#7c3aed"))
+    for i, (nombre, icono, color, texto_boton) in enumerate([
+        ("Ingresos", "assets/coin.png", ("#10b981", "#059669"), "Registrar"),
+        ("Egresos", "assets/wallet.png", ("#ef4444", "#dc2626"), "Registrar"),
+        ("Reportes", "assets/iconuse.png", ("#3b82f6", "#2563eb"), "Ver"),
+        ("Informes", "assets/web.png", ("#8b5cf6", "#7c3aed"), "Ver")
     ]):
-        tarjeta = crear_tarjeta_moderna(tarjetas_frame, nombre, icono, color)
+        tarjeta = crear_tarjeta_moderna(tarjetas_frame, nombre, icono, color, boton_texto=texto_boton)
         tarjeta.grid(row=0, column=i, padx=15, pady=10, sticky="nsew")
         tarjetas_frame.grid_columnconfigure(i, weight=1)
         
@@ -239,7 +243,8 @@ def mostrar_inicio(contenedor):
         "Informe Consolidado de Ingresos",
         "assets/excel.png",
         ("#8b5cf6", "#7c3aed"),
-        command=confirmar_y_generar
+        command=confirmar_y_generar,
+        boton_texto="Generar"
     )
     nueva_tarjeta.pack(anchor="center")  # Centrado horizontal
 
@@ -308,7 +313,7 @@ def mostrar_inicio(contenedor):
     )
     recordatorios_content.pack(pady=20, padx=10)
 
-def crear_tarjeta_moderna(master, texto, icono_path, color, command=None):
+def crear_tarjeta_moderna(master, texto, icono_path, color, command=None, boton_texto="Generar"):
     frame = ctk.CTkFrame(
         master, 
         width=180, 
@@ -352,7 +357,7 @@ def crear_tarjeta_moderna(master, texto, icono_path, color, command=None):
     # BOTÓN ESTILIZADO AÑADIDO AQUÍ
     boton = ctk.CTkButton(
         content_frame,
-        text="Generar",
+        text=boton_texto,
         width=100,
         height=28,
         fg_color=color,
