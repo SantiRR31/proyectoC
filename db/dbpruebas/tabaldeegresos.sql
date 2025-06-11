@@ -35,7 +35,7 @@ drop table polizasEgresos;
 -- Renombre la tabla 
 ALTER TABLE partidasEgresos_old RENAME TO partidasEgresos_old;
 -- ver el sql usado para crear la tabla 
-SELECT sql FROM sqlite_master WHERE type='table' AND name='detallePolizaEgreso';
+SELECT sql FROM sqlite_master WHERE type='table' AND name='polizasEgresos';
 -- Ver las tablas existentes
 .tables
 -- 

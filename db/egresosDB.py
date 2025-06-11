@@ -11,8 +11,6 @@ def buscar_descripcion_db(clave):
     conn.close()
     return resultado[0] if resultado else "No encontrada"
 
-#
-
 """ def buscar_clave_por_descripcion(descripcion):
     conn = conectar()
     if conn is None:
@@ -53,8 +51,7 @@ def buscar_clave_por_descripcion(descripcion):
         {"clave": fila[0], "descripcion": fila[1], "partida": fila[2]}
         for fila in resultados
     ]
-
-
+    
 def buscar_claves_por_texto(texto):
     conn = conectar()
     if conn is None:
@@ -64,7 +61,6 @@ def buscar_claves_por_texto(texto):
     resultados = cursor.fetchall()
     conn.close()
     return resultados
-
 
 def obtener_partida_especifica_por_clave(clave_cucop):
     conn = conectar()
@@ -88,14 +84,25 @@ def inrtar_poliza_egreso(poliza):
     cursor.execute(
         '''
         INSERT INTO polizasEgresos (
-            "FECHA", "NO. DE PÓLIZA", "NOMBRE", "MONTO", "MONTO EN LETRAS",
-            "TIPO DE PAGO", "CLAVE DE RASTREO", "DENOMINACIÓN", "OBSERVACIONES"
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            "no_poliza",
+            "fecha",
+            "monto",
+            "nombre",
+            "tipo_pago",
+            "clave_ref",
+            "denominacion",
+            "observaciones"
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ''',
         (
-            poliza.fecha, poliza.poliza_id, poliza.nombre, poliza.monto,
-            poliza.montoletr, poliza.tipo_pago, poliza.clave_ref,
-            poliza.denominacion, poliza.observaciones
+            poliza.poliza_id,
+            poliza.fecha,
+            poliza.monto,
+            poliza.nombre, 
+            poliza.tipo_pago, 
+            poliza.clave_ref,
+            poliza.denominacion, 
+            poliza.observaciones
         )
     )
     # Obtener el id de la póliza recién insertada (si es autoincremental)
@@ -106,13 +113,98 @@ def inrtar_poliza_egreso(poliza):
         cursor.execute(
             '''
             INSERT INTO detallePolizaEgreso (
-                id_poliza, "CLAVE CUCoP", cargo
+                id_poliza, 
+                "CLAVE CUCoP", 
+                cargo
             ) VALUES (?, ?, ?)
             ''',
-            (id_poliza, concepto.clave_cucop, concepto.cargo)
+            (id_poliza, 
+             concepto.clave_cucop, 
+             concepto.cargo)
         )
 
     conn.commit()
     conn.close()
     return "Póliza y detalles insertados correctamente"
     
+def obtener_siguiente_no_poliza_mes(fecha):
+    """
+    Devuelve el siguiente número de póliza para el mes y año de la fecha dada.
+    fecha: string 'DD/MM/YYYY'
+    """
+    from datetime import datetime
+    dt = datetime.strptime(fecha, "%d/%m/%Y")
+    mes = dt.strftime("%m")
+    anio = dt.strftime("%Y")
+    conn = conectar()
+    if conn is None:
+        return "01"
+    cursor = conn.cursor()
+    cursor.execute(
+        '''
+        SELECT COUNT(*) FROM polizasEgresos
+        WHERE substr(fecha, 4, 2) = ? AND substr(fecha, 7, 4) = ?
+        ''',
+        (mes, anio)
+    )
+    resultado = cursor.fetchone()
+    conn.close()
+    consecutivo = (resultado[0] or 0) + 1
+    return str(consecutivo).zfill(2)
+
+
+from models.egresomodelos import PolizaEgreso, ConceptoEgreso
+
+def consultar_poliza_por_no(no_poliza):
+    conn = conectar()
+    if conn is None:
+        return None
+    cursor = conn.cursor()
+    # 1. Consultar la póliza principal
+    cursor.execute(
+        '''
+        SELECT id_poliza, no_poliza, fecha, monto, nombre, tipo_pago, clave_ref, denominacion, observaciones
+        FROM polizasEgresos
+        WHERE no_poliza = ?
+        ''',
+        (no_poliza,)
+    )
+    poliza_row = cursor.fetchone()
+    if not poliza_row:
+        conn.close()
+        return None
+
+    # Crear el objeto PolizaEgreso
+    poliza = PolizaEgreso(
+        poliza_id=poliza_row[1],   # no_poliza
+        fecha=poliza_row[2],
+        monto=poliza_row[3],
+        montoletr="",              # Si tienes este campo, agrégalo aquí
+        nombre=poliza_row[4],
+        tipo_pago=poliza_row[5],
+        clave_ref=poliza_row[6],
+        denominacion=poliza_row[7],
+        observaciones=poliza_row[8]
+    )
+
+    id_poliza = poliza_row[0]
+
+    # 2. Consultar los conceptos (detalles)
+    cursor.execute(
+        '''
+        SELECT "CLAVE CUCoP", cargo
+        FROM detallePolizaEgreso
+        WHERE id_poliza = ?
+        ''',
+        (id_poliza,)
+    )
+    detalles = cursor.fetchall()
+    for detalle in detalles:
+        clave_cucop = detalle[0]
+        cargo = detalle[1]
+        # Si quieres, puedes consultar la descripción y partida_especifica aquí
+        concepto = ConceptoEgreso(clave_cucop, descripcion="", partida_especifica="", cargo=cargo)
+        poliza.agregar_concepto(concepto)
+
+    conn.close()
+    return poliza
