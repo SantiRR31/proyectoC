@@ -9,8 +9,10 @@ import customtkinter as ctk
 import math
 from db.egresosDB import *
 from models.egresomodelos import *
+from datetime import datetime
+import tkinter as tk
 
-
+#----------------- Funciones de captura y validación de pólizas de egresos -----------------
 def capturar_poliza(form,entradas):
         poliza_id = form["poliza_id"].get()
         fecha = form["fecha"].get()
@@ -67,6 +69,8 @@ def obtener_valores_campos(form):
         "denominacion": form["denominacion"].get(),
         "observaciones": form["observaciones"].get(),
     }
+
+#------------------ Funciones de asignación y guardado de pólizas de egresos formatos pdf y -----------------
 
 def asignar_valores_en_hoja(hoja, poliza):
     campos_a_celdas = {
@@ -148,6 +152,8 @@ def guardar_pdf(poliza):
     except Exception as e:
         print("Error al exportar PDF:", e)
         messagebox.showerror("Error", f"No se pudo exportar como PDF.\n{e}")
+        
+#------------------ Animación de descarga y guardado -----------------
 
 class AnimacionDescarga(ctk.CTkToplevel):
     def __init__(self, master=None):
@@ -225,6 +231,8 @@ def ejecutar_con_loading(funcion, btn_guardar, btn_descargar, contenedor_princip
             btn_descargar.configure(state="normal", text="📥 Descargar")
     contenedor_principal.after(100, ejecutar)
     
+#------------------ Funciones de limpieza y animación de confirmación -----------------
+    
 def limpiar_formulario(contenedor_principal, mostrar_formulario_egresos, frame_padre):
     respuesta = messagebox.askyesno(
         "Limpiar formulario",
@@ -248,14 +256,204 @@ def animar_confirmacion(widget):
         except:
             pass
 
-def generar_no_poliza(numero, fecha):
-    # numero: consecutivo (ejemplo: 1, 2, 3)
-    # fecha: objeto datetime o string 'YYYY-MM-DD'
-    if isinstance(fecha, str):
-        fecha = datetime.strptime(fecha, "%Y-%m-%d")
-    mes = fecha.strftime("%b").lower()  # 'jun'
-    anio = fecha.strftime("%y")         # '25'
-    return f"{str(numero).zfill(3)}-{mes}-{anio}"
+#------------------ Funciones de generación de números de póliza -----------------
 
-# Ejemplo:
-no_poliza = generar_no_poliza(1, "2025-06-10")  # '001-jun-25'
+def generar_no_poliza_para_fecha(fecha):
+    # Detecta y convierte si la fecha viene en formato 'DD/MM/YYYY'
+    if "/" in fecha:
+        dt = datetime.strptime(fecha, "%d/%m/%Y")
+    else:
+        dt = datetime.strptime(fecha, "%Y-%m-%d")
+    consecutivo = obtener_siguiente_no_poliza_mes(dt.strftime("%d/%m/%Y"))
+    mes = dt.strftime("%b").lower()
+    anio = dt.strftime("%Y")
+    dia = dt.strftime("%d")
+    return f"{consecutivo}/{mes}/{anio}"
+
+
+# egresos_utils.py
+
+def consultar_poliza():
+    print("Consultando póliza...")
+
+def editar_poliza():
+    print("Editando póliza...")
+
+def eliminar_poliza():
+    print("Eliminando póliza...")
+
+def agregar_poliza():
+    print("Agregando nueva póliza...")
+
+def buscar_poliza():
+    print("Buscando póliza...")
+#------------------ Funciones de búsqueda y sugerencias -----------------
+            
+def mostrar_sugerencias(event, entrada_desc, entrada_clave, lista_sugerencias):
+        tecla = event.keysym
+        if tecla in ("Up", "Down", "Return", "Escape"):
+            return
+        texto = entrada_desc.get().strip()
+        if len(texto) < 2:
+            lista_sugerencias.place_forget()
+            return 
+        try:
+            coincidencias = buscar_clave_por_descripcion(texto)
+            lista_sugerencias.delete(0, tk.END)
+
+            if coincidencias:
+                for item in coincidencias[:10]:
+                    texto_mostrado = f'{item ["clave"]} - {item["descripcion"][:50]}... (Partida: {item ["partida"]})'
+                    lista_sugerencias.insert(tk.END, texto_mostrado)
+
+                lista_sugerencias.place(
+                    in_=entrada_desc,
+                    relx=0,
+                    rely=1.0,
+                    relwidth=1.0,
+                    bordermode="outside",
+                )
+                lista_sugerencias.lift()
+            # Guardamos las coincidencias para uso posterior
+                lista_sugerencias.coins = coincidencias
+            else:
+                lista_sugerencias.place_forget()
+        except Exception as e:
+            print(f"Error en sujerencias:{e} ")
+            lista_sugerencias.place_forget()
+            
+def llenar_denominacion(event, entrada_clave, entrada_resultado):
+        clave = entrada_clave.get()
+        denominacion = buscar_descripcion_db(clave)
+        entrada_resultado.configure(state="normal")
+        entrada_resultado.delete(0, tk.END)
+        entrada_resultado.insert(0, denominacion)
+        #entrada_resultado.configure(state="readonly")
+        
+def llenar_por_clave(event, entrada_clave, entrada_desc):
+    clave = entrada_clave.get().strip()
+    if clave:
+        try:
+            descripcion = buscar_descripcion_db(clave)
+            if descripcion and descripcion.strip().lower() != "No encontrada":                    
+                entrada_desc.configure(state="normal", fg_color= "transparent")
+                entrada_desc.delete(0, tk.END)
+                entrada_desc.insert(0, descripcion)
+                #threading.Thread(target=lambda: animar_confirmacion(entrada_desc), daemon=True).start()
+            else:
+                entrada_desc.configure(state="normal")                    
+                entrada_desc.delete(0, tk.END)
+                entrada_desc.insert(0, "No encontrada")
+                entrada_desc.configure(fg_color="#ef8989")
+ # rojo claro (bg)
+        except Exception as e:
+            print(f"Error al buscar descripción: {e}")
+            
+            
+            
+def actualizar_total(entradas, total_entry, cargo_entry, validacion_label):
+    try:
+        suma_total = sum(float(entrada[2].get()) for entrada in entradas if entrada[2].get().strip())
+        total_entry.configure(state="normal")
+        total_entry.delete(0, tk.END)
+        total_entry.insert(0, f"${suma_total:,.2f}")
+        total_entry.configure(state="readonly")
+
+        importe_valor = cargo_entry.get().strip()
+        if importe_valor:
+            importe_float = float(importe_valor)
+            diferencia = abs(importe_float - suma_total)
+
+            if diferencia < 0.01:
+                validacion_label.configure(
+                    text="✓ Totales coinciden",
+                    text_color="#10b981",
+                    font=("Arial", 10, "bold")
+                )
+            else:
+                validacion_label.configure(
+                    text=f"✗ Diferencias (${diferencia:,.2f})",
+                    text_color="#ef4444",
+                    font=("Arial", 10, "bold")
+                )
+        else:
+            validacion_label.configure(
+                text="⚠ Ingrese monto total",
+                text_color="#f59e0b",
+                font=("Arial", 10)
+            )
+    except ValueError:
+        validacion_label.configure(
+            text="⚠ Valores no válidos",
+            text_color="#f59e0b",
+            font=("Arial", 10)
+        )
+
+#------------------ Funciones de actualización de estado del formulario -----------------
+
+def actualizar_estado_formulario(modo: str, widgets: dict, campos=None, conceptos=None, btn_guardar=None, btn_descargar=None, btn_buscar=None):
+    desactivar = modo in ("Consultar", "Eliminar")
+
+    for entry in widgets.get("entradas", []):
+        entry.configure(state="normal" if not desactivar else "disabled")
+        if isinstance(entry, ctk.CTkEntry):
+            entry.configure(border_color="#3b82f6" if not desactivar else "#4b5563")
+
+    for boton in widgets.get("botones", []):
+        boton.configure(state="normal" if not desactivar else "disabled")
+        if desactivar:
+            boton.configure(fg_color="#6b7280")
+        else:
+            if boton.cget("text") == "💾 Guardar":
+                boton.configure(fg_color="#10b981", hover_color="#059669")
+            elif boton.cget("text") == "📥 Descargar":
+                boton.configure(fg_color="#3b82f6", hover_color="#2563eb")
+            elif boton.cget("text") == " Abrir Carpeta":
+                boton.configure(fg_color="#6b7280", hover_color="#4b5563")
+            else:
+                boton.configure(fg_color="#22c55e", hover_color="#16a34a")
+
+    for menu in widgets.get("menus", []):
+        try:
+            menu.configure(state="normal" if not desactivar else "disabled")
+        except Exception:
+            pass
+
+    # Validar campos obligatorios en modo agregar/editar
+    if modo in ("Agregar", "Editar"):
+        if campos is not None and conceptos is not None and btn_guardar and btn_descargar and btn_buscar:
+            actualizar_estado_botones(modo, campos, conceptos, btn_guardar, btn_descargar, btn_buscar)
+            
+def actualizar_estado_botones(modo, campos, conceptos, btn_guardar, btn_descargar, btn_buscar):
+    # Por defecto, todos los botones activos
+    guardar_estado = "normal"
+    descargar_estado = "normal"
+    buscar_estado = "normal"
+
+    # En modo agregar o editar, desactiva si hay campos vacíos
+    if modo in ("agregar", "editar"):
+        if campos_obligatorios_vacios(campos, conceptos):
+            guardar_estado = "disabled"
+            descargar_estado = "disabled"
+        # Solo en modo agregar, desactiva buscar
+        if modo == "agregar":
+            buscar_estado = "disabled"
+    # En modo consultar o eliminar, desactiva todos menos buscar
+    elif modo in ("consultar", "eliminar"):
+        guardar_estado = "disabled"
+        descargar_estado = "disabled"
+        # Puedes decidir si buscar está activo o no en estos modos
+
+    btn_guardar.configure(state=guardar_estado)
+    btn_descargar.configure(state=descargar_estado)
+    btn_buscar.configure(state=buscar_estado)
+    
+def campos_obligatorios_vacios(campos, conceptos):
+    # Valida los campos fijos
+    if any(campo.get().strip() == "" for campo in campos):
+        return True
+    # Valida los conceptos (clave, descripción, importe)
+    for entrada_clave, entrada_desc, entrada_importe in conceptos:
+        if not entrada_clave.get().strip() or not entrada_desc.get().strip() or not entrada_importe.get().strip():
+            return True
+    return False
