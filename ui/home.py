@@ -348,7 +348,6 @@ def lanzar_ventana_principal():
         lambda: (guardar_estado_ventana(root), root.destroy())
     )
     
-    
     # Cargar pantalla inicial
     abrir_inicio(frame_contenido)
     cambiar_boton_activo(btn_inicio_sidebar)

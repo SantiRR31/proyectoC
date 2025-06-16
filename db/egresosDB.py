@@ -1,4 +1,5 @@
 from db.conexion import conectar
+from models.egresomodelos import PolizaEgreso, ConceptoEgreso
 
 # Funcion para buscar la descripcion de una clave en la tabla PARTIDAS_EGRESOS
 def buscar_descripcion_db(clave):
@@ -91,8 +92,9 @@ def inrtar_poliza_egreso(poliza):
             "tipo_pago",
             "clave_ref",
             "denominacion",
-            "observaciones"
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            "observaciones",
+            "no_cheque"
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''',
         (
             poliza.poliza_id,
@@ -100,9 +102,10 @@ def inrtar_poliza_egreso(poliza):
             poliza.monto,
             poliza.nombre, 
             poliza.tipo_pago, 
-            poliza.clave_ref,
+            getattr (poliza, "clave_ref", None),
             poliza.denominacion, 
-            poliza.observaciones
+            poliza.observaciones,
+            getattr(poliza, "no_cheque", None)
         )
     )
     # Obtener el id de la póliza recién insertada (si es autoincremental)
@@ -126,6 +129,8 @@ def inrtar_poliza_egreso(poliza):
     conn.commit()
     conn.close()
     return "Póliza y detalles insertados correctamente"
+
+
     
 def obtener_siguiente_no_poliza_mes(fecha):
     """
@@ -153,8 +158,6 @@ def obtener_siguiente_no_poliza_mes(fecha):
     return str(consecutivo).zfill(2)
 
 
-from models.egresomodelos import PolizaEgreso, ConceptoEgreso
-
 def consultar_poliza_por_no(no_poliza):
     conn = conectar()
     if conn is None:
@@ -163,7 +166,7 @@ def consultar_poliza_por_no(no_poliza):
     # 1. Consultar la póliza principal
     cursor.execute(
         '''
-        SELECT id_poliza, no_poliza, fecha, monto, nombre, tipo_pago, clave_ref, denominacion, observaciones
+        SELECT id_poliza, no_poliza, fecha, monto, nombre, tipo_pago, clave_ref, denominacion, observaciones, no_cheque
         FROM polizasEgresos
         WHERE no_poliza = ?
         ''',
@@ -179,14 +182,14 @@ def consultar_poliza_por_no(no_poliza):
         poliza_id=poliza_row[1],   # no_poliza
         fecha=poliza_row[2],
         monto=poliza_row[3],
-        montoletr="",              # Si tienes este campo, agrégalo aquí
+        montoletr="",  # Puedes calcularlo si lo necesitas
         nombre=poliza_row[4],
         tipo_pago=poliza_row[5],
         clave_ref=poliza_row[6],
         denominacion=poliza_row[7],
-        observaciones=poliza_row[8]
+        observaciones=poliza_row[8],
+        no_cheque=poliza_row[9]
     )
-
     id_poliza = poliza_row[0]
 
     # 2. Consultar los conceptos (detalles)
@@ -202,9 +205,19 @@ def consultar_poliza_por_no(no_poliza):
     for detalle in detalles:
         clave_cucop = detalle[0]
         cargo = detalle[1]
-        # Si quieres, puedes consultar la descripción y partida_especifica aquí
-        concepto = ConceptoEgreso(clave_cucop, descripcion="", partida_especifica="", cargo=cargo)
+        # Consultar descripción y partida_especifica si lo deseas
+        cursor.execute(
+            '''
+            SELECT "DESCRIPCIÓN", "PARTIDA ESPECÍFICA"
+            FROM partidasEgresos
+            WHERE "CLAVE CUCoP" = ?
+            ''',
+            (clave_cucop,)
+        )
+        partida_row = cursor.fetchone()
+        descripcion = partida_row[0] if partida_row else ""
+        partida_especifica = partida_row[1] if partida_row else ""
+        concepto = ConceptoEgreso(clave_cucop, descripcion, partida_especifica, cargo)
         poliza.agregar_concepto(concepto)
-
     conn.close()
     return poliza

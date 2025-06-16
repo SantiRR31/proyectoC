@@ -44,7 +44,8 @@ def mostrar_formulario_egresos(frame_padre):
 
     ctk.CTkButton(
         toolbar_frame, 
-        text="➕ Agregar",
+        text="Agregar",
+        image = CTkImage(Image.open(ruta_absoluta("assets/icons/plus.png")), size=(20, 18)),
         width=50, 
         command=lambda: (
             actualizar_estado_formulario("Agregar",widgets,campos=campos_obligatorios,conceptos=entradas,btn_guardar=btn_guardar,btn_descargar=btn_descargar,btn_buscar=btn_buscar),
@@ -57,7 +58,8 @@ def mostrar_formulario_egresos(frame_padre):
 
     ctk.CTkButton(
         toolbar_frame, 
-        text="✏️ Editar",
+        text="Editar",
+        image= CTkImage(Image.open(ruta_absoluta("assets/icons/pencil.png")), size=(20, 18)),
         width=50, 
         command=lambda: (
             actualizar_estado_formulario("Editar",widgets,campos=campos_obligatorios,conceptos=entradas,btn_guardar=btn_guardar,btn_descargar=btn_descargar,btn_buscar=btn_buscar),
@@ -68,7 +70,8 @@ def mostrar_formulario_egresos(frame_padre):
         fg_color="#facc15").pack(side="left", padx=5)
     ctk.CTkButton(
         toolbar_frame, 
-        text="🗑️ Eliminar", 
+        text="Eliminar",
+        image = CTkImage(Image.open(ruta_absoluta("assets/icons/trash.png")), size=(20, 18)), 
         width=50,
         command=lambda: (
             actualizar_estado_formulario("Eliminar",widgets,campos=campos_obligatorios,conceptos=entradas,btn_guardar=btn_guardar,btn_descargar=btn_descargar,btn_buscar=btn_buscar),
@@ -79,13 +82,13 @@ def mostrar_formulario_egresos(frame_padre):
         fg_color="#ef4444").pack(side="left", padx=5)
     ctk.CTkButton(
         toolbar_frame, 
-        text="🔍 Consultar", 
+        text="Consultar",
+        image=CTkImage(Image.open(ruta_absoluta("assets/icons/buscar.png")), size=(20, 18)), 
         width=50,
         command=lambda: (
             actualizar_estado_formulario("Consultar",widgets,campos=campos_obligatorios,conceptos=entradas,btn_guardar=btn_guardar,btn_descargar=btn_descargar,btn_buscar=btn_buscar),
             actualizar_estado_botones("Consultar", campos_obligatorios, entradas, btn_guardar, btn_descargar, btn_buscar),
             bind_actualizacion(campos_obligatorios, entradas, "Consultar", btn_guardar, btn_descargar, btn_buscar),
-            consultar_poliza()
         ),
         fg_color="#3b82f6").pack(side="left", padx=5)
 
@@ -104,17 +107,32 @@ def mostrar_formulario_egresos(frame_padre):
         font=FUENTE_LABEL,
         anchor="w"
     ).grid(row=0, column=0, padx=(15, 5), pady=10, sticky="ew")
+    
 
     fecha_policia = DateEntry(
         seccion_poliza,
         date_pattern="dd/mm/yyyy",
         font=FUENTE_TEXTO,
         locale="es_MX",
-        background="#3b82f6",
-        foreground="white",
-        borderwidth=1
-    )
-    fecha_policia.grid(row=0, column=1, padx=5, pady=10, sticky="ew")
+        background="#18181b",           # Fondo general (casi negro)
+        foreground="#e0e7ef",           # Texto claro
+        borderwidth=1,
+        relief="flat",
+        selectbackground="#2563eb",     # Azul para selección
+        selectforeground="#ffffff",     # Texto blanco para selección
+        disabledbackground="#23232a",   # Fondo deshabilitado (gris oscuro)
+        disabledforeground="#6b7280",   # Texto deshabilitado (gris)
+        headersbackground="#1e293b",    # Fondo encabezados (azul oscuro)
+        headersforeground="#60a5fa",    # Texto encabezados (azul claro)
+        weekendbackground="#18181b",    # Fondo fines de semana (igual que fondo)
+        weekendforeground="#2563eb",    # Texto fines de semana (azul)
+        normalbackground="#18181b",     # Fondo días normales
+        normalforeground="#e0e7ef",     # Texto días normales
+        arrowcolor="#2563eb",           # Flechas azules
+        bordercolor="#23232a",          # Borde azul
+        showweeknumbers=False
+        )
+    fecha_policia.grid(row=0, column=1, padx=5, pady=10, sticky="ew")       # Oculta la columna de números de semana
 
     ctk.CTkLabel(
         seccion_poliza,
@@ -133,9 +151,9 @@ def mostrar_formulario_egresos(frame_padre):
     btn_buscar = ctk.CTkButton(
         seccion_poliza, 
         text="",
-        image=CTkImage(Image.open("assets/buscar.png"), size=(20, 18)), 
+        image=CTkImage(Image.open(ruta_absoluta("assets/icons/buscar.png")), size=(20, 18)), 
         width=40,
-        command=lambda: buscar_poliza()
+        command=lambda: consultar_poliza(widgets, no_poliza=no_poliza.get() if no_poliza.get() else None)
         )
     btn_buscar.place(relx=0.98, rely=0.07, anchor="ne")
 
@@ -195,6 +213,7 @@ def mostrar_formulario_egresos(frame_padre):
     )
     vcmd = seccion_poliza.register(solo_numeros_decimales)
     cargo_entry.configure(validate="key", validatecommand=(vcmd, "%P"))
+    cargo_entry.bind("<KeyRelease>", lambda event: actualizar_total(entradas, total, cargo_entry, validacion_totales, total, total_ctk))
     cargo_entry.grid(row=4, column=1, padx=5, pady=5, sticky="ew")
 
 # Entrada de cantidad en letras (más ancha)
@@ -235,7 +254,7 @@ def mostrar_formulario_egresos(frame_padre):
         font=FUENTE_SUBTITULO
     ).grid(row=0, column=0, columnspan=4, pady=(5, 10), sticky="ew")
 
-    # Elementos de método de pago
+   # Elementos de método de pago
     ctk.CTkLabel(
         metodo_pago_frame,
         text="Tipo de pago:",
@@ -245,29 +264,57 @@ def mostrar_formulario_egresos(frame_padre):
 
     tipo_pago = ctk.CTkOptionMenu(
         metodo_pago_frame,
-        values=["EFECTIVO", "CHEQUE", "TRANSF. ELECTRÓNICA"],
+        values=["", "CHEQUE", "TRANSF. ELECTRÓNICA"],
         font=FUENTE_TEXTO,
         dropdown_font=FUENTE_TEXTO,
         width=200
     )
     tipo_pago.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
 
-    ctk.CTkLabel(
+        # Etiqueta y entrada para "No. Cheque"
+    no_cheque_label = ctk.CTkLabel(
+        metodo_pago_frame,
+        text="No. Cheque:",
+        font=FUENTE_LABEL,
+        anchor="w"
+    )
+    no_cheque_entry = ctk.CTkEntry(
+        metodo_pago_frame,
+        placeholder_text="🔢 No. Cheque",
+        **ESTILO_ENTRADA
+    )
+
+    # Etiqueta y entrada para "Clave/Referencia"
+    clave_ref_label = ctk.CTkLabel(
         metodo_pago_frame,
         text="Clave/Referencia:",
         font=FUENTE_LABEL,
         anchor="w"
-    ).grid(row=1, column=2, padx=(15, 5), pady=5, sticky="ew")
-
+    ) 
     clave_rastreo = ctk.CTkEntry(
-        metodo_pago_frame,
-        placeholder_text="🔑 Clave de rastreo",
-        **ESTILO_ENTRADA
+    metodo_pago_frame,
+    placeholder_text="🔑 Clave de rastreo",
+    **ESTILO_ENTRADA
     )
     clave_rastreo.configure(validate="key", validatecommand=(vcmdo, "%P"))
     clave_rastreo.bind("<KeyRelease>", lambda event: convertir_a_mayusculas(clave_rastreo, event))
-    clave_rastreo.grid(row=1, column=3, padx=(5, 15), pady=5, sticky="ew")
-    
+
+    def mostrar_campos_pago(*args):
+        # Ocultar ambos primero
+        no_cheque_label.grid_forget()
+        no_cheque_entry.grid_forget()
+        clave_ref_label.grid_forget()
+        clave_rastreo.grid_forget()
+
+        if tipo_pago.get() == "CHEQUE":
+            no_cheque_label.grid(row=1, column=2, padx=(15, 5), pady=5, sticky="ew")
+            no_cheque_entry.grid(row=1, column=3, padx=(5, 15), pady=5, sticky="ew")
+        elif tipo_pago.get() == "TRANSF. ELECTRÓNICA":
+            clave_ref_label.grid(row=1, column=2, padx=(15, 5), pady=5, sticky="ew")
+            clave_rastreo.grid(row=1, column=3, padx=(5, 15), pady=5, sticky="ew")
+
+    tipo_pago.configure(command=mostrar_campos_pago)
+
     #-----------------------------------------------------------# Sección de conceptos -------------------------------------------------------------------------------------------
     
     conceptos_frame = ctk.CTkFrame(contenedor_principal, **ESTILO_FRAME)
@@ -466,7 +513,7 @@ def mostrar_formulario_egresos(frame_padre):
         
         vcmd = fila_frame.register(solo_numeros_decimales)
         entrada_importe.configure(validate="key", validatecommand=(vcmd, "%P"))
-        entrada_importe.bind("<KeyRelease>", lambda event: actualizar_total(entradas, total, cargo_entry, validacion_totales))
+        entrada_importe.bind("<KeyRelease>", lambda event: actualizar_total(entradas, total, cargo_entry, validacion_totales, total, total_ctk))
         entrada_importe.grid(row=0, column=2, padx=5, pady=2, sticky="ew")
         entrada_clave.bind("<FocusOut>", lambda event: llenar_por_clave(event, entrada_clave, entrada_desc))
         entrada_clave.bind("<Return>", lambda event: entrada_importe.focus_set())
@@ -481,7 +528,7 @@ def mostrar_formulario_egresos(frame_padre):
             height=30,
             fg_color="#ef4444",
             hover_color="#dc2626",
-            command=lambda: (fila_frame.destroy(), entradas.remove((entrada_clave, entrada_desc, entrada_importe)), actualizar_total(entradas, total, cargo_entry, validacion_totales))
+            command=lambda: (fila_frame.destroy(), entradas.remove((entrada_clave, entrada_desc, entrada_importe)), actualizar_total(entradas, total, cargo_entry, validacion_totales, total, total_ctk))
         )
         btn_eliminar.grid(row=0, column=3, padx=5, pady=2)
 
@@ -569,11 +616,12 @@ def mostrar_formulario_egresos(frame_padre):
 
 
     # Total y validación
-    ctk.CTkLabel(
+    total_ctk = ctk.CTkLabel(
         acciones_frame,
         text="Total:",
         font=FUENTE_LABEL        
-    ).grid(row=0, column=0, sticky="w", padx=(0, 10))
+    )
+    total_ctk.grid(row=0, column=0, sticky="w", padx=(0, 10))
 
 
     total = ctk.CTkEntry(
@@ -592,24 +640,28 @@ def mostrar_formulario_egresos(frame_padre):
         text_color="#6b7280"
     )
     validacion_totales.grid(row=0, column=2, sticky="w", padx=(0, 5))
+    
+    def guardar_poliza():
+        poliza = capturar_poliza(form, entradas)
+        if poliza is None:
+            return None  # No guardar si la validación falla
+        return inrtar_poliza_egreso(poliza)
 
     # Botones de acción
     btn_guardar = ctk.CTkButton(
         acciones_frame,
         text="💾 Guardar",
         width=50,
-        #height=32,
         **ESTILO_BOTON,
         fg_color="#10b981",
         hover_color="#059669",
         command=lambda: ejecutar_con_loading(
-            inrtar_poliza_egreso,           # función a ejecutar
-            btn_guardar,               # botón guardar
-            btn_descargar,             # botón descargar
-            contenedor_principal,      # contenedor principal
-            limpiar_formulario,        # función para limpiar el formulario
-            capturar_poliza(form, entradas)             # argumentos para guardar_egresos
-    )
+            guardar_poliza,           # función a ejecutar
+            btn_guardar,
+            btn_descargar,
+            contenedor_principal,
+            lambda: limpiar_formulario(contenedor_principal, mostrar_formulario_egresos, frame_padre)
+        )
     )
     btn_guardar.grid(row=0, column=4, padx=5,sticky="e")
 
@@ -646,6 +698,7 @@ def mostrar_formulario_egresos(frame_padre):
         "clave_rastreo": clave_rastreo,
         "observaciones": observaciones_entry,
         "denominacion": denominacion_entry,
+        "no_cheque": no_cheque_entry,  
     }      
          
     def mostrar_menu_descarga(form, entradas):
@@ -685,7 +738,6 @@ def mostrar_formulario_egresos(frame_padre):
     campos_obligatorios = [
         nombre,
         cargo_entry,
-        clave_rastreo,
         observaciones_entry
     ]
 # Los conceptos están en la lista 'entradas'
@@ -700,7 +752,7 @@ def mostrar_formulario_egresos(frame_padre):
             entrada_desc.bind("<KeyRelease>", on_change)
             entrada_importe.bind("<KeyRelease>", on_change)
     
-    actualizar_total(entradas, total, cargo_entry, validacion_totales)
+    actualizar_total(entradas, total, cargo_entry, validacion_totales, total, total_ctk)
 
     # -------------------------------------------------------------------------------------------------------------------
     # Registro de widgets relevantes en un diccionario
@@ -714,6 +766,7 @@ def mostrar_formulario_egresos(frame_padre):
             tipo_pago,
             denominacion_entry,
             observaciones_entry,
+            no_cheque_entry
             
         ],
         "botones": [
@@ -723,7 +776,6 @@ def mostrar_formulario_egresos(frame_padre):
         ],
         "conceptos": entradas
     }
-    
     # Por ejemplo:
     campos_obligatorios = [
         nombre,
