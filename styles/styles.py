@@ -8,34 +8,11 @@ COLOR_TEXTO = ("#121212", "#f1f5f9")
 COLOR_TEXTO_APARTADO = ("#334155", "#475569")
 COLOR_TEXTO_APARTADO_SECUNDARIO = ("#64748b", "#94a3b8")
 
-
-
-
 #--- Colores --------
 
 COLOR_PRIMARIO = ("#cc3d42", "#cc3d42")
 COLOR_CONT_PRIMARIO = ("#faf7f6", "#191919")
 COLOR_CONT_SECUNDARIO = ("#ddd9d9", "#1c1c1c")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 COLOR_FONDO = ("#cc3d42", "#cc3d42")
 BG_COLOR = ("#f9f9f9", "#121212")
@@ -186,4 +163,18 @@ ESTILO_BOTON = {
     #"font": FUENTE_BOTON,
     "height": 35,
     "corner_radius": 8
+}
+
+ESTILO_LIST_SUG = {
+    "height":6,
+    "bg":"#ffffff",
+    "fg":"#111827",
+    "selectbackground":"#3b82f6",
+    "selectforeground":"#ffffff",
+    "font":("Arial", 10),
+    "highlightthickness":1,
+    "highlightcolor":"#3b82f6",
+    "activestyle":"dotbox",
+    "relief":"solid",
+    "borderwidth":1
 }

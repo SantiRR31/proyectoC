@@ -1,33 +1,22 @@
-CREATE table if not exists polizasEgresos (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    fecha TEXT not null,
-    numero_poliza text not null UNIQUE,
-    nombre TEXT not null,
-    cargo_total REAL not null,
-    tipo_pago TEXT NOT NULL CHECK (tipo_pago IN ('Efectivo', 'Cheque', 'Transferencia', 'Tarjeta de Crédito', 'Tarjeta de Débito')),
-    observaciones TEXT,
+CREATE TABLE polizasEgresos (
+    id_poliza INTEGER PRIMARY KEY AUTOINCREMENT,
+    no_poliza TEXT UNIQUE,         -- Aquí va tu formato personalizado
+    fecha DATE NOT NULL,
+    monto REAL NOT NULL,
+    nombre TEXT NOT NULL,
+    tipo_pago TEXT NOT NULL,
+    clave_ref TEXT NOT NULL,
+    denominacion TEXT,
+    observaciones TEXT
 );
 
 create table if not exists detallePolizaEgreso (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    poliza_id intager not null,ytf
-    clave_partida text not null,
+    "id_poliza" intager not null,
+    "CLAVE CUCoP" text not null,
     cargo real not null,
-    FOREIGN KEY (poliza_id) REFERENCES polizasEgresos(id),
-    FOREIGN KEY (clave_partida) REFERENCES partidasPresupuestarias(clave_partida)
-
-
+    FOREIGN KEY (id_poliza) REFERENCES polizasEgresos(id_poliza),
+    FOREIGN KEY ("CLAVE CUCoP") REFERENCES partidasEgresos("CLAVE CUCoP")
 );
-
-
--- Renombre la tabla 
-ALTER TABLE partidasEgresos_old RENAME TO partidasEgresos_old;
--- ver el sql usado para crear la tabla 
-SELECT sql FROM sqlite_master WHERE type='table' AND name='partidasEgresos';
--- Ver las tablas existentes
-.tables
--- 
-select * from partidasEgresos;
 
 CREATE TABLE partidasEgresos (
     "CABM ACTUALIZADO" TEXT PRIMARY KEY,
@@ -39,6 +28,19 @@ CREATE TABLE partidasEgresos (
     "CABM ANTERIOR" TEXT,
     "UNIDAD  DE MEDIDA (sugerida)" TEXT
 );
+
+drop table detallePolizaEgreso;
+drop table polizasEgresos;
+
+-- Renombre la tabla 
+ALTER TABLE partidasEgresos_old RENAME TO partidasEgresos_old;
+-- ver el sql usado para crear la tabla 
+SELECT sql FROM sqlite_master WHERE type='table' AND name='polizasEgresos';
+-- Ver las tablas existentes
+.tables
+-- 
+select * from partidasEgresos;
+
 
 
 INSERT INTO partidasEgresos (
@@ -114,3 +116,12 @@ HAVING
 
 
 
+SELECT "CLAVE CUCoP", "DESCRIPCIÓN", "PARTIDA ESPECÍFICA"
+FROM partidasEgresos
+WHERE "DESCRIPCIÓN" LIKE 'apo%'
+UNION ALL
+SELECT "CLAVE CUCoP", "DESCRIPCIÓN", "PARTIDA ESPECÍFICA"
+FROM partidasEgresos
+WHERE "DESCRIPCIÓN" LIKE '%apo%' AND "DESCRIPCIÓN" NOT LIKE 'apo%'
+
+SELECT "PARTIDA ESPECÍFICA" FROM partidasEgresos WHERE "CLAVE CUCoP" = 21200038
