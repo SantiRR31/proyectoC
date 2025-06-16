@@ -4,12 +4,13 @@ from styles.styles import *
 from PIL import Image
 from customtkinter import CTkImage
 import datetime
-from functions.funcions import gen_inf_consolidado, confirmar_y_generar
+from functions.funcions import gen_inf_consolidado, confirmar_y_generar, confirmar_aux
 import requests
 from io import BytesIO
 import threading
 from dotenv import load_dotenv
 import os
+from utils.rutas import ruta_absoluta
 
 
 
@@ -58,6 +59,10 @@ def mostrar_inicio(contenedor):
     # Widget de fecha y hora actual
     datetime_frame = ctk.CTkFrame(top_info_frame, fg_color=("#f3f4f6", "#1f2937"), corner_radius=10)
     datetime_frame.pack(side="left", padx=10)
+    
+    # Contenedor horizontal para fecha + botón
+    fecha_container = ctk.CTkFrame(datetime_frame, fg_color="transparent")
+    fecha_container.pack(pady=(8, 0), padx=8, fill="x")
 
     fecha_actual = datetime.datetime.now().strftime("%d/%m/%Y")
     hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
@@ -69,14 +74,67 @@ def mostrar_inicio(contenedor):
         text_color=("#111827", "#f9fafb")
     )
     fecha_label.pack(pady=(10, 0), padx=15)
+    
+    calendar_path = ruta_absoluta(os.path.join("assets", "calendar1.png"))
+    try:
+        # Verificar si la imagen existe
+        if os.path.exists(calendar_path):
+            calendar_icon = ctk.CTkImage(
+                light_image=Image.open(calendar_path),
+                dark_image=Image.open(calendar_path),
+                size=(28, 28)  # Tamaño ligeramente menor para mejor proporción
+            )
+        else:
+            raise FileNotFoundError
+    except Exception as e:
+        print(f"[Error] No se pudo cargar el icono: {str(e)}")
+        # Fallback visual elegante
+        calendar_icon = None
+        calendar_text = "📅"
+    else:
+        calendar_text = ""  # Mostrar solo imagen
+    # 2. Botón de calendario (icono)
+    calendario_btn = ctk.CTkButton(
+        fecha_container,
+        text=calendar_text,  # Solo muestra el emoji si no hay imagen
+        image=calendar_icon, # Alternativa: usar CTkImage con icono personalizado
+        width=30,
+        height=30,
+        corner_radius=8,
+        fg_color="transparent",
+        hover_color=("#d1d5db", "#4b5563"),
+        command=lambda: mostrar_calendario(fecha_label)  # Función al hacer clic
+    )
+    calendario_btn.pack(side="right")
 
+
+    # 3. Label de hora (separado)
+    hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
     hora_label = ctk.CTkLabel(
         datetime_frame,
         text=hora_actual,
         font=("Arial", 16),
         text_color=("#4b5563", "#d1d5db")
     )
-    hora_label.pack(pady=(0, 10), padx=15)
+    hora_label.pack(pady=(0, 8), padx=8)
+    
+    # --- Función para mostrar calendario ---
+    def mostrar_calendario(label_fecha):
+        popup = ctk.CTkToplevel()
+        popup.title("Calendario")
+        popup.geometry("300x300")
+        popup.grab_set()  # Ventana modal
+    
+        # Calendario (requiere tkcalendar: pip install tkcalendar)
+        from tkcalendar import Calendar
+        cal = Calendar(
+            popup, 
+            selectmode="day",
+            date_pattern="dd/mm/yyyy",
+            background="#f3f4f6" if ctk.get_appearance_mode() == "Light" else "#1f2937",
+            foreground="black" if ctk.get_appearance_mode() == "Light" else "white"
+        )
+        cal.pack(pady=20, fill="both", expand=True)
 
     # Actualizar la hora cada segundo
     def actualizar_hora():
@@ -222,12 +280,13 @@ def mostrar_inicio(contenedor):
     tarjetas_frame.pack(fill="x", pady=20)
 
     # Tarjetas con efecto hover y sombra
-    for i, (nombre, icono, color, texto_boton) in enumerate([
+    for i, (nombre, icono_rel, color, texto_boton) in enumerate([
         ("Ingresos", "assets/coin.png", ("#10b981", "#059669"), "Registrar"),
         ("Egresos", "assets/wallet.png", ("#ef4444", "#dc2626"), "Registrar"),
         ("Reportes", "assets/iconuse.png", ("#3b82f6", "#2563eb"), "Ver"),
         ("Informes", "assets/web.png", ("#8b5cf6", "#7c3aed"), "Ver")
     ]):
+        icono = ruta_absoluta(icono_rel)
         tarjeta = crear_tarjeta_moderna(tarjetas_frame, nombre, icono, color, boton_texto=texto_boton)
         tarjeta.grid(row=0, column=i, padx=15, pady=10, sticky="nsew")
         tarjetas_frame.grid_columnconfigure(i, weight=1)
@@ -241,12 +300,22 @@ def mostrar_inicio(contenedor):
     nueva_tarjeta = crear_tarjeta_moderna(
         center_frame,
         "Informe Consolidado de Ingresos",
-        "assets/excel.png",
+        ruta_absoluta("assets/excel.png"),
         ("#8b5cf6", "#7c3aed"),
         command=confirmar_y_generar,
         boton_texto="Generar"
     )
     nueva_tarjeta.pack(anchor="center")  # Centrado horizontal
+    
+    nueva_tarjeta2 = crear_tarjeta_moderna(
+        center_frame,
+        "Auxiliar Bancario",
+        ruta_absoluta("assets/coin.png"),  # Necesitarás crear este ícono
+        ("#f59e0b", "#d97706"),  # Color naranja/dorado
+        command=confirmar_aux,  # Función específica para esta tarjeta
+        boton_texto="Generar"
+    )
+    nueva_tarjeta2.pack(side="left", anchor="center", padx=10)
 
     # Área informativa con pestañas
     tabview = ctk.CTkTabview(

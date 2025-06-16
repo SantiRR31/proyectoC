@@ -134,19 +134,19 @@ def mostrar_formulario_ingresos(frame_padre):
                 importe_float = float(importe_valor)
                 if abs(importe_float - suma_total) < 0.01:
                     validacion_totales.configure(text="✅", text_color="#008d62")
-                    btn_guardar.configure(state="normal")
+                    #btn_guardar.configure(state="normal")
                     btn_descargar.configure(state="normal")
                 else:
                     validacion_totales.configure(text="❌", text_color="#d10d2f")
-                    btn_guardar.configure(state="disabled")
+                    #btn_guardar.configure(state="disabled")
                     btn_descargar.configure(state="disabled")
             else:
                 validacion_totales.configure(text="❌", text_color="gray")
-                btn_guardar.configure(state="disabled")
+                #btn_guardar.configure(state="disabled")
                 btn_descargar.configure(state="disabled")           
         except ValueError:
             pass  # Ignorar errores si algún campo tiene un valor no numérico
-            btn_guardar.configure(state="disabled")
+            #btn_guardar.configure(state="disabled")
             btn_descargar.configure(state="disabled")
             
     def eliminar_fila(fila, tupla):
@@ -414,9 +414,11 @@ def mostrar_formulario_ingresos(frame_padre):
 
     # si queremos fucionar los votones de guardar y de descargar
     def guardar_descargar():
-        guardar_datos_en_db()
-        guardar_Ingresos()
-    
+        try:
+            guardar_datos_en_db()
+            guardar_Ingresos()
+        except Exception as e:
+            messagebox.showerror("Error", f"Ocurrio un error: {e}")
 
     btn_agregar_fila = ctk.CTkButton(seccion_filas, text="➕ Agregar", command=agregar_fila, corner_radius=32,
                                      fg_color="#008d62", hover_color="#2ca880")
@@ -465,28 +467,28 @@ def mostrar_formulario_ingresos(frame_padre):
     )
     btn_ver_descargas.pack(side="right", padx=10)
     
-    imgBtnGuardar = Image.open(ruta_absoluta("assets/check.png"))
-    btn_guardar = ctk.CTkButton(
-        botones_frame, 
-        text="Guardar", 
-        width=120, 
-        fg_color="#004b8f", 
-        hover_color="#0065a5", 
-        corner_radius=32,
-        image=CTkImage(imgBtnGuardar, size=(20, 20)),  # nota: es "image", no "Image"
-        command=guardar_datos_en_db
-    )
-    btn_guardar.pack(side="right", padx=10)
+    #imgBtnGuardar = Image.open(ruta_absoluta("assets/check.png"))
+    #btn_guardar = ctk.CTkButton(
+    #    botones_frame, 
+    #    text="Guardar", 
+    #    width=120, 
+    #    fg_color="#004b8f", 
+    #    hover_color="#0065a5", 
+    #    corner_radius=32,
+    #    image=CTkImage(imgBtnGuardar, size=(20, 20)),  # nota: es "image", no "Image"
+    #    command=guardar_datos_en_db
+    #)
+    #btn_guardar.pack(side="right", padx=10)
 
     imgBtnDescargar = Image.open(ruta_absoluta("assets/downlo.png"))
     btn_descargar = ctk.CTkButton(
         botones_frame,
-        text="Descargar",
+        text="Guardar y Descargar",
         width=120,
         fg_color="#008d62",
         hover_color="#2ca880",
         corner_radius=32,
         image=CTkImage(imgBtnDescargar, size=(20, 20)), # nota: es "image", no "Image",
-        command=guardar_Ingresos
+        command=guardar_descargar
     )
     btn_descargar.pack(side="right", padx=10)
