@@ -9,7 +9,19 @@ class ConceptoEgreso:
         return f"<ConceptoEgreso clave={self.clave_cucop} cargo={self.cargo}>"
 
 class PolizaEgreso:
-    def __init__(self, poliza_id, fecha, monto, montoletr,nombre, tipo_pago, clave_ref, denominacion, observaciones):
+    def __init__(
+        self,
+        poliza_id,
+        fecha,
+        monto,
+        montoletr,
+        nombre,
+        tipo_pago,
+        clave_ref=None,      # Ahora opcional
+        denominacion=None,
+        observaciones=None,
+        no_cheque=None       # Nuevo campo opcional
+    ):
         self.poliza_id = poliza_id 
         self.fecha = fecha
         self.monto = monto
@@ -19,6 +31,7 @@ class PolizaEgreso:
         self.clave_ref = clave_ref
         self.denominacion = denominacion
         self.observaciones = observaciones
+        self.no_cheque = no_cheque
         self.conceptos = []  # Lista de ConceptoEgreso
 
     def agregar_concepto(self, concepto: ConceptoEgreso):

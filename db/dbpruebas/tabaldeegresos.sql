@@ -1,13 +1,14 @@
 CREATE TABLE polizasEgresos (
     id_poliza INTEGER PRIMARY KEY AUTOINCREMENT,
-    no_poliza TEXT UNIQUE,         -- Aquí va tu formato personalizado
+    no_poliza TEXT UNIQUE,         
     fecha DATE NOT NULL,
     monto REAL NOT NULL,
     nombre TEXT NOT NULL,
     tipo_pago TEXT NOT NULL,
-    clave_ref TEXT NOT NULL,
+    clave_ref TEXT ,
     denominacion TEXT,
-    observaciones TEXT
+    observaciones TEXT,
+    no_cheque TEXT
 );
 
 create table if not exists detallePolizaEgreso (
@@ -33,7 +34,7 @@ drop table detallePolizaEgreso;
 drop table polizasEgresos;
 
 -- Renombre la tabla 
-ALTER TABLE partidasEgresos_old RENAME TO partidasEgresos_old;
+ALTER TABLE polizasEgresos RENAME TO polizasEgresos_old;
 -- ver el sql usado para crear la tabla 
 SELECT sql FROM sqlite_master WHERE type='table' AND name='polizasEgresos';
 -- Ver las tablas existentes
@@ -102,8 +103,6 @@ drop table partidasEgresos
 
 select * from partidasEgresos
 
-
-
 SELECT 
     "DESCRIPCIÓN",
     COUNT(*) AS cantidad
@@ -114,8 +113,6 @@ GROUP BY
 HAVING 
     COUNT(*) > 1;
 
-
-
 SELECT "CLAVE CUCoP", "DESCRIPCIÓN", "PARTIDA ESPECÍFICA"
 FROM partidasEgresos
 WHERE "DESCRIPCIÓN" LIKE 'apo%'
@@ -125,3 +122,12 @@ FROM partidasEgresos
 WHERE "DESCRIPCIÓN" LIKE '%apo%' AND "DESCRIPCIÓN" NOT LIKE 'apo%'
 
 SELECT "PARTIDA ESPECÍFICA" FROM partidasEgresos WHERE "CLAVE CUCoP" = 21200038
+
+INSERT INTO polizasEgresos (
+    id_poliza, no_poliza, fecha, monto, nombre, tipo_pago, clave_ref, denominacion, observaciones
+)
+SELECT
+    id_poliza, no_poliza, fecha, monto, nombre, tipo_pago, clave_ref, denominacion, observaciones
+FROM polizasEgresos_old;
+
+SELECT * FROM polizasEgresos;
