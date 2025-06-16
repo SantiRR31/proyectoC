@@ -1,1 +1,1 @@
-SELECT DISTINCT fecha FROM polizasIngresos;
+SELECT fecha FROM polizasIngresos ORDER BY fecha;
