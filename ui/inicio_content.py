@@ -131,6 +131,8 @@ def mostrar_inicio(contenedor):
             popup, 
             selectmode="day",
             date_pattern="dd/mm/yyyy",
+            locale="es",
+            font=("Helvetica", 16),
             background="#f3f4f6" if ctk.get_appearance_mode() == "Light" else "#1f2937",
             foreground="black" if ctk.get_appearance_mode() == "Light" else "white"
         )
@@ -300,7 +302,7 @@ def mostrar_inicio(contenedor):
     nueva_tarjeta = crear_tarjeta_moderna(
         center_frame,
         "Informe Consolidado de Ingresos",
-        ruta_absoluta("assets/excel.png"),
+        ruta_absoluta("assets/excel2.png"),
         ("#8b5cf6", "#7c3aed"),
         command=confirmar_y_generar,
         boton_texto="Generar"
@@ -310,7 +312,7 @@ def mostrar_inicio(contenedor):
     nueva_tarjeta2 = crear_tarjeta_moderna(
         center_frame,
         "Auxiliar Bancario",
-        ruta_absoluta("assets/coin.png"),  # Necesitarás crear este ícono
+        ruta_absoluta("assets/excel2.png"),  # Necesitarás crear este ícono
         ("#f59e0b", "#d97706"),  # Color naranja/dorado
         command=confirmar_aux,  # Función específica para esta tarjeta
         boton_texto="Generar"

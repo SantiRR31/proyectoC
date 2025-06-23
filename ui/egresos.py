@@ -151,6 +151,7 @@ def mostrar_formulario_egresos(frame_padre):
     btn_buscar = ctk.CTkButton(
         seccion_poliza, 
         text="",
+        image = CTkImage(Image.open(ruta_absoluta("assets/buscar.png")), size=(20, 18)),
         image=CTkImage(Image.open(ruta_absoluta("assets/icons/buscar.png")), size=(20, 18)), 
         width=40,
         command=lambda: consultar_poliza(widgets, no_poliza=no_poliza.get() if no_poliza.get() else None)
