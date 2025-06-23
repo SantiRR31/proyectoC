@@ -32,7 +32,9 @@ def buscar_denominacion_db(clave):
         conn.close()
         return resultado[0] if resultado else "No encontrada"
     
-def confirmar_y_generar():
+    
+    
+def confirmar_y_generar2():
     respuesta = messagebox.askyesno("Generar Informe Consolidado de Ingresos", "¿Está seguro de generar el reporte?")
     if respuesta:
         gen_inf_consolidado()

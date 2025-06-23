@@ -107,6 +107,7 @@ def mostrar_ajustes(frame_contenido):
     # Separador visual
     ctk.CTkFrame(contenedor_principal, height=2, fg_color=("#191919","#faf7f6")).pack(fill="x", padx=30, pady=10)
 
+
     # Sección de carpeta de destino
     seccion_carpeta = ctk.CTkFrame(contenedor_principal, fg_color= ("#faf7f6", "#191919") , corner_radius=12)
     seccion_carpeta.pack(fill="x", padx=30, pady=(0, 15))

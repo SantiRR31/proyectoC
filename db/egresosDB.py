@@ -118,12 +118,15 @@ def inrtar_poliza_egreso(poliza):
             INSERT INTO detallePolizaEgreso (
                 id_poliza, 
                 "CLAVE CUCoP", 
-                cargo
-            ) VALUES (?, ?, ?)
+                cargo,
+                "PARTIDA ESPECÍFICA"
+            ) VALUES (?, ?, ?, ?)
             ''',
             (id_poliza, 
              concepto.clave_cucop, 
-             concepto.cargo)
+             concepto.cargo,
+             concepto.partida_especifica
+             )
         )
 
     conn.commit()
@@ -221,3 +224,49 @@ def consultar_poliza_por_no(no_poliza):
         poliza.agregar_concepto(concepto)
     conn.close()
     return poliza
+
+
+
+
+def obtener_polizas_egresos_mes(mes_actual):
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT fecha, no_poliza, monto, id_poliza
+        FROM polizasEgresos
+        WHERE strftime('%Y-%m', 
+            substr(fecha, 7) || '-' || substr(fecha, 4, 2) || '-' || substr(fecha, 1, 2)
+        ) = ?
+    """, (mes_actual,))
+    resultados = cursor.fetchall()
+    conn.close()
+    return resultados
+
+def obtener_partidas_mes(mes_actual):
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT DISTINCT d."PARTIDA ESPECÍFICA"
+        FROM detallePolizaEgreso d
+        JOIN polizasEgresos p ON d.id_poliza = p.id_poliza
+        WHERE strftime('%Y-%m', 
+            substr(p.fecha, 7) || '-' || substr(p.fecha, 4, 2) || '-' || substr(p.fecha, 1, 2)
+        ) = ?
+        ORDER BY d."PARTIDA ESPECÍFICA"
+    """, (mes_actual,))
+    resultados = cursor.fetchall()
+    conn.close()
+    return resultados
+
+def obtener_conceptos_por_partida_especifica (id_poliza):
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT "PARTIDA ESPECÍFICA", SUM(cargo)
+        FROM detallePolizaEgreso
+        WHERE id_poliza = ?
+        GROUP BY "PARTIDA ESPECÍFICA"
+    """, (id_poliza,))
+    resultados = cursor.fetchall()
+    conn.close()
+    return {row[0]: row[1] for row in resultados}

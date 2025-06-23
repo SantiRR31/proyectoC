@@ -17,10 +17,10 @@ class PolizaEgreso:
         montoletr,
         nombre,
         tipo_pago,
-        clave_ref=None,      # Ahora opcional
+        clave_ref=None,      # opcional
         denominacion=None,
         observaciones=None,
-        no_cheque=None       # Nuevo campo opcional
+        no_cheque=None       # opcional
     ):
         self.poliza_id = poliza_id 
         self.fecha = fecha

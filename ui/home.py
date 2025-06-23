@@ -1,5 +1,6 @@
 import os
 import tkinter as tk
+from tkinter import messagebox
 import customtkinter as ctk
 from styles.styles import *
 from ui.inicio_content import mostrar_inicio
@@ -12,15 +13,16 @@ from customtkinter import CTkImage, CTkFont
 import json
 from utils.config_utils import actualizar_config
 from utils.rutas import ruta_absoluta
-CONFIG_PATH = "config.json"
+CONFIG_PATH = ruta_absoluta("config.json")
+from utils.config_utils import cargar_config
 
 def guardar_estado_ventana(root):
     actualizar_config("geometry", root.geometry())
     actualizar_config("state", root.state())
     actualizar_config("appearance_mode", ctk.get_appearance_mode())
     actualizar_config("appearance_mode", ctk.get_appearance_mode())
-    actualizar_config("color_theme", "blue")  # O el tema que elija el usuario
-
+    actualizar_config("color_theme", "blue")  
+    
 def cargar_estado_ventana(root):
     if os.path.exists(CONFIG_PATH):
         try:
@@ -33,45 +35,19 @@ def cargar_estado_ventana(root):
         except Exception:
             pass
         
-def cargar_config():
-    # Valores por defecto
-    defaults = {
-        "carpeta_destino": "~/Documentos/Cecati122/Polizas",
-        "clave_cecati": "22DBT0005P",
-        "banco_caja": "BANORTE",
-        "geometry": "1280x720+100+100",
-        "state": "normal",
-        "appearance_mode": "dark",
-        "color_theme": "blue"
-    }
-    config = {}
-    if os.path.exists(CONFIG_PATH):
-        with open(CONFIG_PATH, "r") as f:
-            try:
-                config = json.load(f)
-            except Exception:
-                config = {}
-    # Asegura que todas las claves existan
-    for key, value in defaults.items():
-        if key not in config:
-            config[key] = value
-    return config
-
-
 config = cargar_config()
 ctk.set_appearance_mode(config.get("appearance_mode", "dark"))
-ctk.set_default_color_theme(config.get("color_theme", "blue"))
-        
+ctk.set_default_color_theme(config.get("color_theme", "blue"))        
         
 def lanzar_ventana_principal():
-    # Configuración inicial
-    #ctk.set_appearance_mode("dark")
-    #ctk.set_default_color_theme("blue")
-
     root = ctk.CTk()
+    def on_closing():
+        if messagebox.askokcancel("Salir", "¿Seguro que deseas cerrar el programa?"):
+            root.destroy()
+
+    
     root.iconbitmap(ruta_absoluta("assets/cecati-122.ico"))
     root.title("Sistema de Gestión CECATI 122")
-    
     
     # ---------------- HEADER ----------------
     header = ctk.CTkFrame(
@@ -79,11 +55,9 @@ def lanzar_ventana_principal():
         height=70, 
         fg_color= COLOR_CONT_PRIMARIO, 
     )
-    header.pack(fill="x", pady=(0, 2))
+    header.pack(fill="x", pady=(0, 2))   
     
-    
-    
-    # Espacio flexible y usuario
+    # Espaci y usuario
     header_space = ctk.CTkLabel(header, text="")
     header_space.pack(side="left", expand=True, fill="x")
     
@@ -354,4 +328,6 @@ def lanzar_ventana_principal():
     
     root.after(0, lambda: cargar_estado_ventana(root))
     root.protocol("WM_DELETE_WINDOW", lambda: (guardar_estado_ventana(root), root.destroy()))
+    root.protocol("WM_DELETE_WINDOW", on_closing)
+
     root.mainloop()
