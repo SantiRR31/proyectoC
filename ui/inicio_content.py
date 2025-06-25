@@ -279,6 +279,8 @@ def mostrar_inicio(contenedor):
             popup, 
             selectmode="day",
             date_pattern="dd/mm/yyyy",
+            locale="es",
+            font=("Helvetica", 16),
             background="#f3f4f6" if ctk.get_appearance_mode() == "Light" else "#1f2937",
             foreground="black" if ctk.get_appearance_mode() == "Light" else "white"
         )

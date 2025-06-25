@@ -14,6 +14,7 @@ from datetime import datetime
 import psutil, time
 from utils.config_utils import cargar_config
 from utils.rutas import ruta_absoluta
+import shutil
 
 CONFIG_PATH = "config.json"
 
@@ -57,7 +58,7 @@ def mostrar_formulario_ingresos(frame_padre):
     # Fila 1 - Fecha y Número de Póliza
     lbl_fecha = ctk.CTkLabel(entrada_frame, text="Fecha del voucher:", font=("Arial", 14))
     lbl_fecha.grid(row=0, column=0, padx=(10,5), pady=5, sticky="w")
-    fecha_policia = DateEntry(entrada_frame, placeholder_text="📅 Fecha de ingreso", font=("Helvetica", 14))
+    fecha_policia = DateEntry(entrada_frame, placeholder_text="📅 Fecha de ingreso", font=("Helvetica", 14), locale="es")
     fecha_policia.grid(row=0, column=1, padx=(5,10), pady=5, sticky="ew")
     #fecha_policia.insert(0, obtener_fecha_actual())
     #fecha_policia.configure(state="readonly")
@@ -78,13 +79,13 @@ def mostrar_formulario_ingresos(frame_padre):
 
     lbl_cuanto_pago = ctk.CTkLabel(entrada_frame, text="Cargo/Importe:", font=("Arial", 14))
     lbl_cuanto_pago.grid(row=1, column=2, padx=(10,5), pady=5, sticky="w")
-    cuanto_pago = ctk.CTkEntry(entrada_frame, placeholder_text="💰 Importe")
+    cuanto_pago = ctk.CTkEntry(entrada_frame, placeholder_text="Importe")
     cuanto_pago.grid(row=1, column=3, padx=(5,10), pady=5, sticky="ew")
 
     # Fila 3 - Notas adicionales de la póliza
     lbl_nota = ctk.CTkLabel(entrada_frame, text="Nota:", font=("Arial", 14))
     lbl_nota.grid(row=2, column=0, padx=(10,5), pady=5, sticky="w")
-    nota = ctk.CTkEntry(entrada_frame, placeholder_text="📝 Notas adicionales")
+    nota = ctk.CTkEntry(entrada_frame, placeholder_text="Notas adicionales")
     nota.grid(row=2, column=1, columnspan=3, padx=(5,10), pady=5, sticky="ew")
     nota.bind("<KeyRelease>", lambda event: convertir_a_mayusculas(nota, event))
     
@@ -103,12 +104,27 @@ def mostrar_formulario_ingresos(frame_padre):
     entradas = []
 
     def buscar_denominacion_db(clave):
-        conn = sqlite3.connect('prueba.db')
-        cursor = conn.cursor()
-        cursor.execute("SELECT denominacion FROM partidasIngresos WHERE partida = ?", (clave,))
-        resultado = cursor.fetchone()
-        conn.close()
-        return resultado[0] if resultado else "No encontrada"
+        origen_db = ruta_absoluta("prueba.db")
+        destino_db = os.path.join(os.getcwd(), "prueba.db")
+        
+        # Si no existe ya en destino, copiarla
+        if not os.path.exists(destino_db):
+            try:
+                shutil.copy(origen_db, destino_db)
+            except Exception as e:
+                print(f"Error al copiar la base de datos: {e}")
+                return "Error al acceder DB"
+        
+        try:
+            conn = sqlite3.connect('prueba.db')
+            cursor = conn.cursor()
+            cursor.execute("SELECT denominacion FROM partidasIngresos WHERE partida = ?", (clave,))
+            resultado = cursor.fetchone()
+            conn.close()
+            return resultado[0] if resultado else "No encontrada"
+        except Exception as e:
+            print(f"Error al consultar la base de datos: {e}")
+            return "Error en consulta"
 
     def llenar_denominacion(event, entrada_clave, entrada_resultado):
         clave = entrada_clave.get()
@@ -157,7 +173,7 @@ def mostrar_formulario_ingresos(frame_padre):
         fila_frame = ctk.CTkFrame(frame_filas, fg_color="transparent", corner_radius=15)
         fila_frame.pack(fill="x", pady=5)
 
-        entrada_clave = ctk.CTkEntry(fila_frame, placeholder_text="🔑 Clave")
+        entrada_clave = ctk.CTkEntry(fila_frame, placeholder_text="Clave")
         entrada_clave.grid(row=0, column=0, padx=10, sticky="ew")
 
         entrada_resultado = ctk.CTkEntry(fila_frame, placeholder_text="Denominación", state="disabled")

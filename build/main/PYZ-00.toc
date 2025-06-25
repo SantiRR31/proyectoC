@@ -1197,6 +1197,11 @@
   ('mimetypes',
    'c:\\users\\santi\\appdata\\local\\programs\\python\\python39\\lib\\mimetypes.py',
    'PYMODULE'),
+  ('models', '-', 'PYMODULE'),
+  ('models.egresomodelos',
+   'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
+   'copia\\models\\egresomodelos.py',
+   'PYMODULE'),
   ('multiprocessing',
    'c:\\users\\santi\\appdata\\local\\programs\\python\\python39\\lib\\multiprocessing\\__init__.py',
    'PYMODULE'),

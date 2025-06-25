@@ -10,6 +10,7 @@ from datetime import datetime
 from tkinter import messagebox
 import threading
 from tkinter import ttk
+from utils.rutas import ruta_absoluta
 
 
 def obtener_fecha_actual():
@@ -62,7 +63,7 @@ def gen_inf_consolidado():
     
     carpeta_informes = r"C:\Cecati122\InformesDeIngresos"
     ruta_archivo_origen = os.path.join(carpeta_informes,nom_archivo)
-    ruta_archivo_destino = os.path.join("assets", "plantillaConsolidadoIngresos.xls")
+    ruta_archivo_destino = ruta_absoluta(os.path.join("assets", "plantillaConsolidadoIngresos.xls"))
     
     carpeta_destino = r"C:\Cecati122\Consolidado Ingresos"
     os.makedirs(carpeta_destino, exist_ok=True)
@@ -161,10 +162,12 @@ def gen_inf_consolidado():
 def confirmar_aux():
     import tkinter as tk
     parent = tk._default_root
+    icon_path = ruta_absoluta("assets/cecati-122.ico")
     ventana_parametros = ctk.CTkToplevel(parent)
     ventana_parametros.title("Seleccionar parámetros")
     ventana_parametros.geometry("350x250")
     ventana_parametros.grab_set()
+    ventana_parametros.iconbitmap(icon_path)
     
     # Centramos la ventana
     ventana_parametros.update_idletasks()
@@ -182,7 +185,7 @@ def confirmar_aux():
                  font=ctk.CTkFont(size=14, weight="bold")).pack(pady=10)
     
     # Año
-    anios = [str(a) for a in range(2020, datetime.now().year + 2)]
+    anios = [str(a) for a in range(2024, datetime.now().year + 2)]
     combo_anio = ctk.CTkComboBox(ventana_parametros, values=anios)
     combo_anio.set(str(datetime.now().year))
     combo_anio.pack(pady=10)
@@ -220,12 +223,11 @@ def confirmar_aux():
                     ventana_parametros.destroy()
 
                 ventana_parametros.after(0, finalizar)
-
             except Exception as e:
-                def mostrar_error():
+                def mostrar_error(err=e):
                     progress.stop()
                     progress.pack_forget()
-                    messagebox.showerror("Error", f"Ocurrió un error: {e}")
+                    messagebox.showerror("Error", f"Ocurrió un error: {err}")
                 ventana_parametros.after(0, mostrar_error)
 
         threading.Thread(target=generar_archivo).start()
@@ -238,7 +240,7 @@ def confirmar_aux():
     ruta_db = "prueba.db"
 # Funcion para generar el documento "auxiliar bancario"    
 def gen_aux_bancario(ruta_db, anio, mes):
-    ruta_plantilla = "assets/plantillaAuxBancario.xls"
+    ruta_plantilla = ruta_absoluta("assets/plantillaAuxBancario.xls")
     carpeta_destino = r"C:\Cecati122\Auxiliar Bancario"
     
     conn = sqlite3.connect(ruta_db)

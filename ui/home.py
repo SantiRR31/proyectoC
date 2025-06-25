@@ -8,6 +8,7 @@ from ui.egresos import mostrar_formulario_egresos
 from ui.formIngresosDiarios import mostrar_formulario_ingresos
 from ui.infRealIngresos import mostrar_informe_real_ingresos
 from ui.ajustes import mostrar_ajustes
+from ui.detalleIngresos import mostrar_detalles_ingresos, estilo_tabla
 from PIL import Image, ImageTk
 from customtkinter import CTkImage, CTkFont
 import json
@@ -180,6 +181,10 @@ def lanzar_ventana_principal():
     def abrir_informe_real_ingresos(contenedor):
         limpiar_contenido(contenedor)
         mostrar_informe_real_ingresos(contenedor)
+        
+    def abrir_det_ingresos(contenedor):
+        limpiar_contenido(contenedor)
+        mostrar_detalles_ingresos(contenedor)
 
     def abrir_ajustes(contenedor):
         limpiar_contenido(contenedor)
@@ -269,6 +274,28 @@ def lanzar_ventana_principal():
         ruta_absoluta("assets/notepad.png"),  
         lambda: abrir_informe_real_ingresos(frame_contenido)
     )
+    
+    separator = ctk.CTkFrame(
+        sidebar, 
+        height=1, 
+        fg_color=COLOR_TEXTO_APARTADO
+    )
+    separator.pack(fill="x", pady=2, padx=15)
+    
+    # Sección Visualizacion
+    ctk.CTkLabel(
+        sidebar, 
+        text="DETALLES DE INGRESOS", 
+        font=CTkFont("Arial", 11, "bold"), 
+        text_color= COLOR_TEXTO_APARTADO_SECUNDARIO
+    ).pack(pady=(15, 5), anchor="w", padx=20)
+    
+    btn_detalles_ing = create_sidebar_btn(
+        sidebar, 
+        "Ver Ingresos", 
+        ruta_absoluta("assets/lookup.png"),  
+        lambda: abrir_det_ingresos(frame_contenido)
+    )
 
     # Espacio flexible antes de los botones inferiores
     spacer = ctk.CTkLabel(sidebar, text="")
@@ -295,6 +322,8 @@ def lanzar_ventana_principal():
             imagenes["tema"] = CTkImage(Image.open(ruta_absoluta("assets/moon 2.png")), size=(20, 20))
             btn_tema.configure(text="Modo Oscuro", image=imagenes["tema"])
             actualizar_config("appearance_mode", "dark")
+            
+        mostrar_detalles_ingresos(frame_contenido)
 
     imagenes = {
     "tema": CTkImage(Image.open(ruta_absoluta("assets/moon 2.png")), size=(20, 20))
