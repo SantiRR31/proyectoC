@@ -34,9 +34,9 @@ drop table detallePolizaEgreso;
 drop table polizasEgresos;
 
 -- Renombre la tabla 
-ALTER TABLE polizasEgresos RENAME TO polizasEgresos_old;
+ALTER TABLE detallePolizaEgreso RENAME TO detallePolizaEgreso_old;
 -- ver el sql usado para crear la tabla 
-SELECT sql FROM sqlite_master WHERE type='table' AND name='polizasEgresos';
+SELECT sql FROM sqlite_master WHERE type='table' AND name='detallePolizaEgreso';
 -- Ver las tablas existentes
 .tables
 -- 
@@ -71,7 +71,7 @@ GROUP BY "CABM ACTUALIZADO"
 HAVING cantidad > 1;
 
 SELECT *
-FROM partidasEgresos_old
+FROM partidasEgresos
 WHERE "CABM ACTUALIZADO" = 'i';
 
 DELETE FROM partidasEgresos_old
@@ -131,3 +131,67 @@ SELECT
 FROM polizasEgresos_old;
 
 SELECT * FROM polizasEgresos;
+
+
+drop table partidasEgresos_old;
+
+drop table polizasEgresos_old;
+
+
+CREATE TABLE detallePolizaEgreso (
+    id_poliza INTEGER NOT NULL,
+    "CLAVE CUCoP" INTEGER NOT NULL,
+    cargo REAL NOT NULL,
+    "PARTIDA ESPECÍFICA" INTEGER NOT NULL,
+    FOREIGN KEY (id_poliza) REFERENCES polizasEgresos_old(id_poliza),
+    FOREIGN KEY ("CLAVE CUCoP") REFERENCES partidasEgresos("CLAVE CUCoP")
+);
+
+INSERT INTO detallePolizaEgreso (id_poliza, "CLAVE CUCoP", cargo, "PARTIDA ESPECÍFICA")
+SELECT 
+    d.id_poliza,
+    d."CLAVE CUCoP",
+    d.cargo,
+    p."PARTIDA ESPECÍFICA"
+FROM 
+    detallePolizaEgreso_old d
+    JOIN partidasEgresos p ON d."CLAVE CUCoP" = p."CLAVE CUCoP";
+
+
+-- Consulta para obtener las pólizas de egresos del mes 
+
+SELECT fecha, no_poliza, monto, id_poliza
+FROM polizasEgresos
+WHERE strftime('%Y-%m', 
+    substr(fecha, 7) || '-' || substr(fecha, 4, 2) || '-' || substr(fecha, 1, 2)
+) = '2025-06';
+
+-- consulta para obtener partidas especificas unicas 
+
+SELECT DISTINCT d."PARTIDA ESPECÍFICA"
+FROM detallePolizaEgreso d
+JOIN polizasEgresos p ON d.id_poliza = p.id_poliza
+WHERE strftime('%Y-%m', 
+    substr(p.fecha, 7) || '-' || substr(p.fecha, 4, 2) || '-' || substr(p.fecha, 1, 2)
+) = '2025-06'
+ORDER BY d."PARTIDA ESPECÍFICA";
+
+
+SELECT "PARTIDA ESPECÍFICA", SUM(cargo)
+FROM detallePolizaEgreso
+WHERE id_poliza = 2
+GROUP BY "PARTIDA ESPECÍFICA";
+.tables
+
+SELECT id_poliza, "PARTIDA ESPECÍFICA", cargo FROM detallePolizaEgreso;
+
+select * from detallePolizaEgreso;
+SELECT 
+    p.id_poliza, 
+    p.no_poliza, 
+    p.fecha, 
+    p.monto, 
+    d."PARTIDA ESPECÍFICA", 
+    d.cargo
+WHERE 
+    p.id_poliza = 1

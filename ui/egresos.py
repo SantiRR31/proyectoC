@@ -12,6 +12,10 @@ from utils.egresos_utils import *
 from datetime import datetime
 from styles.styles import *
 from models.egresomodelos import *
+CONFIG_PATH = ruta_absoluta("config.json")
+import json
+    
+config = cargar_config()
 
 def mostrar_formulario_egresos(frame_padre):
     modo = "agregar" 
@@ -603,7 +607,7 @@ def mostrar_formulario_egresos(frame_padre):
         #border_width=2,     
         #border_color="#3b82f6"
         )
-    acciones_frame.pack(fill="x", padx=20)
+    acciones_frame.pack(fill="x", pady=(0, 15), padx=20)
     
     # Configura columnas para que crezcan
     acciones_frame.grid_columnconfigure(0, weight=0)  # Label Total
@@ -621,7 +625,7 @@ def mostrar_formulario_egresos(frame_padre):
         text="Total:",
         font=FUENTE_LABEL        
     )
-    total_ctk.grid(row=0, column=0, sticky="w", padx=(0, 10))
+    total_ctk.grid(row=0, column=0, sticky="w", padx=(0, 5))
 
 
     total = ctk.CTkEntry(
@@ -676,16 +680,16 @@ def mostrar_formulario_egresos(frame_padre):
     )
     btn_descargar.grid(row=0, column=5, padx=5, sticky="e")
 
-    btn_buscar = ctk.CTkButton(
+    abrir_carp = ctk.CTkButton(
         acciones_frame,
         text=" Abrir Carpeta",
         width=50,
         **ESTILO_BOTON,
         fg_color="#6b7280",
         hover_color="#4b5563",
-        command=lambda: abrir_carpeta("~/Documentos/Cecati122/PolizasDeIngresos")
+        command=lambda: abrir_carpeta(config["carpeta_destino"],"PolizasDeEgresos")
     )
-    btn_buscar.grid(row=0, column=6, padx=5, sticky="e")
+    abrir_carp.grid(row=0, column=6, padx=5, sticky="e")
 
     # Diccionario con los campos del formulario
     form = {
@@ -704,6 +708,7 @@ def mostrar_formulario_egresos(frame_padre):
     def mostrar_menu_descarga(form, entradas):
         menu = tk.Menu(None, tearoff=0)
         poliza = capturar_poliza(form, entradas)
+        
         menu.add_command(
             label="Exportar como PDF",
             command=lambda: ejecutar_con_loading(
@@ -723,7 +728,7 @@ def mostrar_formulario_egresos(frame_padre):
                 btn_descargar,
                 contenedor_principal,
                 lambda: limpiar_formulario(contenedor_principal, mostrar_formulario_egresos, frame_padre),
-                form, entradas
+                poliza
             )
         )
     # Posicionar el menú cerca del botón
@@ -733,7 +738,31 @@ def mostrar_formulario_egresos(frame_padre):
             menu.tk_popup(x, y)
         finally:
             menu.grab_release()
-
+            
+    def mostar_menu_op(): 
+        menu = tk.Menu(None, tearoff=0)
+        menu.add_command(
+            label = "Generar libro del mes",
+            command = lambda: confirmar_y_generar()
+        )
+        
+        try:
+            x= btn_guardar.winfo_rootx()
+            y = btn_guardar.winfo_rooty() + btn_guardar.winfo_height()
+            menu.tk_popup(x, y)
+        finally:
+            menu.grab_release()
+            
+    btn_iopciones = ctk.CTkButton(
+        acciones_frame,
+        text="⋮ Opciones",
+        width = 50,
+        fg_color= "transparent",
+        hover_color="#4b5563",
+        command=mostar_menu_op
+    )        
+    btn_iopciones.grid(row=0, column=3, padx=5, sticky="e")
+    
     # campos obligatorios
     campos_obligatorios = [
         nombre,
@@ -774,13 +803,14 @@ def mostrar_formulario_egresos(frame_padre):
             btn_descargar,
             btn_buscar
         ],
-        "conceptos": entradas
+        "conceptos": entradas,
+        "menu": btn_iopciones
     }
     # Por ejemplo:
     campos_obligatorios = [
         nombre,
         cargo_entry,
-        clave_rastreo,
+        #clave_rastreo,
         observaciones_entry
     ]
     # Establecer modo inicial (ej. agregar)

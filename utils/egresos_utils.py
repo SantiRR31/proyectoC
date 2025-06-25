@@ -1,9 +1,11 @@
 from datetime import time
 from datetime import datetime
 import os
+import sqlite3
+import traceback
 import xlwings as xw
 from tkinter import messagebox
-from utils.utils import obtener_fecha_actual
+from utils.utils import *
 from utils.rutas import ruta_absoluta
 import customtkinter as ctk
 import math
@@ -11,6 +13,8 @@ from db.egresosDB import *
 from models.egresomodelos import *
 from datetime import datetime
 import tkinter as tk
+
+config = cargar_config()
 
 #----------------- Funciones de captura y validación de pólizas de egresos -----------------
 
@@ -26,7 +30,9 @@ def capturar_poliza(form, entradas):
     observaciones = form["observaciones"].get()
     no_cheque = None
     if tipo_pago == "CHEQUE":
-        no_cheque = form["no_cheque"].get().strip() or None
+        no_cheque = form["no_cheque"].get().strip() or None  
+    elif tipo_pago == "TRANSFERENCIA":
+        clave_ref = form["clave_rastreo"].get().strip() or None
 
     poliza = PolizaEgreso(
         poliza_id,
@@ -112,20 +118,37 @@ def asignar_valores_en_hoja(hoja, poliza):
 
     for campo, celda in campos_a_celdas.items():
         valor = getattr(poliza, campo, "")
-        if campo == "clave_rastreo":
-            valor = f"CLAVE DE RASTREO {valor}"
+        if campo == "clave_ref":
+            if poliza.tipo_pago == "CHEQUE":
+                valor = f"NO. DE CHEQUE {poliza.no_cheque or ''}"
+            elif poliza.tipo_pago == "TRANSFERENCIA":
+                valor = f"CLAVE DE RASTREO {poliza.clave_ref or ''}"
+            else:
+                valor = ""
         hoja.range(celda).value = valor
+        
 
 def insertar_entradas_en_hoja(hoja, conceptos, fila_inicial=18):
-    for concepto in conceptos:
-        if concepto.partida_especifica and concepto.cargo:
-            hoja.range(f"B{fila_inicial}").value = concepto.partida_especifica
-            hoja.range(f"AV{fila_inicial}").value = float(concepto.cargo)
+    try:
+        partidas_sumadas = {}
+        for concepto in conceptos:
+            if concepto.partida_especifica and concepto.cargo:
+                clave = concepto.partida_especifica
+                if clave not in partidas_sumadas:
+                    partidas_sumadas[clave] = {"total": 0}
+                partidas_sumadas[clave]["total"] += float(concepto.cargo)
+            else:
+                messagebox.showerror("Error", "Faltan datos. Verifica que todos los campos estén completos.")
+                return False
+        for partida, datos in partidas_sumadas.items():
+            hoja.range(f"B{fila_inicial}").value = partida
+            hoja.range(f"AV{fila_inicial}").value = datos["total"]
             fila_inicial += 1
-        else:
-            messagebox.showerror("Error", "Faltan datos. Verifica que todos los campos estén completos.")
-            return False
-    return True
+        return True
+    except Exception as e:
+        print("Error al insertar entradas en la hoja:", e)
+        messagebox.showerror("Error", f"No se pudieron insertar los conceptos.\n{e}")
+        return False
 
 def guardar_egresos(poliza):
     try:
@@ -140,7 +163,7 @@ def guardar_egresos(poliza):
 
         fecha_actual = obtener_fecha_actual().replace("/", "-")
         nombre_archivo = f"Poliza_Egresos_{fecha_actual}.xlsx"
-        ruta_descargas = os.path.expanduser("~/Documentos/Cecati122/PolizasDeEgresos")
+        ruta_descargas = os.path.join(config["carpeta_destino"], "PolizasDeEgresos")
         os.makedirs(ruta_descargas, exist_ok=True)
         ruta_archivo = os.path.join(ruta_descargas, nombre_archivo)
 
@@ -150,6 +173,7 @@ def guardar_egresos(poliza):
     except Exception as e:
         print("Error al guardar:", e)
         messagebox.showerror("Error", f"No se pudo guardar la información.\n{e}")
+        traceback.print_exc()
                 
 def guardar_pdf(poliza):
     try:
@@ -167,7 +191,7 @@ def guardar_pdf(poliza):
 
         fecha_actual = obtener_fecha_actual().replace("/", "-")
         nombre_archivo = f"Poliza_Egresos_{fecha_actual}.pdf"
-        ruta_descargas = os.path.expanduser("~/Documentos/Cecati122/PolizasDeEgresos")
+        ruta_descargas = os.path.expanduser(config["carpeta_destino"],"PolizasDeEgresos")
         os.makedirs(ruta_descargas, exist_ok=True)
         ruta_pdf = os.path.join(ruta_descargas, nombre_archivo)
 
@@ -230,8 +254,10 @@ class AnimacionDescarga(ctk.CTkToplevel):
         self.after(120, self.animar)
 
 def ejecutar_con_loading(funcion, btn_guardar, btn_descargar, contenedor_principal, limpiar_formulario, *args):
-    btn_guardar.configure(state="disabled", text="Guardando...")
-    btn_descargar.configure(state="disabled", text="Descargando...")
+    if btn_guardar is not None:
+        btn_guardar.configure(state="disabled", text="Guardando...")
+    if btn_descargar is not None:
+        btn_descargar.configure(state="disabled", text="Descargando...")
 
     # Mostrar animación visual
     anim = AnimacionDescarga(contenedor_principal)
@@ -252,8 +278,26 @@ def ejecutar_con_loading(funcion, btn_guardar, btn_descargar, contenedor_princip
             messagebox.showerror("Error", f"No se pudo guardar la información.\n{e}")
         finally:
             anim.destroy()  # Cierra la animación
-            btn_guardar.configure(state="normal", text="💾 Guardar")
-            btn_descargar.configure(state="normal", text="📥 Descargar")
+            if btn_guardar is not None:
+                btn_guardar.configure(state="normal", text="💾 Guardar")
+            if btn_descargar is not None:
+                btn_descargar.configure(state="normal", text="📥 Descargar")
+    contenedor_principal.after(100, ejecutar)
+    
+    
+def mostrar_loading_y_ejecutar(funcion, contenedor_principal, *args, **kwargs):
+        
+    anim = AnimacionDescarga(contenedor_principal)
+    anim.grab_set()
+
+    def ejecutar():
+        try:
+            funcion(*args, **kwargs)
+        except Exception as e:
+            messagebox.showerror("Error", f"Ocurrió un error:\n{e}")
+        finally:
+            anim.destroy()
+
     contenedor_principal.after(100, ejecutar)
     
 #------------------ Funciones de limpieza y animación de confirmación -----------------
@@ -324,34 +368,34 @@ def consultar_poliza(widgets, no_poliza):
         entry.configure(state="normal")
 
 # Asigna los valores a los campos del formulario
-    widgets["poliza_id"].delete(0, "end")
-    widgets["poliza_id"].insert(0, poliza.poliza_id)
+    widgets.entradas["poliza_id"].delete(0, "end")
+    widgets.entradas["poliza_id"].insert(0, poliza.poliza_id)
 
-    widgets["fecha"].set_date(poliza.fecha) # Si usas DateEntry con .set()
+    widgets.entradas["fecha"].set_date(poliza.fecha) # Si usas DateEntry con .set()
 
-    widgets["nombre"].delete(0, "end")
-    widgets["nombre"].insert(0, poliza.nombre)
+    widgets.entradas["nombre"].delete(0, "end")
+    widgets.entradas["nombre"].insert(0, poliza.nombre)
 
-    widgets["cargo"].delete(0, "end")
-    widgets["cargo"].insert(0, poliza.monto)
+    widgets.entradas["cargo"].delete(0, "end")
+    widgets.entradas["cargo"].insert(0, poliza.monto)
 
-    widgets["cargo_letras"].delete(0, "end")
-    widgets["cargo_letras"].insert(0, poliza.montoletr)
+    widgets.entradas["cargo_letras"].delete(0, "end")
+    widgets.entradas["cargo_letras"].insert(0, poliza.montoletr)
 
-    widgets["tipo_pago"].set(poliza.tipo_pago)
+    widgets.entradas["tipo_pago"].set(poliza.tipo_pago)
 
-    widgets["clave_rastreo"].delete(0, "end")
+    widgets.entradas["clave_rastreo"].delete(0, "end")
     widgets["clave_rastreo"].insert(0, poliza.clave_ref or "")
 
-    widgets["denominacion"].delete(0, "end")
-    widgets["denominacion"].insert(0, poliza.denominacion or "")
+    widgets.entradas["denominacion"].delete(0, "end")
+    widgets.entradas["denominacion"].insert(0, poliza.denominacion or "")
 
-    widgets["observaciones"].delete(0, "end")
-    widgets["observaciones"].insert(0, poliza.observaciones or "")
+    widgets.entradas["observaciones"].delete(0, "end")
+    widgets.entradas["observaciones"].insert(0, poliza.observaciones or "")
 
-    if "no_cheque" in form and form["no_cheque"]:
-        form["no_cheque"].delete(0, "end")
-        form["no_cheque"].insert(0, poliza.no_cheque or "")
+    if "no_cheque" in widgets and widgets.entradas["no_cheque"]:
+        widgets.entradas["no_cheque"].delete(0, "end")
+        widgets.entradas["no_cheque"].insert(0, poliza.no_cheque or "")
 
 def editar_poliza():
     print("Editando póliza...")
@@ -518,7 +562,7 @@ def actualizar_estado_formulario(modo: str, widgets: dict, campos=None, concepto
             elif boton.cget("text") == " Abrir Carpeta":
                 boton.configure(fg_color="#6b7280", hover_color="#4b5563")
             else:
-                boton.configure(fg_color="#22c55e", hover_color="#16a34a")
+                boton.configure(fg_color="#1f6aa5", hover_color="#103858")
 
     for menu in widgets.get("menus", []):
         try:
@@ -565,3 +609,133 @@ def campos_obligatorios_vacios(campos, conceptos):
         if not entrada_clave.get().strip() or not entrada_desc.get().strip() or not entrada_importe.get().strip():
             return True
     return False
+
+
+
+#------------------ Funciones para generar el liro de egresos -----------------
+
+meses = {
+    1: "enero", 2: "febrero", 3: "marzo", 4: "abril",
+    5: "mayo", 6: "junio", 7: "julio", 8: "agosto",
+    9: "septiembre", 10: "octubre", 11: "noviembre", 12: "diciembre"
+}
+
+def confirmar_y_generar_egresos(contenedor_principal=None):
+    respuesta = messagebox.askyesno("Generar reporte", "¿Está seguro de generar el reporte de egresos?")
+    if respuesta:
+        # Puedes pasar None para los botones si no tienes referencias a ellos
+        mostrar_loading_y_ejecutar(
+            generar_reporte_egresos_xlwings,
+            contenedor_principal=contenedor_principal,
+        )
+        
+
+
+def generar_reporte_egresos_xlwings():
+    try:
+        # Fecha actual y mes actual en formato YYYY-MM
+        hoy = datetime.now()
+        mes_actual = hoy.strftime('%Y-%m')
+        nombre_hoja = hoy.strftime('%b %Y').lower()  # Ejemplo: 'may 2025'
+
+        polizas_mes = polizas_mes = obtener_polizas_egresos_mes(mes_actual)
+
+        if not polizas_mes:
+            raise ValueError("No se encontraron pólizas de egresos en el mes actual.")
+
+        # Obtener partidas específicas únicas del mes actual
+        
+        # Al obtener partidas_mes:
+        partidas_mes = [row[0] for row in obtener_partidas_mes(mes_actual)]
+
+        # Abrir Excel
+        app = xw.App(visible=False)
+        wb = app.books.open("assets/plantillas/LibroDeEgresos.xls")
+        
+        nombre_hoja_plantilla = "mar 2025"  # <-- Ajusta esto según tu plantilla
+        nombre_hoja = hoy.strftime('%b %Y').lower()
+        
+        if nombre_hoja not in [sheet.name.lower() for sheet in wb.sheets]:
+            # Si la hoja no existe, crear una nueva copia de la plantilla
+            try:
+                sht_plantilla = wb.sheets[nombre_hoja_plantilla]
+                sht_nueva = sht_plantilla.copy(after=wb.sheets[-1])
+                sht_nueva.name = nombre_hoja
+            except Exception as e:
+                raise ValueError(f"No se pudo crear la hoja '{nombre_hoja}': {e}")
+
+        # Seleccionar hoja del mes
+        try:
+            sht = wb.sheets[nombre_hoja]
+        except:
+            raise ValueError(f"No se encontró la hoja: '{nombre_hoja}' en el archivo Excel.")
+
+        # Borrar datos anteriores en la hoja
+        sht.range("A10:J40").clear_contents()
+
+        mes_ano = f"{meses[hoy.month]}/{hoy.year}"
+        sht.range("K5").value = mes_ano
+
+        # Escribir encabezados de partidas específicas
+        col_inicio = 4
+        max_cols = 6
+        columna_j = 10
+        fila_formula = 41
+        rango_inicio = 10
+        rango_fin = 40
+
+        num_partidas = len(partidas_mes)
+
+        if num_partidas > max_cols:
+            col_a_insertar = num_partidas - max_cols
+            for offset in range(col_a_insertar):
+                sht.range((1, columna_j)).api.EntireColumn.Insert()
+                col_destino = columna_j + offset
+                letra_col = xw.utils.col_name(col_destino)
+                formula = f"=SUMA({letra_col}{rango_inicio}:{letra_col}{rango_fin})"
+                sht.range((fila_formula, col_destino)).formula = formula
+
+        for idx, partida in enumerate(partidas_mes):
+            sht.range((8, col_inicio + idx)).value = partida
+
+        # Escribir pólizas
+        fila_inicio = 10
+        for idx, (fecha, no_poliza, importe, id_poliza) in enumerate(polizas_mes):
+            fila = fila_inicio + idx
+            fecha_dt = datetime.strptime(fecha, "%d/%m/%Y")
+            sht.range(f"A{fila}").value = fecha_dt
+            sht.range(f"B{fila}").value = no_poliza
+            sht.range(f"C{fila}").value = importe
+
+            # Obtener cargos por partida específica
+            cargos = obtener_conceptos_por_partida_especifica(id_poliza)
+
+            # Escribir cargos
+            for col_idx, partida in enumerate(partidas_mes):
+                valor = cargos.get(partida, 0)
+                sht.range((fila, col_inicio + col_idx)).value = "" if valor == 0 else valor
+
+        # Guardar en carpeta personalizada
+        #carpeta_base = r"C:\Cecati122"
+        carpeta_salida = os.path.join(config["carpeta_destino"], "InformesDeEgresos")
+        os.makedirs(carpeta_salida, exist_ok=True)
+        archivo_salida = os.path.join(carpeta_salida, f"egresos_{mes_actual}.xlsx")
+
+        mes_act = hoy.month
+        anio_act = hoy.year
+        nvo_nom_libro = f"{meses[mes_act]} {anio_act}"
+        sht.name = nvo_nom_libro
+
+        wb.save(archivo_salida)
+
+        # Cerrar recursos
+        wb.close()
+        app.quit()
+        
+        # Confirmación
+        messagebox.showinfo("Reporte generado", f"El reporte de egresos se ha generado exitosamente:\n{archivo_salida}")
+        return archivo_salida
+
+    except Exception as e:
+        print(f"Error generando el reporte de egresos: {e}")
+        messagebox.showerror("Error", f"Ocurrió un error al generar el reporte de egresos:\n{e}")

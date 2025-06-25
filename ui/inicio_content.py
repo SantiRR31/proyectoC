@@ -4,15 +4,174 @@ from styles.styles import *
 from PIL import Image
 from customtkinter import CTkImage
 import datetime
-from functions.funcions import gen_inf_consolidado, confirmar_y_generar, confirmar_aux
+from functions.funcions import confirmar_aux, confirmar_y_generar2
 import requests
 from io import BytesIO
 import threading
 from dotenv import load_dotenv
 import os
 from utils.rutas import ruta_absoluta
+from utils.egresos_utils import confirmar_y_generar_egresos
+from utils.rutas import ruta_absoluta
+from utils.utils import abrir_carpeta, cargar_config
 
 
+config = cargar_config()
+
+def mostrar_inicio(contenedor):
+    # Configuración del contenedor principal con gradiente sutil
+    contenedor.configure(fg_color=("#f8fafc", "#1a1a1a"))
+    
+    # Frame interno para mejor organización
+    main_frame = ctk.CTkFrame(contenedor, fg_color="transparent")
+    main_frame.pack(fill="both", expand=True, padx=20, pady=20)
+
+    # Encabezado moderno
+    header_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+    header_frame.pack(fill="x", pady=(0, 20))
+
+    # Título con efecto moderno
+    titulo = ctk.CTkLabel(
+        header_frame, 
+        text="Sistema de Gestión CECATI 122",
+        font=("Arial", 24, "bold"),
+        text_color=TEXT_PRIMARY
+    )
+    titulo.pack(pady=(10, 5))
+
+    # Subtítulo con estilo minimalista
+    subtitulo = ctk.CTkLabel(
+        header_frame, 
+        text="Panel principal del sistema administrativo",
+        font=("Arial", 14),
+        text_color=("#6b7280", "#9ca3af")
+    )
+    subtitulo.pack()
+
+    # Sección de widgets superiores
+    top_info_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+    top_info_frame.pack(fill="x", pady=(0, 20))
+
+    # Widget de fecha y hora moderno
+    datetime_frame = ctk.CTkFrame(top_info_frame, fg_color=("#ffffff", "#2a2a2a"), corner_radius=12)
+    datetime_frame.pack(side="left", padx=10)
+    
+    # Contenedor para fecha y botón
+    fecha_container = ctk.CTkFrame(datetime_frame, fg_color="transparent")
+    fecha_container.pack(pady=(10, 0), padx=10, fill="x")
+
+    # Icono de calendario moderno
+    calendar_path = ruta_absoluta(os.path.join("assets", "calendar1.png"))
+    try:
+        if os.path.exists(calendar_path):
+            calendar_icon = ctk.CTkImage(
+                light_image=Image.open(calendar_path),
+                dark_image=Image.open(calendar_path),
+                size=(24, 24)
+            )
+        else:
+            raise FileNotFoundError
+    except Exception as e:
+        print(f"[Error] No se pudo cargar el icono: {str(e)}")
+        calendar_icon = None
+        calendar_text = "📅"
+    else:
+        calendar_text = ""
+
+    calendario_btn = ctk.CTkButton(
+        fecha_container,
+        text=calendar_text,
+        image=calendar_icon,
+        width=30,
+        height=30,
+        corner_radius=8,
+        fg_color="transparent",
+        hover_color=("#e5e7eb", "#3d3d3d"),
+        command=lambda: mostrar_calendario(fecha_label)
+    )
+    calendario_btn.pack(side="right")
+
+    fecha_actual = datetime.datetime.now().strftime("%d/%m/%Y")
+    fecha_label = ctk.CTkLabel(
+        fecha_container,
+        text=fecha_actual,
+        font=("Arial", 14, "bold"),
+        text_color=("#111827", "#f9fafb")
+    )
+    fecha_label.pack(side="left", padx=(0, 10))
+
+    hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
+    hora_label = ctk.CTkLabel(
+        datetime_frame,
+        text=hora_actual,
+        font=("Arial", 16, "bold"),
+        text_color=("#3b82f6", "#60a5fa")
+    )
+    hora_label.pack(pady=(0, 10), padx=10)
+
+    def actualizar_hora():
+        ahora = datetime.datetime.now()
+        hora_label.configure(text=ahora.strftime("%H:%M:%S"))
+        hora_label.after(1000, actualizar_hora)
+    
+    actualizar_hora()
+
+    # Widget de clima modernizado
+    clima_frame = ctk.CTkFrame(top_info_frame, fg_color=("#ffffff", "#2a2a2a"), corner_radius=12)
+    clima_frame.pack(side="left", padx=10)
+    
+    clima_content = ctk.CTkFrame(clima_frame, fg_color="transparent")
+    clima_content.pack(pady=10, padx=10)
+
+    clima_icon_label = ctk.CTkLabel(clima_content, text="", width=40, height=40)
+    clima_icon_label.pack(side="left", padx=(0, 10))
+
+    clima_text_frame = ctk.CTkFrame(clima_content, fg_color="transparent")
+    clima_text_frame.pack(side="left")
+
+    ciudad_label = ctk.CTkLabel(
+        clima_text_frame,
+        text="Tequisquiapan",
+        font=("Arial", 12, "bold"),
+        text_color=("#111827", "#f9fafb")
+    )
+    ciudad_label.pack(anchor="w")
+
+    temp_label = ctk.CTkLabel(
+        clima_text_frame,
+        text="Cargando...",
+        font=("Arial", 14),
+        text_color=("#3b82f6", "#60a5fa")
+    )
+    temp_label.pack(anchor="w")
+
+    detalles_label = ctk.CTkLabel(
+        clima_text_frame,
+        text="",
+        font=("Arial", 11),
+        text_color=("#6b7280", "#9ca3af")
+    )
+    detalles_label.pack(anchor="w")
+
+    # Widget de estado del sistema moderno
+    estado_frame = ctk.CTkFrame(top_info_frame, fg_color=("#ffffff", "#2a2a2a"), corner_radius=12)
+    estado_frame.pack(side="right", padx=10)
+
+    estado_icon = ctk.CTkLabel(
+        estado_frame,
+        text="✓",
+        font=("Arial", 24),
+        text_color=("#10b981", "#059669")
+    )
+    estado_icon.pack(pady=(10, 5))
+
+    estado_label = ctk.CTkLabel(
+        estado_frame,
+        text="Sistema Operativo",
+        font=("Arial", 12, "bold"),
+        text_color=("#6b7280", "#9ca3af")
+    )
+    estado_label.pack(pady=(0, 10))
 
 def mostrar_inicio(contenedor):
     # Configuración del contenedor principal con gradiente sutil
@@ -106,17 +265,6 @@ def mostrar_inicio(contenedor):
         command=lambda: mostrar_calendario(fecha_label)  # Función al hacer clic
     )
     calendario_btn.pack(side="right")
-
-
-    # 3. Label de hora (separado)
-    hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
-    hora_label = ctk.CTkLabel(
-        datetime_frame,
-        text=hora_actual,
-        font=("Arial", 16),
-        text_color=("#4b5563", "#d1d5db")
-    )
-    hora_label.pack(pady=(0, 8), padx=8)
     
     # --- Función para mostrar calendario ---
     def mostrar_calendario(label_fecha):
@@ -138,16 +286,9 @@ def mostrar_inicio(contenedor):
         )
         cal.pack(pady=20, fill="both", expand=True)
 
-    # Actualizar la hora cada segundo
-    def actualizar_hora():
-        ahora = datetime.datetime.now()
-        hora_label.configure(text=ahora.strftime("%H:%M:%S"))
-        hora_label.after(1000, actualizar_hora)
-    
-    actualizar_hora()
     
     clima_frame = ctk.CTkFrame(top_info_frame, fg_color=("#f3f4f6", "#1f2937"), corner_radius=10)
-    clima_frame.pack(side="left", padx=10)
+    clima_frame.pack(side="right", padx=10)
     
     clima_content = ctk.CTkFrame(clima_frame, fg_color="transparent")
     clima_content.pack(pady=8, padx=8)
@@ -159,7 +300,7 @@ def mostrar_inicio(contenedor):
         width=40,
         height=40
     )
-    clima_icon_label.pack(side="left", padx=(0, 8))
+    clima_icon_label.pack(side="right", padx=(0, 8))
 
     clima_text_label = ctk.CTkLabel(
         clima_content,
@@ -168,7 +309,7 @@ def mostrar_inicio(contenedor):
         text_color=("#111827", "#f9fafb"),
         justify="left"
     )
-    clima_text_label.pack(side="left")
+    clima_text_label.pack(side="right", fill="x", expand=True)
 
     # 👉 Esta función SÓLO obtiene datos. No toca la interfaz.
     def obtener_clima_datos():
@@ -251,221 +392,125 @@ def mostrar_inicio(contenedor):
         else:
             clima_frame.after(1800000, lambda: actualizar_clima())
 
-
     # En el lugar donde inicias el clima:
     actualizar_clima(inicial=True)  # Iniciar el ciclo
 
-
-
-    # Widget de estado del sistema
-    estado_frame = ctk.CTkFrame(top_info_frame, fg_color=("#f3f4f6", "#1f2937"), corner_radius=10)
-    estado_frame.pack(side="right", padx=10)
-
-    estado_label = ctk.CTkLabel(
-        estado_frame,
-        text="Estado del sistema:",
-        font=("Arial", 12),
-        text_color=("#6b7280", "#9ca3af")
-    )
-    estado_label.pack(pady=(5, 0), padx=15)
-
-    estado_valor = ctk.CTkLabel(
-        estado_frame,
-        text="✔ Operativo",
-        font=("Arial", 14, "bold"),
-        text_color=("#10b981", "#059669")
-    )
-    estado_valor.pack(pady=(0, 5), padx=15)
-
+    def crear_tarjeta_moderna_con_menu(parent, nombre, icono, color, opciones, boton_texto="Opciones", command=None):
+        tarjeta = ctk.CTkFrame(
+            parent, 
+            fg_color=color[0],
+            corner_radius=16,
+            border_width=2,
+            border_color=color[1],
+            width=200, 
+            height=220,  # Aumentado para espacio del botón
+        )
+        icono_frame = ctk.CTkFrame(
+            tarjeta,
+            width=60,
+            height=60,
+            corner_radius=12,
+            fg_color=( "#ffffff","#18181b")
+        )
+        icono_frame.pack(pady=(20, 15))
+        
+        try:
+            icon_img = ctk.CTkImage(Image.open(icono), size=(32, 32))
+            ctk.CTkLabel(icono_frame, image=icon_img, text="").place(relx=0.5, rely=0.5, anchor="center")
+        except:
+            ctk.CTkLabel(icono_frame, text="📊", font=("Arial", 24)).place(relx=0.5, rely=0.5, anchor="center")
+    
+    # titulo 
+        titulo = ctk.CTkLabel(
+            tarjeta,
+            text = nombre,
+            font=("Arial", 16, "bold"),
+            text_color = "#fff",
+            wraplength=150,
+            justify="center"
+        )
+        titulo.pack(pady=(0, 8))
+        
+        if not opciones:
+            opciones = ["Próximamente"]
+    
+        menu = ctk.CTkOptionMenu(
+            tarjeta,
+            values=opciones,
+            fg_color=color[1],
+            button_color=color[0],
+            dropdown_fg_color= "#23232a",
+            dropdown_text_color= "#fff",
+            font = ("Arial", 12),
+            width = 140,
+            command=command
+        )
+        menu.set(boton_texto)
+        menu.pack(pady=(0,18))
+    
+        def on_enter(e):
+            tarjeta.configure(fg_color=color[1])
+        def on_leave(e):
+            tarjeta.configure(fg_color=color[0])
+        tarjeta.bind("<Enter>", on_enter)
+        tarjeta.bind("<Leave>", on_leave)
+    
+        return tarjeta
+        
     # Sección de tarjetas con diseño más profesional
     tarjetas_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
     tarjetas_frame.pack(fill="x", pady=20)
 
-    # Tarjetas con efecto hover y sombra
-    for i, (nombre, icono_rel, color, texto_boton) in enumerate([
-        ("Ingresos", "assets/coin.png", ("#10b981", "#059669"), "Registrar"),
-        ("Egresos", "assets/wallet.png", ("#ef4444", "#dc2626"), "Registrar"),
-        ("Reportes", "assets/iconuse.png", ("#3b82f6", "#2563eb"), "Ver"),
-        ("Informes", "assets/web.png", ("#8b5cf6", "#7c3aed"), "Ver")
-    ]):
-        icono = ruta_absoluta(icono_rel)
-        tarjeta = crear_tarjeta_moderna(tarjetas_frame, nombre, icono, color, boton_texto=texto_boton)
-        tarjeta.grid(row=0, column=i, padx=15, pady=10, sticky="nsew")
-        tarjetas_frame.grid_columnconfigure(i, weight=1)
+    tarjetas_info = [
+        ("Ingresos", "assets/coin.png", ("#10b981", "#059669"), ["Registrar", "Consultar", "Exportar"], "Opciones", None),
+        ("Egresos", "assets/wallet.png", ("#ef4444", "#dc2626"), ["Generar reporte mensual"], "Opciones", {"Generar reporte mensual": lambda:confirmar_y_generar_egresos(contenedor_principal=contenedor)}),
+        ("Informes", "assets/web.png", ("#8b5cf6", "#7c3aed"), ["Ver", "Descargar"], "Opciones", None),
+        ("Inf. Consolidado de Ingresos", "assets/excel.png", ("#0081a8", "#0f6580"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar2}),
+        ("Auxiliar Bancario", "assets/coin.png", ("#f59e0b", "#d97706"), ["Generar"], "Opciones", {"Generar": confirmar_aux}),
+    ]
+    
+    columnas = 3
+    
+    for col in range(columnas):
+            tarjetas_frame.grid_columnconfigure(col, weight=1)
+            
+    for idx, (nombre, icono, color, opciones, boton_texto, comandos) in enumerate(tarjetas_info):
+        fila = idx // columnas
+        columna = idx % columnas
+
+        def menu_command(opcion, cmd=comandos, nombre_local=nombre):
+            if cmd and opcion in cmd and callable(cmd[opcion]):
+                cmd[opcion]()
+            else:
+                print(f"{nombre_local}: {opcion}")
+
+        tarjeta = crear_tarjeta_moderna_con_menu(
+            parent=tarjetas_frame,
+            nombre=nombre,
+            icono=ruta_absoluta(icono),
+            color=color,
+            opciones=opciones,
+            boton_texto=boton_texto,
+            command=menu_command
+        )
+        tarjeta.grid(row=fila, column=columna, padx=15, pady=15, sticky="nsew")
         
-    # NUEVA FILA CENTRADA CON ELEMENTO ADICIONAL
-    # Contenedor para centrar el nuevo elemento
-    center_frame = ctk.CTkFrame(tarjetas_frame, fg_color="transparent")
-    center_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", pady=(20, 0))
-    
-    # Nuevo elemento similar a las tarjetas
-    nueva_tarjeta = crear_tarjeta_moderna(
-        center_frame,
-        "Informe Consolidado de Ingresos",
-        ruta_absoluta("assets/excel2.png"),
-        ("#8b5cf6", "#7c3aed"),
-        command=confirmar_y_generar,
-        boton_texto="Generar"
-    )
-    nueva_tarjeta.pack(anchor="center")  # Centrado horizontal
-    
-    nueva_tarjeta2 = crear_tarjeta_moderna(
-        center_frame,
-        "Auxiliar Bancario",
-        ruta_absoluta("assets/excel2.png"),  # Necesitarás crear este ícono
-        ("#f59e0b", "#d97706"),  # Color naranja/dorado
-        command=confirmar_aux,  # Función específica para esta tarjeta
-        boton_texto="Generar"
-    )
-    nueva_tarjeta2.pack(side="left", anchor="center", padx=10)
-
-    # Área informativa con pestañas
-    tabview = ctk.CTkTabview(
-        main_frame,
-        fg_color=("#ffffff", "#1e293b"),
-        segmented_button_fg_color=("#e5e7eb", "#374151"),
-        segmented_button_selected_color=("#3b82f6", "#2563eb"),
-        segmented_button_selected_hover_color=("#2563eb", "#1d4ed8"),
-        width=600,
-        height=180
-    )
-    tabview.pack(pady=(20, 10), padx=5)
-    
-    # Añadir pestañas
-    tabview.add("Bienvenida")
-    tabview.add("Noticias")
-    tabview.add("Recordatorios")
-
-    # Contenido de la pestaña de bienvenida
-    bienvenida_content = ctk.CTkLabel(
-        tabview.tab("Bienvenida"),
-        text=(
-            "Bienvenido al sistema de control administrativo del CECATI 122\n\n"
-            "Este sistema está diseñado para optimizar tus procesos diarios, mantener\n"
-            "el control financiero institucional y generar reportes automatizados.\n\n"
-            "Selecciona una opción del menú lateral para comenzar."
-        ),
-        font=("Arial", 14),
-        text_color=("#374151", "#f3f4f6"),
-        justify="center",
-        wraplength=550
-    )
-    bienvenida_content.pack(pady=20, padx=10)
-
-    # Contenido de la pestaña de noticias
-    noticias_content = ctk.CTkLabel(
-        tabview.tab("Noticias"),
-        text=(
-            "Últimas actualizaciones del sistema:\n\n"
-            "• Versión 2.1 del sistema instalada\n"
-            "• Nuevo módulo de reportes disponible\n"
-            "• Mantenimiento programado para el próximo viernes"
-        ),
-        font=("Arial", 14),
-        text_color=("#374151", "#f3f4f6"),
-        justify="left",
-        wraplength=550
-    )
-    noticias_content.pack(pady=20, padx=10)
-
-    # Contenido de la pestaña de recordatorios
-    recordatorios_content = ctk.CTkLabel(
-        tabview.tab("Recordatorios"),
-        text=(
-            "Recordatorios importantes:\n\n"
-            "• Reporte mensual pendiente de enviar\n"
-            "• Revisar ingresos de la semana\n"
-            "• Verificar egresos no categorizados"
-        ),
-        font=("Arial", 14),
-        text_color=("#374151", "#f3f4f6"),
-        justify="left",
-        wraplength=550
-    )
-    recordatorios_content.pack(pady=20, padx=10)
-
-def crear_tarjeta_moderna(master, texto, icono_path, color, command=None, boton_texto="Generar"):
-    frame = ctk.CTkFrame(
-        master, 
-        width=180, 
-        height=200,  # Aumentado para espacio del botón
-        fg_color=("#ffffff", "#1c1c1c"),
-        border_color=color,
-        border_width=2,
-        corner_radius=18
-    )
-    
-    # Contenido de la tarjeta
-    content_frame = ctk.CTkFrame(frame, fg_color="transparent")
-    content_frame.pack(expand=True, fill="both", padx=10, pady=10)
-    
-    try:
-        icono = CTkImage(Image.open(icono_path), size=(60, 60))
-        icono_label = ctk.CTkLabel(
-            content_frame, 
-            image=icono, 
-            text=""
+    # boton para abrir la carpeta de informes
+    acciones_frame = ctk.CTkFrame(
+        contenedor,
+        fg_color="transparent",
+        corner_radius=12,
         )
-        icono_label.pack(pady=(15, 10))
-    except Exception as e:
-        print(f"No se pudo cargar el ícono {icono_path}: {e}")
-        icono_label = ctk.CTkLabel(
-            content_frame, 
-            text="📊",
-            font=("Arial", 30),
-            text_color=color[0]
-        )
-        icono_label.pack(pady=(15, 10))
-
-    texto_label = ctk.CTkLabel(
-        content_frame, 
-        text=texto, 
-        font=("Arial", 16, "bold"), 
-        text_color=("#111827", "#f9fafb")
+    acciones_frame.pack(fill="x", padx=20, pady=(0, 10))
+    
+    abrir_carpeta_archivos = ctk.CTkButton(
+        acciones_frame,
+        width=50,
+        text="Abrir carpeta",
+        command=lambda: abrir_carpeta(config["carpeta_destino"], ""),
+        image=CTkImage(Image.open(ruta_absoluta("assets/icons/file.png")), size=(28, 28)),
+        **ESTILO_BOTON,
+        
     )
-    texto_label.pack(pady=(0, 10))
+    abrir_carpeta_archivos.pack(padx=20, fill="x", side="right")
     
-    # BOTÓN ESTILIZADO AÑADIDO AQUÍ
-    boton = ctk.CTkButton(
-        content_frame,
-        text=boton_texto,
-        width=100,
-        height=28,
-        fg_color=color,
-        hover_color=ajustar_color(color, -25),
-        text_color="white",
-        font=("Arial", 12, "bold"),
-        corner_radius=8,
-        border_width=0, 
-        command=command
-    )
-    boton.pack(pady=(0, 5))
-    
-    # Efecto hover para toda la tarjeta
-    def on_enter(e):
-        frame.configure(fg_color=("#f9fafb", "#334155"))
-        boton.configure(fg_color=ajustar_color(color, 15))
-    
-    def on_leave(e):
-        frame.configure(fg_color=("#ffffff", "#1c1c1c"))
-        boton.configure(fg_color=color)
-    
-    frame.bind("<Enter>", on_enter)
-    frame.bind("<Leave>", on_leave)
-    
-    return frame
-
-# Función para ajustar colores (añadir al mismo archivo o en styles.py)
-def ajustar_color(color, delta):
-    """Ajusta el brillo de un color hexadecimal"""
-    if isinstance(color, tuple):
-        return tuple(ajustar_color(c, delta) for c in color)
-    
-    color = color.lstrip('#')
-    r, g, b = tuple(int(color[i:i+2], 16) for i in (0, 2, 4))
-    
-    r = max(0, min(255, r + delta))
-    g = max(0, min(255, g + delta))
-    b = max(0, min(255, b + delta))
-    
-    return f"#{r:02x}{g:02x}{b:02x}"

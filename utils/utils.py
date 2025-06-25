@@ -1,6 +1,35 @@
+import json
 import tkinter as tk
 import datetime
 import os
+from utils.rutas import ruta_absoluta
+
+CONFIG_PATH = ruta_absoluta("config.json")
+
+def cargar_config():
+    # Valores por defecto
+    defaults = {
+        "carpeta_destino": "~/Documentos/Cecati122/Polizas",
+        "clave_cecati": "22DBT0005P",
+        "banco_caja": "BANORTE",
+        "geometry": "1280x720+100+100",
+        "state": "normal",
+        "appearance_mode": "dark",
+        "color_theme": "blue"
+    }
+    config = {}
+    if os.path.exists(CONFIG_PATH):
+        with open(CONFIG_PATH, "r") as f:
+            try:
+                config = json.load(f)
+            except Exception:
+                config = {}
+    # Asegura que todas las claves existan
+    for key, value in defaults.items():
+        if key not in config:
+            config[key] = value
+    return config
+
 
 def obtener_fecha_actual():
     """Devuelve la fecha actual en formato 'DD/mmm/YYYY', por ejemplo: 01/ene/2025."""
@@ -8,29 +37,18 @@ def obtener_fecha_actual():
     ahora = datetime.datetime.now()
     return ahora.strftime(f"%d-{meses[ahora.month-1]}%Y")
 
-""" def abrir_carpeta():
-    carpeta_descargas = os.path.expanduser("~/Documentos/Cecati122/PolizasDeIngresos")
-    if not os.path.exists(carpeta_descargas):
-        os.makedirs(carpeta_descargas, exist_ok=True)
-        os.startfile(carpeta_descargas) """
-        
-    
-
-def abrir_carpeta(ruta):
+def abrir_carpeta(ruta_base, subcarpeta=""):
     import os
     # Expandir ~ al directorio del usuario
-    ruta_expandida = os.path.expanduser(ruta)
-    carpeta = os.path.dirname(os.path.abspath(ruta_expandida))
-    
+    ruta_expandida = os.path.expanduser(ruta_base)
+    ruta_final = os.path.join(ruta_expandida, subcarpeta) if subcarpeta else ruta_expandida
+
     # Crear la carpeta si no existe
-    if not os.path.exists(carpeta):
-        os.makedirs(carpeta, exist_ok=True)
-    
+    if not os.path.exists(ruta_final):
+        os.makedirs(ruta_final, exist_ok=True)
+
     # Abrir la carpeta
-    os.startfile(carpeta)
-
-
-
+    os.startfile(ruta_final)
 
 def convertir_a_mayusculas(entry_widget, event=None):
     texto = entry_widget.get()
