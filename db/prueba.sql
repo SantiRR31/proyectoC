@@ -1,1 +1,2 @@
-SELECT fecha FROM polizasIngresos ORDER BY fecha;
+
+ALTER TABLE detallePolizaIngreso ADD COLUMN fecha TEXT;

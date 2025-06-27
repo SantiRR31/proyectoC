@@ -88,6 +88,8 @@ def mostrar_ajustes(frame_contenido):
         text="Cambiar",
         width=90,
         corner_radius=8,
+        fg_color="#d10d2f",
+        hover_color="#d93954",
         command=lambda: abrir_ventana_clave(frame_contenido, clave_cecati, actualizar_clave_cecati)
     ).grid(row=1, column=2, padx=10, pady=10)
 
@@ -99,6 +101,8 @@ def mostrar_ajustes(frame_contenido):
         text="Cambiar",
         width=90,
         corner_radius=8,
+        fg_color="#d10d2f",
+        hover_color="#d93954",
         command=lambda: abrir_ventana_banco(frame_contenido, banco_caja, actualizar_banco_caja)
     ).grid(row=2, column=2, padx=10, pady=10)
 
@@ -126,6 +130,8 @@ def mostrar_ajustes(frame_contenido):
         text="Seleccionar",
         width=90,
         corner_radius=8,
+        fg_color="#d10d2f",
+        hover_color="#d93954",
         command=selecionar_carpeta
     ).grid(row=1, column=2, padx=10, pady=10)
 
@@ -138,6 +144,8 @@ def mostrar_ajustes(frame_contenido):
         text="¿Ayuda?",
         corner_radius=8,
         command=abrir_ventana_soporte,
+        fg_color="#d10d2f",
+        hover_color="#d93954",
         image = ctk.CTkImage(Image.open(ruta_absoluta("assets/help.png")), size=(18, 18))
     )
     btn_ayuda.pack(pady=(10, 0))
@@ -183,13 +191,13 @@ def abrir_ventana_clave(frame_contenido, clave_cecati, actualizar_callback):
             actualizar_callback(nueva_clave)
             ventana.destroy()
 
-    frame_botones = ctk.CTkFrame(ventana)
+    frame_botones = ctk.CTkFrame(ventana, fg_color="transparent")
     frame_botones.grid(row=4, column=0, pady=20)
 
-    btn_guardar = ctk.CTkButton(frame_botones, text="Guardar", command=guardar_clave)
+    btn_guardar = ctk.CTkButton(frame_botones, text="Guardar", fg_color="#008d62", hover_color="#2ca880", command=guardar_clave)
     btn_guardar.pack(side="left", padx=10)
 
-    btn_cancelar = ctk.CTkButton(frame_botones, text="Cancelar", command=ventana.destroy)
+    btn_cancelar = ctk.CTkButton(frame_botones, text="Cancelar", text_color="black", fg_color="#ffb201", hover_color="#ffd300", command=ventana.destroy)
     btn_cancelar.pack(side="left", padx=10)
 
     ventana.grid_columnconfigure(0, weight=1)
@@ -225,13 +233,13 @@ def abrir_ventana_banco(frame_contenido, banco_caja, actualizar_callback):
             actualizar_callback(nuevo_banco)
             ventana.destroy()
 
-    frame_botones = ctk.CTkFrame(ventana)
+    frame_botones = ctk.CTkFrame(ventana, fg_color="transparent")
     frame_botones.grid(row=4, column=0, pady=20)
 
-    btn_guardar = ctk.CTkButton(frame_botones, text="Guardar", command=guardar_banco)
+    btn_guardar = ctk.CTkButton(frame_botones, text="Guardar", fg_color="#008d62", hover_color="#2ca880", command=guardar_banco)
     btn_guardar.pack(side="left", padx=10)
 
-    btn_cancelar = ctk.CTkButton(frame_botones, text="Cancelar", command=ventana.destroy)
+    btn_cancelar = ctk.CTkButton(frame_botones, text="Cancelar",text_color="black", fg_color="#ffb201", hover_color="#ffd300", command=ventana.destroy)
     btn_cancelar.pack(side="left", padx=10)
 
     ventana.grid_columnconfigure(0, weight=1)
@@ -270,6 +278,8 @@ def abrir_ventana_soporte():
     btn_copiar1 = ctk.CTkButton(
         ventana,
         text="Copiar correo 1",
+        fg_color="#d10d2f",
+        hover_color="#d93954",
         command=lambda: copiar_al_portapapeles(correo1)
     )
     btn_copiar1.pack(pady=(0, 10))
@@ -284,6 +294,8 @@ def abrir_ventana_soporte():
     btn_copiar2 = ctk.CTkButton(
         ventana,
         text="Copiar correo 2",
+        fg_color="#d10d2f",
+        hover_color="#d93954",
         command=lambda: copiar_al_portapapeles(correo2)
     )
     btn_copiar2.pack(pady=(0, 10))
@@ -294,5 +306,5 @@ def abrir_ventana_soporte():
         ventana.clipboard_append(correo)
         ventana.update()
 
-    btn_cerrar = ctk.CTkButton(ventana, text="Cerrar", command=ventana.destroy)
+    btn_cerrar = ctk.CTkButton(ventana, text="Cerrar", fg_color="#d10d2f", hover_color="#d93954", command=ventana.destroy)
     btn_cerrar.pack(pady=(0, 10))

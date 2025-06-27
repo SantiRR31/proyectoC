@@ -75,7 +75,9 @@ def mostrar_formulario_ingresos(frame_padre):
     lbl_banco.grid(row=1, column=0, padx=(10,5), pady=5, sticky="w")
     banco_o_caja = ctk.CTkEntry(entrada_frame, placeholder_text="🏦 Banco o Caja")
     banco_o_caja.grid(row=1, column=1, padx=(5,10), pady=5, sticky="ew")
-    banco_o_caja.insert(0, config.get("banco_caja", "BANNORTE"))  # Cargar valor por defecto
+    #Obtener el banco y desactivar el boton
+    banco_o_caja.insert(0, config.get("banco_caja", "BANORTE"))  # Cargar valor por defecto
+    #banco_o_caja.configure(state="readonly") --- ACTIVAR SI NO AFECTA EN EL PROGRAMA
 
     lbl_cuanto_pago = ctk.CTkLabel(entrada_frame, text="Cargo/Importe:", font=("Arial", 14))
     lbl_cuanto_pago.grid(row=1, column=2, padx=(10,5), pady=5, sticky="w")
@@ -416,9 +418,9 @@ def mostrar_formulario_ingresos(frame_padre):
                 abono = abono_entry.get().strip()
                 if clave and abono:
                     cursor.execute("""
-                        INSERT INTO detallePolizaIngreso (noPoliza, clave, abono)
-                        VALUES (?, ?, ?)
-                    """, (no, clave, float(abono)))
+                        INSERT INTO detallePolizaIngreso (noPoliza, clave, abono, fecha)
+                        VALUES (?, ?, ?, ?)
+                    """, (no, clave, float(abono), fecha))
 
             conn.commit()
             conn.close()

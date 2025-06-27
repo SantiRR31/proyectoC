@@ -8,7 +8,10 @@ import sqlite3
 from tkinter import messagebox
 
 
+
 def mostrar_detalles_ingresos(frame_padre):
+    #if not hasattr(mostrar_detalles_ingresos, "refresco"):
+    
     for widget in frame_padre.winfo_children():
         widget.destroy()
 
@@ -39,9 +42,9 @@ def mostrar_detalles_ingresos(frame_padre):
     anchos = {
         "fecha": 135,     # Fecha (dd/mm/yyyy)
         "Poliza": 135,    # Número de póliza
-        "banco": 150,     # Nombre del banco
+        "banco": 200,     # Nombre del banco
         "importe": 150,   # Valor numérico
-        "nota": 250       # Notas (más ancho por texto variable)
+        "nota": 200       # Notas (más ancho por texto variable)
     }
 
     # Manejar color de fondo del widget según modo
@@ -50,10 +53,6 @@ def mostrar_detalles_ingresos(frame_padre):
     else:
         tabla.tk_setPalette(background="white")
     
-    #for col in columnas:
-    #    tabla.heading(col, text=col.capitalize())
-    #    tabla.column(col, anchor="w", width=100)
-    
     for col in columnas:
         # Configurar cabecera
         tabla.heading(col, text=col.capitalize())
@@ -61,7 +60,7 @@ def mostrar_detalles_ingresos(frame_padre):
         # Configurar propiedades de columna
         tabla.column(
             col, 
-            anchor="w",              # Alineación (w=izquierda)
+            anchor="center" if col in ["fecha", "Poliza", "banco"] else "e" if col == "importe" else "w",              # Alineación (w=izquierda)
             width=anchos[col],       # Ancho personalizado
             minwidth=100,             # Ancho mínimo al redimensionar
             stretch=True if col == "nota" else False  # Solo "nota" se expande
@@ -69,17 +68,7 @@ def mostrar_detalles_ingresos(frame_padre):
         
     tabla.update_idletasks()  # Actualiza cálculos de layout
     contenedor_tabla.update()  # Asegura que el contenedor padre se actualice
-    # Modifica solo para la columna "importe"
-    tabla.column("importe", anchor="e")  # "e" = right align
     
-    #print("Anchos configurados:")
-    #for col in columnas:
-    #    print(f"{col}: {tabla.column(col, 'width')}px")   
-    #print(f"Ancho disponible: {frame_tree.winfo_width()}px")
-
-
-
-
     tabla.pack(side="left", fill="both", expand=True)
 
     scrollbar = ttk.Scrollbar(frame_tree, orient="vertical", command=tabla.yview)
@@ -92,10 +81,7 @@ def mostrar_detalles_ingresos(frame_padre):
     cursor = conexion.cursor()
     cursor.execute("SELECT id, fecha, noPoliza, banco, importe, nota FROM polizasIngresos ORDER BY STRFTIME('%Y-%m-%d', SUBSTR(fecha, 7, 4) || '-' || SUBSTR(fecha, 4, 2) || '-' || SUBSTR(fecha, 1, 2)) DESC")
     registros = cursor.fetchall()
-    # Imprimirlos en consola
-    #for fila in registros:
-    #    id, fecha, noPoliza, banco, importe, nota = fila
-    #    print(f"ID: {id} | Fecha: {fecha} | Póliza: {noPoliza} | Banco: {banco} | Importe: {importe} | Nota: {nota}")
+    
     conexion.close()
 
     if not registros:
@@ -105,11 +91,14 @@ def mostrar_detalles_ingresos(frame_padre):
     # Insertar registros
     for fila in registros:
         id_registro = fila[0]
-        valores_visibles = fila[1:]
+        fecha, poliza, banco, importe, nota = fila[1:]
+        importe_formateado = f"${importe:,.2f}"
+        
+        valores_visibles = (fecha, poliza, banco, importe_formateado, nota)
         tabla.insert("", "end", values=valores_visibles, iid=id_registro)
 
     # Botones para editar y eliminar seleccionados
-    frame_botones = ctk.CTkFrame(frame_padre)
+    frame_botones = ctk.CTkFrame(frame_padre, fg_color="transparent")
     frame_botones.pack(pady=10)
 
     def obtener_seleccion():
@@ -121,12 +110,12 @@ def mostrar_detalles_ingresos(frame_padre):
         id_registro = seleccionado
         return [id_registro] + valores
 
-    btn_editar = ctk.CTkButton(frame_botones, text="Editar seleccionado", command=lambda: (
+    btn_editar = ctk.CTkButton(frame_botones, text="Editar seleccionado", text_color="black", fg_color="#ffd300", hover_color="#ffb201", command=lambda: (
         (datos := obtener_seleccion()) and editar_registro(*datos, frame_padre)
     ))
     btn_editar.pack(side="left", padx=10)
 
-    btn_eliminar = ctk.CTkButton(frame_botones, text="Eliminar seleccionado", fg_color="red", hover_color="darkred",
+    btn_eliminar = ctk.CTkButton(frame_botones, text="Eliminar seleccionado", fg_color="#d10d2f", hover_color="#d93954",
         command=lambda: (
             (datos := obtener_seleccion()) and eliminar_registro(datos[0], frame_padre)
     ))
@@ -134,11 +123,18 @@ def mostrar_detalles_ingresos(frame_padre):
 
     # Eliminar registro
 def eliminar_registro(id_registro, frame_padre):
-    confirm = messagebox.askyesno("Confirmar", "¿Estás seguro de eliminar este registro?")
+    confirm = messagebox.askyesno("Confirmar", "¿Está seguro de eliminar este registro?")
     if confirm:
         conexion = sqlite3.connect("prueba.db")
         cursor = conexion.cursor()
-        cursor.execute("DELETE FROM polizasIngresos WHERE id = ?", (id_registro,))
+        cursor.execute("SELECT fecha, noPoliza FROM polizasIngresos WHERE id = ?", (id_registro,))
+        resultado = cursor.fetchone()
+        if resultado:
+            fecha, noPoliza = resultado
+            cursor.execute("DELETE FROM polizasIngresos WHERE id = ?", (id_registro,))
+            cursor.execute("DELETE FROM detallePolizaIngreso WHERE noPoliza = ? AND fecha = ?", (noPoliza, fecha))
+        else:
+            messagebox.showerror("Error", "El registro no se encontró")
         conexion.commit()
         conexion.close()
         mostrar_detalles_ingresos(frame_padre)  # Refrescar vista
@@ -147,7 +143,8 @@ def eliminar_registro(id_registro, frame_padre):
 def editar_registro(id_registro, fecha_antigua, no_poliza_ant, banco_ant, importe_ant, nota_ant, frame_padre):
     ventana_editar = ctk.CTkToplevel()
     ventana_editar.title("Editar Registro")
-    ventana_editar.geometry("400x400")
+    ventana_editar.geometry("500x750")
+    ventana_editar.resizable(False, False)
     
     entradas = {}
     
@@ -160,33 +157,71 @@ def editar_registro(id_registro, fecha_antigua, no_poliza_ant, banco_ant, import
     }
 
     for campo, valor in campos.items():
-        ctk.CTkLabel(ventana_editar, text=campo + ":").pack(pady=(10, 0))
-        entrada = ctk.CTkEntry(ventana_editar)
-        entrada.insert(0, valor)
-        entrada.pack()
+        ctk.CTkLabel(ventana_editar, text=campo + ":").pack(pady=(20, 0))
+        
+        if campo == "Nota":
+            entrada = ctk.CTkTextbox(ventana_editar, height=100)
+            entrada.insert("1.0", valor)
+        else:
+            entrada = ctk.CTkEntry(ventana_editar)
+            entrada.insert(0, valor)
+        
+        entrada.pack(fill="x", padx=20)
         entradas[campo] = entrada
+        
+    ctk.CTkLabel(
+        ventana_editar,
+        text=(
+        "Importante!\n\n"
+        "Si se ha equivocado en algún dato, se recomienda verificar el archivo generado.\n"
+        "Una vez rectificado el error, recomendamos borrar la hoja generada y volverla a generar,\n"
+        "así mismo también este registro.\n\n"
+        "La modificación en esta sección podría generar posibles problemas en futuros documentos.\n\n"
+        "Si necesita ayuda, contáctese con el equipo de soporte en la sección 'Ajustes'."),
+        text_color="red",
+        wraplength=450,
+        justify="left",
+        font=ctk.CTkFont(size=12, weight="bold")
+    ).pack(pady=(10, 0), padx=20)
 
     def guardar():
         nueva_fecha = entradas["Fecha (dd/mm/yyyy)"].get()
         nuevo_poliza = entradas["No. Póliza"].get()
         nuevo_banco = entradas["Banco"].get()
-        nuevo_importe = entradas["Importe"].get()
-        nueva_nota = entradas["Nota"].get()
+        nuevo_importe = entradas["Importe"].get().replace("$", "").replace(",", "").strip()
+        nueva_nota = entradas["Nota"].get("1.0", "end").strip()
 
 
         conexion = sqlite3.connect("prueba.db")
         cursor = conexion.cursor()
-        cursor.execute("""
-            UPDATE polizasIngresos
-            SET fecha = ?, noPoliza = ?, banco = ?, importe = ?, nota = ?
-            WHERE id = ?
-        """, (nueva_fecha, nuevo_poliza, nuevo_banco, nuevo_importe, nueva_nota, id_registro))
+        
+        cursor.execute("SELECT fecha, noPoliza FROM polizasIngresos WHERE id = ?", (id_registro,))
+        resultado = cursor.fetchone()
+
+        if resultado:
+            fecha_actual, noPoliza_Actual = resultado
+            
+            cursor.execute("""
+                UPDATE polizasIngresos
+                SET fecha = ?, noPoliza = ?, banco = ?, importe = ?, nota = ?
+                WHERE id = ?
+            """, (nueva_fecha, nuevo_poliza, nuevo_banco, nuevo_importe, nueva_nota, id_registro))
+        
+            cursor.execute("""
+                UPDATE detallePolizaIngreso
+                SET fecha = ?, noPoliza = ?, abono = ?
+                WHERE noPoliza = ? AND fecha = ?
+            """, (nueva_fecha, nuevo_poliza, nuevo_importe, noPoliza_Actual, fecha_actual))
+            
         conexion.commit()
         conexion.close()
         ventana_editar.destroy()
         mostrar_detalles_ingresos(frame_padre)
 
-    ctk.CTkButton(ventana_editar, text="Guardar cambios", command=guardar).pack(pady=20)
+    frame_botones = ctk.CTkFrame(ventana_editar, fg_color="transparent")
+    frame_botones.pack(pady=(20, 10))
+    ctk.CTkButton(frame_botones, text="Guardar cambios", fg_color="#008d62", hover_color="#2ca880", command=guardar).pack(side="left", padx=10)
+    ctk.CTkButton(frame_botones, text="Cancelar", fg_color="#d10d2f", hover_color="#d93954", command=ventana_editar.destroy).pack(side="left", padx=10)
     
 def actualizar_estilo_tabla(tabla):
     modo = ctk.get_appearance_mode()
@@ -229,15 +264,19 @@ def estilo_tabla():
 
     # Mapeo mejorado (incluye estado normal y selección)
     style.map("Light.Treeview",
-        background=[("selected", "#cce5ff"), ("!selected", "white")],  # ¡Corregido!
+        background=[("selected", "#cce5ff"), ("!selected", "white")], 
         foreground=[("selected", "black"), ("!selected", "black")]
     )
     style.map("Dark.Treeview",
-        background=[("selected", "#3a3a3a"), ("!selected", "#1e1e1e")],  # ¡Corregido!
+        background=[("selected", "#3a3a3a"), ("!selected", "#1e1e1e")], 
         foreground=[("selected", "white"), ("!selected", "white")]
     )
 
 
+
+
+
+                          
     
 
     

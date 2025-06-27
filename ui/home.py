@@ -17,6 +17,8 @@ from utils.rutas import ruta_absoluta
 CONFIG_PATH = ruta_absoluta("config.json")
 from utils.config_utils import cargar_config
 
+vista_act = None
+
 def guardar_estado_ventana(root):
     actualizar_config("geometry", root.geometry())
     actualizar_config("state", root.state())
@@ -184,7 +186,9 @@ def lanzar_ventana_principal():
         
     def abrir_det_ingresos(contenedor):
         limpiar_contenido(contenedor)
+        from ui.detalleIngresos import mostrar_detalles_ingresos
         mostrar_detalles_ingresos(contenedor)
+        registrar_vista(mostrar_detalles_ingresos, contenedor)  # ¡Registra la vista!
 
     def abrir_ajustes(contenedor):
         limpiar_contenido(contenedor)
@@ -309,6 +313,19 @@ def lanzar_ventana_principal():
         lambda: abrir_ajustes(frame_contenido)
     )
     
+    vista_actual = None
+    contenedor_actual = None
+    
+    def registrar_vista(funcion, contenedor):
+        global vista_actual, contenedor_actual
+        vista_actual = funcion
+        contenedor_actual = contenedor
+        
+    def refrescar_vista_actual():
+        if vista_actual and contenedor_actual:
+            limpiar_contenido(contenedor_actual)
+            vista_actual(contenedor_actual)
+    
     # Botón de tema con mejor diseño
     def cambiar_tema():
         current_mode = ctk.get_appearance_mode()
@@ -322,8 +339,9 @@ def lanzar_ventana_principal():
             imagenes["tema"] = CTkImage(Image.open(ruta_absoluta("assets/moon 2.png")), size=(20, 20))
             btn_tema.configure(text="Modo Oscuro", image=imagenes["tema"])
             actualizar_config("appearance_mode", "dark")
-            
-        mostrar_detalles_ingresos(frame_contenido)
+          
+        if contenedor_actual:  
+            refrescar_vista_actual()
 
     imagenes = {
     "tema": CTkImage(Image.open(ruta_absoluta("assets/moon 2.png")), size=(20, 20))
