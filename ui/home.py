@@ -14,6 +14,7 @@ from customtkinter import CTkImage, CTkFont
 import json
 from utils.config_utils import actualizar_config
 from utils.rutas import ruta_absoluta
+
 CONFIG_PATH = ruta_absoluta("config.json")
 from utils.config_utils import cargar_config
 

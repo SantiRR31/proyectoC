@@ -1,5 +1,4 @@
 import customtkinter as ctk
-from tkinter import LEFT
 from styles.styles import *
 from PIL import Image
 from customtkinter import CTkImage
@@ -13,8 +12,8 @@ import os
 from utils.rutas import ruta_absoluta
 from utils.egresos_utils import confirmar_y_generar_egresos
 from utils.rutas import ruta_absoluta
-from utils.utils import abrir_carpeta, cargar_config
-
+from utils.utils import abrir_carpeta
+from utils.config_utils import cargar_config
 
 config = cargar_config()
 

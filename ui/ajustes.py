@@ -8,29 +8,9 @@ from PIL import Image
 import os
 from utils.config_utils import cargar_config, actualizar_config
 from utils.rutas import ruta_absoluta
-
+from utils.config_utils import cargar_config
 CONFIG_PATH = "config.json"
 
-
-def cargar_config():
-    # Valores por defecto
-    defaults = {
-        "carpeta_destino": "~/Documentos/Cecati122/Polizas",
-        "clave_cecati": "22DBT0005P",
-        "banco_caja": "BANORTE"
-    }
-    config = {}
-    if os.path.exists(CONFIG_PATH):
-        with open(CONFIG_PATH, "r") as f:
-            try:
-                config = json.load(f)
-            except Exception:
-                config = {}
-    # Asegura que todas las claves existan
-    for key, value in defaults.items():
-        if key not in config:
-            config[key] = value
-    return config
 
 
 def mostrar_ajustes(frame_contenido):
@@ -41,7 +21,7 @@ def mostrar_ajustes(frame_contenido):
     carpeta_destino = tk.StringVar(value=config.get("carpeta_destino", "~/Documentos/Cecati122/Polizas"))
     clave_cecati = tk.StringVar(value=config.get("clave_cecati", "22DBT0005P"))
     banco_caja = tk.StringVar(value=config.get("banco_caja", "BANORTE"))
-
+    no_cecati = tk.StringVar(value=config.get("no_cecati", "0000"))
 
     def selecionar_carpeta():
         carpeta = fd.askdirectory(title="Seleccionar carpeta de destino")
@@ -56,6 +36,10 @@ def mostrar_ajustes(frame_contenido):
     def actualizar_banco_caja(nuevo_banco):
         banco_caja.set(nuevo_banco)
         actualizar_config("banco_caja", nuevo_banco)
+    
+    def actualizar_noCecati(nuevo_no):
+        no_cecati.set(nuevo_no)
+        actualizar_config("no_cecati",nuevo_no)
 
     # Título principal
     ctk.CTkLabel(
@@ -79,33 +63,45 @@ def mostrar_ajustes(frame_contenido):
         font=FUENTE_SUBMENU,
         text_color="#d31329"
     ).grid(row=0, column=0, columnspan=3, sticky="w", pady=(10, 5))
+    
+    
+    def crear_fila_ajuste(parent, row, label, variable, abrir_ventana_callback):
+        ctk.CTkLabel(
+            parent, 
+            text=label, 
+            font=FUENTE_LABEL
+        ).grid(row=row, column=0, padx=10, pady=10, sticky="w")
+        
+        ctk.CTkEntry(
+            parent, 
+            textvariable=variable, 
+            state="readonly", 
+            width=180
+        ).grid(row=row, column=1, padx=10, pady=10, sticky="we")
+        
+        ctk.CTkButton(
+            parent,
+            text="Cambiar",
+            width=90,
+            corner_radius=8,
+            command=abrir_ventana_callback
+    ).grid(row=row, column=2, padx=10, pady=10)
 
-    # Clave CECATI
-    ctk.CTkLabel(seccion_datos, text="Clave CECATI:", font=FUENTE_LABEL).grid(row=1, column=0, padx=10, pady=10, sticky="w")
-    ctk.CTkEntry(seccion_datos, textvariable=clave_cecati, state="readonly", width=180).grid(row=1, column=1, padx=10, pady=10, sticky="we")
-    ctk.CTkButton(
-        seccion_datos,
-        text="Cambiar",
-        width=90,
-        corner_radius=8,
-        fg_color="#d10d2f",
-        hover_color="#d93954",
-        command=lambda: abrir_ventana_clave(frame_contenido, clave_cecati, actualizar_clave_cecati)
-    ).grid(row=1, column=2, padx=10, pady=10)
+    crear_fila_ajuste(
+        seccion_datos, 1, "Clave CECATI:", clave_cecati,
+        lambda: abrir_ventana_edicion(frame_contenido, "Cambiar Clave CECATI", "Clave actual:", clave_cecati, "Nueva clave:", actualizar_clave_cecati, maxlen=10)
+    )
 
-    # Banco/Caja
-    ctk.CTkLabel(seccion_datos, text="Banco/Caja:", font=FUENTE_LABEL).grid(row=2, column=0, padx=10, pady=10, sticky="w")
-    ctk.CTkEntry(seccion_datos, textvariable=banco_caja, state="readonly", width=180).grid(row=2, column=1, padx=10, pady=10, sticky="we")
-    ctk.CTkButton(
-        seccion_datos,
-        text="Cambiar",
-        width=90,
-        corner_radius=8,
-        fg_color="#d10d2f",
-        hover_color="#d93954",
-        command=lambda: abrir_ventana_banco(frame_contenido, banco_caja, actualizar_banco_caja)
-    ).grid(row=2, column=2, padx=10, pady=10)
+    crear_fila_ajuste(
+        seccion_datos, 2, "Banco/Caja:", banco_caja,
+        lambda: abrir_ventana_edicion(frame_contenido, "Cambiar Banco o Caja", "Banco actual:", banco_caja, "Nuevo banco:", actualizar_banco_caja)
+    )
 
+    crear_fila_ajuste(
+        seccion_datos, 3, "No cecati:", no_cecati,
+        lambda: abrir_ventana_edicion(frame_contenido, "Cambiar No Cecati", "No actual:", no_cecati, "Nuevo No:", actualizar_noCecati, maxlen=10)
+    )
+    
     seccion_datos.grid_columnconfigure(1, weight=1)
 
     # Separador visual
@@ -308,3 +304,45 @@ def abrir_ventana_soporte():
 
     btn_cerrar = ctk.CTkButton(ventana, text="Cerrar", fg_color="#d10d2f", hover_color="#d93954", command=ventana.destroy)
     btn_cerrar.pack(pady=(0, 10))
+    btn_cerrar = ctk.CTkButton(ventana, text="Cerrar", command=ventana.destroy)
+    btn_cerrar.pack(pady=(0, 10))
+    
+def abrir_ventana_edicion(frame_contenido, titulo, label_actual, variable_actual, label_nuevo, actualizar_callback, maxlen=20):
+    ventana = ctk.CTkToplevel(frame_contenido)
+    ventana.title(titulo)
+    ventana.geometry("400x250")
+    ventana.resizable(False, False)
+    ventana.grab_set()
+    ventana.focus_force()
+
+    ctk.CTkLabel(ventana, text=label_actual, font=FUENTE_LABEL).grid(row=0, column=0, padx=20, pady=(20, 5), sticky="w")
+    ctk.CTkEntry(ventana, state="readonly", textvariable=variable_actual).grid(row=1, column=0, padx=20, pady=5, sticky="we")
+
+    ctk.CTkLabel(ventana, text=label_nuevo, font=FUENTE_LABEL).grid(row=2, column=0, padx=20, pady=(15, 5), sticky="w")
+    nuevo_valor_var = tk.StringVar()
+
+    def limitar_y_mayusculas(*args):
+        valor = nuevo_valor_var.get().upper()
+        if len(valor) > maxlen:
+            valor = valor[:maxlen]
+        nuevo_valor_var.set(valor)
+
+    nuevo_valor_var.trace_add("write", limitar_y_mayusculas)
+
+    entry_nueva = ctk.CTkEntry(ventana, textvariable=nuevo_valor_var)
+    entry_nueva.grid(row=3, column=0, padx=20, pady=5, sticky="we")
+    entry_nueva.focus_set()
+
+    def guardar():
+        nuevo_valor = nuevo_valor_var.get().strip()
+        if nuevo_valor:
+            actualizar_callback(nuevo_valor)
+            ventana.destroy()
+
+    frame_botones = ctk.CTkFrame(ventana)
+    frame_botones.grid(row=4, column=0, pady=20)
+
+    ctk.CTkButton(frame_botones, text="Guardar", command=guardar).pack(side="left", padx=10)
+    ctk.CTkButton(frame_botones, text="Cancelar", command=ventana.destroy).pack(side="left", padx=10)
+
+    ventana.grid_columnconfigure(0, weight=1)
