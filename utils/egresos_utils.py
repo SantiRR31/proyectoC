@@ -1,10 +1,11 @@
 from datetime import time
 from datetime import datetime
+import gc
 import os
 import sqlite3
 import traceback
 import xlwings as xw
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 from utils.utils import *
 from utils.rutas import ruta_absoluta
 import customtkinter as ctk
@@ -12,7 +13,7 @@ import math
 from db.egresosDB import *
 from models.egresomodelos import *
 from datetime import datetime
-import tkinter as tk
+from utils.config_utils import cargar_config
 
 config = cargar_config()
 
@@ -125,6 +126,13 @@ def asignar_valores_en_hoja(hoja, poliza):
                 valor = f"CLAVE DE RASTREO {poliza.clave_ref or ''}"
             else:
                 valor = ""
+        if campo == "fecha":
+            try:
+                d, m, y = valor.split("/")
+                valor = f"{m}/{d}/{y}"
+            except Exception:
+                pass
+            valor = f"{valor}" # El apóstrofe fuerza a texto en Excel
         hoja.range(celda).value = valor
         
 
@@ -153,19 +161,37 @@ def insertar_entradas_en_hoja(hoja, conceptos, fila_inicial=18):
 def guardar_egresos(poliza):
     try:
         app = xw.App(visible=False)
-        wb = app.books.open(ruta_absoluta("assets/plantillas/egresos.xlsx"))
-        hoja = wb.sheets["01 ene 2025"]
+        # Archivo por mes
+        fecha_dt = datetime.strptime(poliza.fecha, "%d/%m/%Y")
+        nombre_archivo = f"egresos_{fecha_dt.strftime('%b_%Y').lower()}.xlsx"
+        ruta_descargas = os.path.join(config["carpeta_destino"], "PolizasDeEgresos")
+        os.makedirs(ruta_descargas, exist_ok=True)
+        ruta_archivo = os.path.join(ruta_descargas, nombre_archivo)
+
+        # Si el archivo existe, ábrelo; si no, crea uno nuevo desde la plantilla
+        if os.path.exists(ruta_archivo):
+            wb = xw.Book(ruta_archivo)
+        else:
+            wb = app.books.open(ruta_absoluta("assets/plantillas/egresos.xlsx"))
+
+        nombre_hoja = obtener_nombre_hoja(poliza.poliza_id)
+        nombres_hojas = [sheet.name for sheet in wb.sheets]
+        if nombre_hoja not in nombres_hojas:
+            # Copia la hoja plantilla (ajusta el nombre según tu plantilla)
+            nombre_plantilla = "01 ene 2025"  # o el nombre real de tu hoja plantilla
+            if nombre_plantilla in nombres_hojas:
+                hoja_plantilla = wb.sheets[nombre_plantilla]
+                hoja_nueva = hoja_plantilla.copy(after=wb.sheets[-1])
+                hoja_nueva.name = nombre_hoja
+            else:
+                # Si no hay plantilla, crea una hoja en blanco como fallback
+                hoja_nueva = wb.sheets.add(nombre_hoja)
+        hoja = wb.sheets[nombre_hoja]
         asignar_valores_en_hoja(hoja, poliza)
 
         if not insertar_entradas_en_hoja(hoja, poliza.conceptos):
             wb.close()
             return
-
-        fecha_actual = obtener_fecha_actual().replace("/", "-")
-        nombre_archivo = f"Poliza_Egresos_{fecha_actual}.xlsx"
-        ruta_descargas = os.path.join(config["carpeta_destino"], "PolizasDeEgresos")
-        os.makedirs(ruta_descargas, exist_ok=True)
-        ruta_archivo = os.path.join(ruta_descargas, nombre_archivo)
 
         wb.save(ruta_archivo)
         messagebox.showinfo("Éxito", f"Archivo guardado en: {ruta_archivo}")
@@ -338,7 +364,6 @@ def generar_no_poliza_para_fecha(fecha):
     anio = dt.strftime("%Y")
     dia = dt.strftime("%d")
     return f"{consecutivo}/{mes}/{anio}"
-
 
 # egresos_utils.py
 
@@ -610,8 +635,6 @@ def campos_obligatorios_vacios(campos, conceptos):
             return True
     return False
 
-
-
 #------------------ Funciones para generar el liro de egresos -----------------
 
 meses = {
@@ -621,42 +644,88 @@ meses = {
 }
 
 def confirmar_y_generar_egresos(contenedor_principal=None):
-    respuesta = messagebox.askyesno("Generar reporte", "¿Está seguro de generar el reporte de egresos?")
-    if respuesta:
-        # Puedes pasar None para los botones si no tienes referencias a ellos
+    ventana = ctk.CTkToplevel()
+    ventana.title("Generar reporte de egresos")
+    ventana.geometry("340x180")
+    ventana.resizable(False, False)
+    ventana.grab_set()
+    ventana.transient(contenedor_principal)
+
+    meses_lista = [
+        "enero", "febrero", "marzo", "abril", "mayo", "junio",
+        "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+    ]
+
+    hoy = datetime.now()
+    mes_actual = hoy.month
+    anio_actual = hoy.year
+
+    ctk.CTkLabel(ventana, text="Seleccione el mes y año del reporte:", font=("Arial", 13)).pack(pady=(16, 6))
+
+    frame = ctk.CTkFrame(ventana, fg_color="transparent")
+    frame.pack(pady=4)
+
+    mes_var = ctk.StringVar(value=meses_lista[mes_actual-1])
+    anio_var = ctk.StringVar(value=str(anio_actual))
+
+    mes_cb = ttk.Combobox(frame, values=meses_lista, textvariable=mes_var, state="readonly", width=14)
+    mes_cb.grid(row=0, column=0, padx=8)
+    anio_cb = ttk.Combobox(frame, values=[str(a) for a in range(anio_actual-5, anio_actual+2)], textvariable=anio_var, width=8, state="readonly")
+    anio_cb.grid(row=0, column=1, padx=8)
+
+    def generar_reporte_seleccionado():
+        mes_idx = meses_lista.index(mes_var.get()) + 1
+        anio = int(anio_var.get())
+        mes_str = f"{anio}-{mes_idx:02d}"
+        ventana.destroy()
+        mostrar_loading_y_ejecutar(
+            lambda: generar_reporte_egresos_xlwings(mes_str),
+            contenedor_principal=contenedor_principal,
+        )
+
+    def generar_reporte_actual():
+        ventana.destroy()
         mostrar_loading_y_ejecutar(
             generar_reporte_egresos_xlwings,
             contenedor_principal=contenedor_principal,
         )
-        
 
+    btn_frame = ctk.CTkFrame(ventana, fg_color="transparent")
+    btn_frame.pack(pady=18)
 
-def generar_reporte_egresos_xlwings():
+    ctk.CTkButton(btn_frame, text="Generar mes seleccionado", command=generar_reporte_seleccionado, width=140).pack(side="left", padx=10)
+    ctk.CTkButton(btn_frame, text="Generar mes actual", command=generar_reporte_actual, width=120).pack(side="left", padx=10)
+
+# función generar_reporte_egresos_
+def generar_reporte_egresos_xlwings(mes_anio=None):
+    app = None
+    wb = None
     try:
-        # Fecha actual y mes actual en formato YYYY-MM
         hoy = datetime.now()
-        mes_actual = hoy.strftime('%Y-%m')
-        nombre_hoja = hoy.strftime('%b %Y').lower()  # Ejemplo: 'may 2025'
+        mes_actual = mes_anio if mes_anio else hoy.strftime('%Y-%m')
+        nombre_hoja = hoy.strftime('%b %Y').lower()  # Ejemplo: 'jun 2025'
 
-        polizas_mes = polizas_mes = obtener_polizas_egresos_mes(mes_actual)
-
+        polizas_mes = obtener_polizas_egresos_mes(mes_actual)
         if not polizas_mes:
             raise ValueError("No se encontraron pólizas de egresos en el mes actual.")
 
-        # Obtener partidas específicas únicas del mes actual
-        
-        # Al obtener partidas_mes:
         partidas_mes = [row[0] for row in obtener_partidas_mes(mes_actual)]
 
-        # Abrir Excel
+        partidas_finales = [120, 330]  # Ahora como enteros
+        # Filtra y ordena ascendente las demás
+        partidas_ordenadas = sorted([p for p in partidas_mes if p not in partidas_finales])
+        # Agrega al final las partidas especiales si existen en la lista
+        partidas_ordenadas += [p for p in partidas_finales if p in partidas_mes]
+        partidas_mes = partidas_ordenadas
+        print(partidas_mes)
+
+        # Abrir Excel de forma segura
         app = xw.App(visible=False)
         wb = app.books.open("assets/plantillas/LibroDeEgresos.xls")
-        
-        nombre_hoja_plantilla = "mar 2025"  # <-- Ajusta esto según tu plantilla
-        nombre_hoja = hoy.strftime('%b %Y').lower()
-        
+
+        # Crear hoja si no existe
+        nombre_hoja_plantilla = "mar 2025"
         if nombre_hoja not in [sheet.name.lower() for sheet in wb.sheets]:
-            # Si la hoja no existe, crear una nueva copia de la plantilla
             try:
                 sht_plantilla = wb.sheets[nombre_hoja_plantilla]
                 sht_nueva = sht_plantilla.copy(after=wb.sheets[-1])
@@ -664,78 +733,105 @@ def generar_reporte_egresos_xlwings():
             except Exception as e:
                 raise ValueError(f"No se pudo crear la hoja '{nombre_hoja}': {e}")
 
-        # Seleccionar hoja del mes
-        try:
-            sht = wb.sheets[nombre_hoja]
-        except:
-            raise ValueError(f"No se encontró la hoja: '{nombre_hoja}' en el archivo Excel.")
+        sht = wb.sheets[nombre_hoja]
 
-        # Borrar datos anteriores en la hoja
+        # Limpiar datos anteriores
         sht.range("A10:J40").clear_contents()
 
-        mes_ano = f"{meses[hoy.month]}/{hoy.year}"
-        sht.range("K5").value = mes_ano
+        # Encabezados
+        mes_excel = hoy.strftime('%b-%y').lower()
+        sht.range("T5").value = mes_excel
+        sht.range("J5").value = config["no_cecati"]
 
-        # Escribir encabezados de partidas específicas
         col_inicio = 4
-        max_cols = 6
+        max_cols = 17
         columna_j = 10
-        fila_formula = 41
+        fila_formula = 47
         rango_inicio = 10
-        rango_fin = 40
+        rango_fin = 46
 
         num_partidas = len(partidas_mes)
+        num_polizas = len(polizas_mes)
 
+        # Insertar columnas si hay más partidas
         if num_partidas > max_cols:
-            col_a_insertar = num_partidas - max_cols
-            for offset in range(col_a_insertar):
-                sht.range((1, columna_j)).api.EntireColumn.Insert()
+            columnas_extra = num_partidas - max_cols
+            for offset in range(columnas_extra):
                 col_destino = columna_j + offset
+                sht.range((1, col_destino)).api.EntireColumn.Insert()
                 letra_col = xw.utils.col_name(col_destino)
                 formula = f"=SUMA({letra_col}{rango_inicio}:{letra_col}{rango_fin})"
                 sht.range((fila_formula, col_destino)).formula = formula
 
+        # Escribir encabezados de partida
         for idx, partida in enumerate(partidas_mes):
             sht.range((8, col_inicio + idx)).value = partida
 
-        # Escribir pólizas
+        # Insertar filas si hay más pólizas de las esperadas
         fila_inicio = 10
-        for idx, (fecha, no_poliza, importe, id_poliza) in enumerate(polizas_mes):
+        if num_polizas > (rango_fin - rango_inicio + 1):
+            filas_extra = num_polizas - (rango_fin - rango_inicio + 1)
+            sht.range(f"A{rango_fin + 1}:A{rango_fin + filas_extra}").api.EntireRow.Insert()
+
+        # Escribir datos de pólizas
+        for idx, (fecha, no_poliza, id_poliza, tipo_pago, no_cheque) in enumerate(polizas_mes):
             fila = fila_inicio + idx
             fecha_dt = datetime.strptime(fecha, "%d/%m/%Y")
             sht.range(f"A{fila}").value = fecha_dt
-            sht.range(f"B{fila}").value = no_poliza
-            sht.range(f"C{fila}").value = importe
+            sht.range(f"B{fila}").value = no_poliza.split("/")[0] if no_poliza else ""
+            sht.range(f"C{fila}").value = no_cheque if tipo_pago == "CHEQUE" else "TRANS" if tipo_pago == "TRANSF. ELECTRÓNICA" else ""
 
-            # Obtener cargos por partida específica
             cargos = obtener_conceptos_por_partida_especifica(id_poliza)
-
-            # Escribir cargos
             for col_idx, partida in enumerate(partidas_mes):
                 valor = cargos.get(partida, 0)
                 sht.range((fila, col_inicio + col_idx)).value = "" if valor == 0 else valor
 
-        # Guardar en carpeta personalizada
-        #carpeta_base = r"C:\Cecati122"
+        # Guardar archivo en carpeta de salida
         carpeta_salida = os.path.join(config["carpeta_destino"], "InformesDeEgresos")
         os.makedirs(carpeta_salida, exist_ok=True)
-        archivo_salida = os.path.join(carpeta_salida, f"egresos_{mes_actual}.xlsx")
 
         mes_act = hoy.month
         anio_act = hoy.year
-        nvo_nom_libro = f"{meses[mes_act]} {anio_act}"
-        sht.name = nvo_nom_libro
+        sht.name = f"{meses[mes_act]} {anio_act}"
 
+        archivo_salida = os.path.join(carpeta_salida, f"egresos_{mes_actual}.xlsx")
+        #app.visible = True
+        wb.app.calculation = 'automatic'
+        #sht.calculate()
+        wb.app.calculate()
         wb.save(archivo_salida)
 
-        # Cerrar recursos
-        wb.close()
-        app.quit()
-        
         # Confirmación
-        messagebox.showinfo("Reporte generado", f"El reporte de egresos se ha generado exitosamente:\n{archivo_salida}")
+        
+        messagebox.showinfo(
+            "Reporte generado",
+            "El reporte de egresos se ha generado exitosamente.\n\nAtención:\nEl archivo fue generado. Si ves #### en las celdas, abre el archivo en Excel y presiona F9 o guarda el archivo para recalcular las fórmulas."
+        )
+
         return archivo_salida
 
     except Exception as e:
         print(f"Error generando el reporte de egresos: {e}")
         messagebox.showerror("Error", f"Ocurrió un error al generar el reporte de egresos:\n{e}")
+
+    finally:
+        # Limpieza segura de recursos
+        try:
+            if wb:
+                
+                wb.close()
+        except Exception as e:
+            print("Error cerrando el libro:", e)
+
+        try:
+            if app:
+                app.quit()
+        except Exception as e:
+            print("Error cerrando Excel:", e)
+
+        # Liberar memoria
+        wb = None
+        app = None
+        sht = None
+        
+        gc.collect()

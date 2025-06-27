@@ -1,35 +1,6 @@
-import json
+import locale
 import tkinter as tk
-import datetime
-import os
-from utils.rutas import ruta_absoluta
-
-CONFIG_PATH = ruta_absoluta("config.json")
-
-def cargar_config():
-    # Valores por defecto
-    defaults = {
-        "carpeta_destino": "~/Documentos/Cecati122/Polizas",
-        "clave_cecati": "22DBT0005P",
-        "banco_caja": "BANORTE",
-        "geometry": "1280x720+100+100",
-        "state": "normal",
-        "appearance_mode": "dark",
-        "color_theme": "blue"
-    }
-    config = {}
-    if os.path.exists(CONFIG_PATH):
-        with open(CONFIG_PATH, "r") as f:
-            try:
-                config = json.load(f)
-            except Exception:
-                config = {}
-    # Asegura que todas las claves existan
-    for key, value in defaults.items():
-        if key not in config:
-            config[key] = value
-    return config
-
+from datetime import datetime
 
 def obtener_fecha_actual():
     """Devuelve la fecha actual en formato 'DD/mmm/YYYY', por ejemplo: 01/ene/2025."""
@@ -70,7 +41,8 @@ def solo_numeros_decimales(texto):
         return False
 
 def solo_letras(texto):
-    return all(letra.isalpha() or letra.isspace() for letra in texto)
+    permitidos = " -'áéíóúÁÉÍÓÚüÜñÑ."
+    return all(letra.isalpha() or letra in permitidos for letra in texto)
 
 def solo_numeros_y_letras(texto):
     return all(letra.isalnum() or letra.isspace() for letra in texto)
@@ -144,5 +116,17 @@ def numero_a_letras_mxn(numero):
 
     return f"({letras} PESOS {centavos:02d}/100 M.N.)"
 
+# Asegúrate de usar el locale español para los nombres de meses
+try:
+    locale.setlocale(locale.LC_TIME, 'es_MX.UTF-8')
+except:
+    try:
+        locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+    except:
+        pass  # Si no está disponible, usará el default
 
-
+def obtener_nombre_hoja(poliza_id):
+    # poliza_id: "08/jun/2025"
+    fecha_dt = datetime.strptime(poliza_id, "%d/%b/%Y")
+    # %B para mes completo, %b para abreviado
+    return fecha_dt.strftime("%d %B %Y").lower()  # Ejemplo: "08 abril 2025"

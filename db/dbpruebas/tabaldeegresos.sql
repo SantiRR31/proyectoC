@@ -83,7 +83,8 @@ GROUP BY "CLAVE CUCoP"
 HAVING cantidad > 1;
 
 SELECT *
-FROM partidasEgresos_OLD
+FROM partidasEgresos;
+
 WHERE "CLAVE CUCoP" IS NULL;
 
 DELETE FROM partidasEgresos_old
@@ -195,3 +196,53 @@ SELECT
     d.cargo
 WHERE 
     p.id_poliza = 1
+
+
+
+INSERT INTO partidasEgresos (
+    "CABM ACTUALIZADO",
+    "TIPO",
+    "PARTIDA ESPECÍFICA",
+    "CLAVE CUCoP",
+    "DESCRIPCIÓN",
+    "NIVEL",
+    "CABM ANTERIOR",
+    "UNIDAD  DE MEDIDA (sugerida)"
+) VALUES
+('120', 1, 120, 120, 'Deudores diversos', 1, NULL, NULL),
+('330', 1, 120, 330, 'Acreedores diversos', 1, NULL, NULL);
+
+
+select * from partidasEgresos 
+where "CLAVE CUCoP" = 330;
+
+
+select * from detallePolizaEgreso
+where id_poliza = 9;
+
+
+UPDATE detallePolizaEgreso
+SET "PARTIDA ESPECÍFICA" = 120
+WHERE id_poliza = 9 AND "CLAVE CUCoP" = 120;
+
+UPDATE detallePolizaEgreso
+SET "CLAVE CUCoP" = 33300005, "PARTIDA ESPECÍFICA" = 33303
+WHERE id_poliza = 11;
+
+
+select * from detallePolizaEgreso
+WHERE id_poliza = 11;
+
+
+INSERT INTO partidasEgresos (
+    "CABM ACTUALIZADO",
+    "TIPO",
+    "PARTIDA ESPECÍFICA",
+    "CLAVE CUCoP",
+    "DESCRIPCIÓN",
+    "NIVEL",
+    "CABM ANTERIOR",
+    "UNIDAD  DE MEDIDA (sugerida)"
+) VALUES
+('37504', 3, 37504, 37504, 'Viaticos nacionales para servidores publicos en el sesempeño de funciones oficiales', 3, NULL, NULL),
+('37500004', 4, 37504, 37500004, 'Viaticos nacionales para servidores publicos en el sesempeño de funciones oficiales', 4, NULL, NULL);

@@ -1,7 +1,7 @@
 import os
 import json
-
-CONFIG_PATH = "config.json"
+from utils.rutas import ruta_absoluta
+CONFIG_PATH = ruta_absoluta("config.json")
 
 DEFAULT_CONFIG = {
     "carpeta_destino": "~/Documentos/Cecati122/Polizas",
@@ -10,7 +10,8 @@ DEFAULT_CONFIG = {
     "geometry": "1280x720+100+100",
     "state": "normal",
     "appearance_mode": "dark",
-    "color_theme": "blue"
+    "color_theme": "blue",
+    "no_cecati": "000"
 }
 
 def cargar_config():
