@@ -161,10 +161,15 @@ def mostrar_formulario_egresos(frame_padre):
         )
     btn_buscar.place(relx=0.98, rely=0.07, anchor="ne")
 
-    fecha = fecha_policia.get()  # Ejemplo: '2025-06-03'
-    no_poliza_valor = generar_no_poliza_para_fecha(fecha)
-    no_poliza.delete(0, "end")
-    no_poliza.insert(0, no_poliza_valor)
+    def actualizar_no_poliza(event=None):
+        fecha = fecha_policia.get()
+        no_poliza_valor = generar_no_poliza_para_fecha(fecha)
+        no_poliza.delete(0, "end")
+        no_poliza.insert(0, no_poliza_valor)
+        
+    actualizar_no_poliza()
+        
+    fecha_policia.bind("<<DateEntrySelected>>", actualizar_no_poliza)
 
     # Separador visual
     separador = ctk.CTkFrame(
@@ -200,7 +205,17 @@ def mostrar_formulario_egresos(frame_padre):
     nombre.configure(validate="key", validatecommand=(vcmdo, "%P"))
     nombre.bind("<KeyRelease>", lambda event: convertir_a_mayusculas(nombre, event))
     nombre.grid(row=3, column=1, columnspan=3, padx=(5, 15), pady=5, sticky="ew")
+    
+    def validar_y_mayusculas_nombre(event=None):
+        texto = nombre.get()
+        # Si no es válido, limpia lo que no sea permitido
+        texto_filtrado = ''.join([c for c in texto if solo_letras(c)])
+        nombre.delete(0, "end")
+        nombre.insert(0, texto_filtrado.upper())
 
+    nombre.bind("<<Paste>>", lambda e: nombre.after(1, validar_y_mayusculas_nombre))
+    nombre.bind("<Control-v>", lambda e: nombre.after(1, validar_y_mayusculas_nombre))
+    
 # Etiqueta "Monto"
     ctk.CTkLabel(
         seccion_poliza,
@@ -300,7 +315,7 @@ def mostrar_formulario_egresos(frame_padre):
     placeholder_text="🔑 Clave de rastreo",
     **ESTILO_ENTRADA
     )
-    clave_rastreo.configure(validate="key", validatecommand=(vcmdo, "%P"))
+    #clave_rastreo.configure(validate="key", validatecommand=(vcmdo, "%P"))
     clave_rastreo.bind("<KeyRelease>", lambda event: convertir_a_mayusculas(clave_rastreo, event))
 
     def mostrar_campos_pago(*args):

@@ -226,13 +226,11 @@ def consultar_poliza_por_no(no_poliza):
     return poliza
 
 
-
-
 def obtener_polizas_egresos_mes(mes_actual):
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT fecha, no_poliza, monto, id_poliza
+        SELECT fecha, no_poliza, id_poliza, tipo_pago, no_cheque
         FROM polizasEgresos
         WHERE strftime('%Y-%m', 
             substr(fecha, 7) || '-' || substr(fecha, 4, 2) || '-' || substr(fecha, 1, 2)
