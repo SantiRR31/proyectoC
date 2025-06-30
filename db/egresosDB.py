@@ -268,3 +268,68 @@ def obtener_conceptos_por_partida_especifica (id_poliza):
     resultados = cursor.fetchall()
     conn.close()
     return {row[0]: row[1] for row in resultados}
+
+
+def obtener_total_deudores(mes_anio):
+    conn = conectar()
+    query = """
+    SELECT SUM(d.cargo)
+    FROM detallePolizaEgreso d
+    JOIN polizasEgresos p ON d.id_poliza = p.id_poliza
+    WHERE d."PARTIDA ESPECÍFICA" = 120
+      AND strftime('%Y-%m', 
+          substr(p.fecha, 7) || '-' || substr(p.fecha, 4, 2) || '-' || substr(p.fecha, 1, 2)
+      ) = ?
+    """
+    cur = conn.cursor()
+    cur.execute(query, (mes_anio,))
+    result = cur.fetchone()
+    return result[0] if result and result[0] is not None else 0
+
+def obtener_total_acreedores(mes_anio):
+    conn= conectar()
+    query = """
+    SELECT SUM(d.cargo)
+    FROM detallePolizaEgreso d
+    JOIN polizasEgresos p ON d.id_poliza = p.id_poliza
+    WHERE d."PARTIDA ESPECÍFICA" = 330
+      AND strftime('%Y-%m', 
+          substr(p.fecha, 7) || '-' || substr(p.fecha, 4, 2) || '-' || substr(p.fecha, 1, 2)
+      ) = ?
+    """
+    cur = conn.cursor()
+    cur.execute(query, (mes_anio,))
+    result = cur.fetchone()
+    return result[0] if result and result[0] is not None else 0
+
+
+def agrupar_partidas_por_grupo(partidas_mes):
+    grupos = {}
+    for codigo, total_cargo in partidas_mes:
+        codigo_str = str(codigo)
+        if len(codigo_str) == 5:
+            grupo = int(codigo_str[:2]) * 100
+        elif len(codigo_str) == 4:
+            grupo = int(codigo_str[:2]) * 100
+        elif len(codigo_str) == 3:
+            grupo = int(codigo_str[0]) * 100
+        else:
+            grupo = int(codigo)
+        if grupo not in grupos:
+            grupos[grupo] = []
+        grupos[grupo].append((codigo, total_cargo))
+    return grupos
+
+
+def obtener_partidas_mesagrupasa (mes_actual): 
+    conn = conectar()
+    query = """
+    SELECT d."PARTIDA ESPECÍFICA", SUM(d.cargo)
+    FROM detallePolizaEgreso d
+    JOIN polizasEgresos po ON d.id_poliza = po.id_poliza
+    WHERE strftime('%Y-%m', substr(po.fecha, 7) || '-' || substr(po.fecha, 4, 2) || '-' || substr(po.fecha, 1, 2)) = ?
+    GROUP BY d."PARTIDA ESPECÍFICA"
+    """
+    cur = conn.cursor()
+    cur.execute(query, (mes_actual,))
+    return cur.fetchall()

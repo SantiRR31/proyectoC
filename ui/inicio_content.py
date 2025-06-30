@@ -10,7 +10,7 @@ import threading
 from dotenv import load_dotenv
 import os
 from utils.rutas import ruta_absoluta
-from utils.egresos_utils import confirmar_y_generar_egresos
+from utils.egresos_utils import confirmar_y_generar_egresos, confirmar_y_generar_consolidado
 from utils.rutas import ruta_absoluta
 from utils.utils import abrir_carpeta
 from utils.config_utils import cargar_config
@@ -466,6 +466,7 @@ def mostrar_inicio(contenedor):
         ("Informes", "assets/web.png", ("#8b5cf6", "#7c3aed"), ["Ver", "Descargar"], "Opciones", None),
         ("Inf. Consolidado de Ingresos", "assets/excel.png", ("#0081a8", "#0f6580"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar2}),
         ("Auxiliar Bancario", "assets/coin.png", ("#f59e0b", "#d97706"), ["Generar"], "Opciones", {"Generar": confirmar_aux}),
+        ("Inf. Consolidado de agresos", "assets/exel.png", ("#f68b83","#f68b83"), ["Generar"],"Opciones", {"Generar": lambda: confirmar_y_generar_consolidado(contenedor_principal=contenedor)}),
     ]
     
     columnas = 3

@@ -36,7 +36,7 @@ drop table polizasEgresos;
 -- Renombre la tabla 
 ALTER TABLE detallePolizaEgreso RENAME TO detallePolizaEgreso_old;
 -- ver el sql usado para crear la tabla 
-SELECT sql FROM sqlite_master WHERE type='table' AND name='detallePolizaEgreso';
+SELECT sql FROM sqlite_master WHERE type='table' AND name='polizasEgresos';
 -- Ver las tablas existentes
 .tables
 -- 
@@ -246,3 +246,10 @@ INSERT INTO partidasEgresos (
 ) VALUES
 ('37504', 3, 37504, 37504, 'Viaticos nacionales para servidores publicos en el sesempeño de funciones oficiales', 3, NULL, NULL),
 ('37500004', 4, 37504, 37500004, 'Viaticos nacionales para servidores publicos en el sesempeño de funciones oficiales', 4, NULL, NULL);
+
+
+SELECT d."PARTIDA ESPECÍFICA", SUM(d.cargo)
+FROM detallePolizaEgreso d
+JOIN polizasEgresos po ON d.id_poliza = po.id_poliza
+WHERE strftime('%Y-%m', substr(po.fecha, 7) || '-' || substr(po.fecha, 4, 2) || '-' || substr(po.fecha, 1, 2)) = '2025-04'
+GROUP BY d."PARTIDA ESPECÍFICA";
