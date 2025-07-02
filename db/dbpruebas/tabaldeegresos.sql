@@ -253,3 +253,43 @@ FROM detallePolizaEgreso d
 JOIN polizasEgresos po ON d.id_poliza = po.id_poliza
 WHERE strftime('%Y-%m', substr(po.fecha, 7) || '-' || substr(po.fecha, 4, 2) || '-' || substr(po.fecha, 1, 2)) = '2025-04'
 GROUP BY d."PARTIDA ESPECÍFICA";
+
+
+SELECT 
+    p.id_poliza,
+    p.no_poliza,
+    p.fecha,
+    p.monto,
+    p.nombre,
+    p.tipo_pago,
+    p.clave_ref,
+    p.denominacion,
+    p.observaciones,
+    p.no_cheque,
+    d."CLAVE CUCoP",
+    d."PARTIDA ESPECÍFICA",
+    d.cargo
+FROM polizasEgresos p
+JOIN detallePolizaEgreso d ON p.id_poliza = d.id_poliza
+WHERE strftime('%Y-%m', 
+    substr(p.fecha, 7) || '-' || substr(p.fecha, 4, 2) || '-' || substr(p.fecha, 1, 2)
+) = '2025-06'
+ORDER BY p.id_poliza, d."PARTIDA ESPECÍFICA";
+
+
+
+-- 1. Borrar de detallePolizaEgreso todas las partidas de las pólizas del mes
+DELETE FROM detallePolizaEgreso
+WHERE id_poliza IN (
+    SELECT id_poliza
+    FROM polizasEgresos
+    WHERE strftime('%Y-%m', 
+        substr(fecha, 7) || '-' || substr(fecha, 4, 2) || '-' || substr(fecha, 1, 2)
+    ) = '2025-06'
+);
+
+-- 2. Borrar las pólizas del mes
+DELETE FROM polizasEgresos
+WHERE strftime('%Y-%m', 
+    substr(fecha, 7) || '-' || substr(fecha, 4, 2) || '-' || substr(fecha, 1, 2)
+) = '2025-06';
