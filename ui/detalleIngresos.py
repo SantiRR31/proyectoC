@@ -5,7 +5,11 @@ from widgets.widgets import *
 from styles.styles import *
 from utils.config_utils import cargar_config
 import sqlite3
+import xlwings as xw
+import os
+from datetime import datetime
 from tkinter import messagebox
+from functions.genRegIngresos import generar_reporte_xlwings
 
 
 
@@ -99,7 +103,13 @@ def mostrar_detalles_ingresos(frame_padre):
 
     # Botones para editar y eliminar seleccionados
     frame_botones = ctk.CTkFrame(frame_padre, fg_color="transparent")
-    frame_botones.pack(pady=10)
+    frame_botones.pack(fill="x", pady=10)
+
+    frame_centro = ctk.CTkFrame(frame_botones, fg_color="transparent")
+    frame_centro.pack(side="left", expand=True)
+    
+    frame_derecha = ctk.CTkFrame(frame_botones, fg_color="transparent")
+    frame_derecha.pack(side="right")
 
     def obtener_seleccion():
         seleccionado = tabla.focus()
@@ -110,16 +120,19 @@ def mostrar_detalles_ingresos(frame_padre):
         id_registro = seleccionado
         return [id_registro] + valores
 
-    btn_editar = ctk.CTkButton(frame_botones, text="Editar seleccionado", text_color="black", fg_color="#ffd300", hover_color="#ffb201", command=lambda: (
+    btn_editar = ctk.CTkButton(frame_centro, text="Editar seleccionado", text_color="black", fg_color="#ffd300", hover_color="#ffb201", command=lambda: (
         (datos := obtener_seleccion()) and editar_registro(*datos, frame_padre)
     ))
     btn_editar.pack(side="left", padx=10)
 
-    btn_eliminar = ctk.CTkButton(frame_botones, text="Eliminar seleccionado", fg_color="#d10d2f", hover_color="#d93954",
+    btn_eliminar = ctk.CTkButton(frame_centro, text="Eliminar seleccionado", fg_color="#d10d2f", hover_color="#d93954",
         command=lambda: (
             (datos := obtener_seleccion()) and eliminar_registro(datos[0], frame_padre)
     ))
     btn_eliminar.pack(side="left", padx=10)
+    
+    btn_generar = ctk.CTkButton(frame_derecha, text="Generar de nuevo", text_color="white", fg_color="#ff6961", hover_color="#c63637", border_color="#ff6961", border_width=2,command=confirmar_generar_reporte)
+    btn_generar.pack(padx=10)
 
     # Eliminar registro
 def eliminar_registro(id_registro, frame_padre):
@@ -137,13 +150,52 @@ def eliminar_registro(id_registro, frame_padre):
             messagebox.showerror("Error", "El registro no se encontró")
         conexion.commit()
         conexion.close()
-        mostrar_detalles_ingresos(frame_padre)  # Refrescar vista
+        
+        try:
+            fecha_obj = datetime.strptime(fecha,"%d/%m/%Y")
+            mes = fecha_obj.strftime('%b').lower()
+            anio = fecha_obj.year
+            
+            nombre_archivo = f"Poliza_ingresos_{mes}_{anio}.xlsx"
+            ruta_excel = os.path.join("C:\\Cecati122\\PolizasDeIngresos", nombre_archivo)
+            
+            if not os.path.exists(ruta_excel):
+                    messagebox.showwarning("Advertencia", f"No se encontró el archivo Excel: {ruta_excel}")
+                    return
+                
+            app = xw.App(visible=False)
+            wb = app.books.open(ruta_excel)               
+            
+            # Buscar hoja que comience con "Pz {noPoliza}"
+            hojas_a_eliminar = [
+                hoja for hoja in wb.sheets if hoja.name.startswith(f"Pz {noPoliza}")
+            ]
+        
+            if hojas_a_eliminar:
+                for hoja in hojas_a_eliminar:
+                    hoja.delete()
+                wb.save()
+                messagebox.showinfo("Éxito", f"Registro eliminado y hoja(s) '{noPoliza}' eliminadas del Excel.")
+            else:
+                messagebox.showwarning("Advertencia", f"No se encontró hoja para la póliza '{noPoliza}'.")
+        
+            wb.close()
+            app.quit()
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Ocurrió un error al modificar el Excel:\n{e}")
+            
+    else:
+        messagebox.showerror("Error", "El registro no se encontró.")    
+        
+        
+    mostrar_detalles_ingresos(frame_padre)  # Refrescar vista
         
 # Editar registro
 def editar_registro(id_registro, fecha_antigua, no_poliza_ant, banco_ant, importe_ant, nota_ant, frame_padre):
     ventana_editar = ctk.CTkToplevel()
     ventana_editar.title("Editar Registro")
-    ventana_editar.geometry("500x750")
+    ventana_editar.geometry("500x900")
     ventana_editar.resizable(False, False)
     
     entradas = {}
@@ -155,7 +207,7 @@ def editar_registro(id_registro, fecha_antigua, no_poliza_ant, banco_ant, import
         "Importe": str(importe_ant),
         "Nota": nota_ant,
     }
-
+    
     for campo, valor in campos.items():
         ctk.CTkLabel(ventana_editar, text=campo + ":").pack(pady=(20, 0))
         
@@ -169,20 +221,75 @@ def editar_registro(id_registro, fecha_antigua, no_poliza_ant, banco_ant, import
         entrada.pack(fill="x", padx=20)
         entradas[campo] = entrada
         
-    ctk.CTkLabel(
-        ventana_editar,
-        text=(
-        "Importante!\n\n"
-        "Si se ha equivocado en algún dato, se recomienda verificar el archivo generado.\n"
-        "Una vez rectificado el error, recomendamos borrar la hoja generada y volverla a generar,\n"
-        "así mismo también este registro.\n\n"
-        "La modificación en esta sección podría generar posibles problemas en futuros documentos.\n\n"
-        "Si necesita ayuda, contáctese con el equipo de soporte en la sección 'Ajustes'."),
-        text_color="red",
-        wraplength=450,
-        justify="left",
-        font=ctk.CTkFont(size=12, weight="bold")
-    ).pack(pady=(10, 0), padx=20)
+    entrada_importe = entradas["Importe"]
+    entrada_importe.bind("<KeyRelease>", lambda event: actualizar_validacion())
+    
+    # ScrollableFrame para los abonos
+    frame_scroll = ctk.CTkScrollableFrame(ventana_editar, label_text="Abonos encontrados:", height=50)
+    frame_scroll.pack(fill="x", padx=20, pady=(30, 10))
+
+    # Encabezados
+    ctk.CTkLabel(frame_scroll, text="Clave", font=ctk.CTkFont(weight="bold")).grid(row=0, column=0, padx=10, pady=5, sticky="w")
+    ctk.CTkLabel(frame_scroll, text="Abono", font=ctk.CTkFont(weight="bold")).grid(row=0, column=1, padx=10, pady=5, sticky="w")
+        
+    # Diccionario para almacenar los entrys editables
+    entradas_detalles = []  # Guardaremos diccionarios por fila
+    
+    conn = sqlite3.connect("prueba.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+            SELECT id, clave, abono
+            FROM detallePolizaIngreso
+            WHERE noPoliza = ? AND fecha = ?
+        """, (no_poliza_ant, fecha_antigua))
+    detalles = cursor.fetchall()
+    
+    if detalles:
+    
+        # Agregar entradas por cada detalle
+        for i, (id, clave, abono) in enumerate(detalles, start=1):
+            #entrada_id = ctk.CTkEntry(frame_scroll)
+            #entrada_id.insert(0, id)
+            #entrada_id.grid(row=i, column=0, padx=10, pady=5)
+            
+            entrada_clave = ctk.CTkEntry(frame_scroll)
+            entrada_clave.insert(0, clave)
+            entrada_clave.grid(row=i, column=1, padx=10, pady=5)
+
+            entrada_abono = ctk.CTkEntry(frame_scroll)
+            entrada_abono.insert(0, str(abono))
+            entrada_abono.grid(row=i, column=2, padx=10, pady=5)
+            
+            entrada_abono.bind("<KeyRelease>", lambda event: actualizar_validacion())
+
+            # Guardar las entradas con su id
+            entradas_detalles.append({
+                "id": id,
+                "clave": entrada_clave,
+                "abono": entrada_abono
+            })
+    else:
+        ctk.CTkLabel(
+            frame_scroll,
+            text="(No se encontraron abonos relacionados.)",
+            font=ctk.CTkFont(size=12, slant="italic"),
+            text_color="gray"
+        ).grid(row=1, column=0, columnspan=2, padx=10, pady=10)
+        
+    #ctk.CTkLabel(
+    #    ventana_editar,
+    #    text=(
+    #    "Importante!\n\n"
+    #    "Si se ha equivocado en algún dato, se recomienda verificar el archivo generado.\n"
+    #    "Una vez rectificado el error, recomendamos borrar la hoja generada y volverla a generar,\n"
+    #    "así mismo también este registro.\n\n"
+    #    "La modificación en esta sección podría generar posibles problemas en futuros documentos.\n\n"
+    #    "Si necesita ayuda, contáctese con el equipo de soporte en la sección 'Ajustes'."),
+    #    text_color="red",
+    #    wraplength=450,
+    #    justify="left",
+    #    font=ctk.CTkFont(size=12, weight="bold")
+    #).pack(pady=(10, 0), padx=20)
 
     def guardar():
         nueva_fecha = entradas["Fecha (dd/mm/yyyy)"].get()
@@ -190,8 +297,33 @@ def editar_registro(id_registro, fecha_antigua, no_poliza_ant, banco_ant, import
         nuevo_banco = entradas["Banco"].get()
         nuevo_importe = entradas["Importe"].get().replace("$", "").replace(",", "").strip()
         nueva_nota = entradas["Nota"].get("1.0", "end").strip()
-
-
+        
+        suma_abonos = 0.0
+        
+        for detalle in entradas_detalles:
+            abono_text = detalle["abono"].get().strip()
+            if not abono_text:
+                continue
+            try:
+                abono_valor = float(abono_text)
+            except ValueError:
+                messagebox.showerror("Error", f"El abono '{abono_text}' no es un número válido")
+                return
+            suma_abonos += abono_valor
+            
+        try:
+            importe_float = float(nuevo_importe)
+        except ValueError:
+            messagebox.showerror("Error", f"El importe ingresado no es valido.")
+            return
+        
+        if round(suma_abonos, 2) != round(importe_float, 2):
+            messagebox.showwarning(
+                "Advertencia",
+                f"La suma de los abonos ({suma_abonos:.2f}) no coincide con el importe total ({importe_float:.2f})."
+            )
+            return
+        
         conexion = sqlite3.connect("prueba.db")
         cursor = conexion.cursor()
         
@@ -209,15 +341,61 @@ def editar_registro(id_registro, fecha_antigua, no_poliza_ant, banco_ant, import
         
             cursor.execute("""
                 UPDATE detallePolizaIngreso
-                SET fecha = ?, noPoliza = ?, abono = ?
+                SET fecha = ?, noPoliza = ?
                 WHERE noPoliza = ? AND fecha = ?
-            """, (nueva_fecha, nuevo_poliza, nuevo_importe, noPoliza_Actual, fecha_actual))
+            """, (nueva_fecha, nuevo_poliza, noPoliza_Actual, fecha_actual))
+            
+            for detalle in entradas_detalles:
+                id = detalle["id"]
+                nueva_clave = detalle["clave"].get().strip()
+                abono_text = detalle["abono"].get().strip()
+                if not abono_text:
+                    continue
+                try:
+                    nuevo_abono = float(abono_text)
+                except ValueError:
+                    continue
+            
+                cursor.execute("""
+                    UPDATE detallePolizaIngreso
+                    SET clave = ?, abono = ?
+                    WHERE id = ?
+                """, (nueva_clave, nuevo_abono, id))
             
         conexion.commit()
         conexion.close()
         ventana_editar.destroy()
         mostrar_detalles_ingresos(frame_padre)
-
+        
+    label_suma = ctk.CTkLabel(ventana_editar, text="Suma de abonos: $0.00")
+    label_suma.pack(pady=(0,10))
+    
+    label_validacion = ctk.CTkLabel(ventana_editar, text="")
+    label_validacion.pack(pady=(0,10))
+    
+    def actualizar_validacion():
+        suma = 0.0
+        for detalle in entradas_detalles:
+            abono_str = detalle["abono"].get().strip()
+            try:
+                abono = float(abono_str)
+                suma += abono
+            except:
+                continue
+            
+        label_suma.configure(text=f"Suma de abonos: ${suma:.2f}")
+        
+        try:
+            importe = float(entradas["Importe"].get().replace("$", "").replace(",", "").strip())
+            if round(suma, 2) == round(importe, 2):
+                label_validacion.configure(text="La suma de los abonos coincide con el importe", text_color="green")
+            else:
+                label_validacion.configure(text="La suma de los abonos NO coincide con el importe", text_color="red")
+        except:
+            label_validacion.configure(text="Importe no válido", text_color="orange")
+        
+    actualizar_validacion()    
+            
     frame_botones = ctk.CTkFrame(ventana_editar, fg_color="transparent")
     frame_botones.pack(pady=(20, 10))
     ctk.CTkButton(frame_botones, text="Guardar cambios", fg_color="#008d62", hover_color="#2ca880", command=guardar).pack(side="left", padx=10)
@@ -226,7 +404,12 @@ def editar_registro(id_registro, fecha_antigua, no_poliza_ant, banco_ant, import
 def actualizar_estilo_tabla(tabla):
     modo = ctk.get_appearance_mode()
     estilo_act = "Dark.Treeview" if modo == "Dark" else "Light.Treeview"
-    tabla.configure(style=estilo_act)    
+    tabla.configure(style=estilo_act)  
+    
+def confirmar_generar_reporte():
+    respuesta = messagebox.askokcancel("Información", "Está a punto de generar de nuevo el reporte de ingresos, asegurese de que los datos sean correctos")
+    if respuesta:
+        generar_reporte_xlwings()
 
 def estilo_tabla():
     style = ttk.Style()

@@ -1,2 +1,3 @@
 
-ALTER TABLE detallePolizaIngreso ADD COLUMN fecha TEXT;
+
+DELETE FROM detallePolizaIngreso WHERE id BETWEEN 101 AND 140;
