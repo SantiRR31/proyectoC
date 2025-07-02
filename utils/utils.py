@@ -130,3 +130,12 @@ def obtener_nombre_hoja(poliza_id):
     fecha_dt = datetime.strptime(poliza_id, "%d/%b/%Y")
     # %B para mes completo, %b para abreviado
     return fecha_dt.strftime("%d %B %Y").lower()  # Ejemplo: "08 abril 2025"
+
+
+def col2int(col):
+    """Convierte una referencia de columna de Excel (ej: 'A', 'AG') a número entero (1-indexed)."""
+    col = col.upper()
+    num = 0
+    for c in col:
+        num = num * 26 + (ord(c) - ord('A') + 1)
+    return num

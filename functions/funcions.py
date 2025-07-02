@@ -238,6 +238,8 @@ def confirmar_aux():
     
     
     ruta_db = "prueba.db"
+    
+    
 # Funcion para generar el documento "auxiliar bancario"    
 def gen_aux_bancario(ruta_db, anio, mes):
     ruta_plantilla = ruta_absoluta("assets/plantillaAuxBancario.xls")
