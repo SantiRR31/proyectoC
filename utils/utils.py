@@ -126,11 +126,22 @@ except:
         pass  # Si no está disponible, usará el default
 
 def obtener_nombre_hoja(poliza_id):
-    # poliza_id: "08/jun/2025"
-    fecha_dt = datetime.strptime(poliza_id, "%d/%b/%Y")
-    # %B para mes completo, %b para abreviado
-    return fecha_dt.strftime("%d %B %Y").lower()  # Ejemplo: "08 abril 2025"
+    # Mapa de meses abreviados con punto a nombres completos en minúsculas
+    meses = {
+        "ene.": "enero", "feb.": "febrero", "mar.": "marzo", "abr.": "abril",
+        "may.": "mayo", "jun.": "junio", "jul.": "julio", "ago.": "agosto",
+        "sep.": "septiembre", "oct.": "octubre", "nov.": "noviembre", "dic.": "diciembre"
+    }
 
+    try:
+        dia, mes_abrev, anio = poliza_id.strip().lower().split("/")
+        nombre_mes = meses.get(mes_abrev)
+        if not nombre_mes:
+            raise ValueError(f"Mes no reconocido: {mes_abrev}")
+        return f"{int(dia):02d} {nombre_mes} {anio}"
+    except Exception as e:
+        print(f"Error procesando poliza_id '{poliza_id}': {e}")
+        return "fecha inválida"
 
 def col2int(col):
     """Convierte una referencia de columna de Excel (ej: 'A', 'AG') a número entero (1-indexed)."""

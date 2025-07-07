@@ -462,7 +462,7 @@ def mostrar_inicio(contenedor):
 
     tarjetas_info = [
         ("Ingresos", "assets/coin.png", ("#10b981", "#059669"), ["Registrar", "Consultar", "Exportar"], "Opciones", None),
-        ("Egresos", "assets/wallet.png", ("#ef4444", "#dc2626"), ["Generar reporte mensual"], "Opciones", {"Generar reporte mensual": lambda:confirmar_y_generar_egresos(contenedor_principal=contenedor)}),
+        ("Egresos", "assets/wallet.png", ("#ef4444", "#dc2626"), ["LIBRO DE REGISTRO DE EGRESOS"], "Opciones", {"LIBRO DE REGISTRO DE EGRESOS": lambda:confirmar_y_generar_egresos(contenedor_principal=contenedor)}),
         ("Informes", "assets/web.png", ("#8b5cf6", "#7c3aed"), ["Ver", "Descargar"], "Opciones", None),
         ("Inf. Consolidado de Ingresos", "assets/excel.png", ("#0081a8", "#0f6580"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar2}),
         ("Auxiliar Bancario", "assets/coin.png", ("#f59e0b", "#d97706"), ["Generar"], "Opciones", {"Generar": confirmar_aux}),

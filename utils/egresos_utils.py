@@ -124,8 +124,7 @@ def asignar_valores_en_hoja(hoja, poliza):
         if campo == "clave_ref":
             if poliza.tipo_pago == "CHEQUE":
                 valor = f"NO. DE CHEQUE {poliza.no_cheque or ''}"
-            elif poliza.tipo_pago == "TRANSFERENCIA":
-                valor = f"CLAVE DE RASTREO {poliza.clave_ref or ''}"
+            elif poliza.tipo_pago == "TRANSF. ELECTRÓNICA":                valor = f"CLAVE DE RASTREO {poliza.clave_ref or ''}"
             else:
                 valor = ""
         if campo == "fecha":
@@ -202,6 +201,11 @@ def guardar_egresos(poliza):
         print("Error al guardar:", e)
         messagebox.showerror("Error", f"No se pudo guardar la información.\n{e}")
         traceback.print_exc()
+    finally:
+        if wb is not None:
+            wb.close()
+        if app is not None:
+            app.quit()
                 
 def guardar_pdf(poliza):
     try:
@@ -681,14 +685,14 @@ def confirmar_y_generar_egresos(contenedor_principal=None):
         mes_str = f"{anio}-{mes_idx:02d}"
         ventana.destroy()
         mostrar_loading_y_ejecutar(
-            lambda: generar_informe_consolidado_egresos(mes_str),
+            lambda: generar_reporte_egresos_xlwings(mes_str),
             contenedor_principal=contenedor_principal,
         )
 
     def generar_reporte_actual():
         ventana.destroy()
         mostrar_loading_y_ejecutar(
-            generar_informe_consolidado_egresos,
+            generar_reporte_egresos_xlwings,
             contenedor_principal=contenedor_principal,
         )
 
