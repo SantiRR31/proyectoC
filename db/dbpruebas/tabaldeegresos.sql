@@ -36,7 +36,7 @@ drop table polizasEgresos;
 -- Renombre la tabla 
 ALTER TABLE detallePolizaEgreso RENAME TO detallePolizaEgreso_old;
 -- ver el sql usado para crear la tabla 
-SELECT sql FROM sqlite_master WHERE type='table' AND name='polizasEgresos';
+SELECT sql FROM sqlite_master WHERE type='table' AND name='partidasEgresos';
 -- Ver las tablas existentes
 .tables
 -- 
@@ -277,6 +277,12 @@ WHERE strftime('%Y-%m',
 ORDER BY p.id_poliza, d."PARTIDA ESPECÍFICA";
 
 
+SELECT * from polizasEgresos as p
+WHERE strftime('%Y-%m', 
+    substr(p.fecha, 7) || '-' || substr(p.fecha, 4, 2) || '-' || substr(p.fecha, 1, 2)
+) = '2025-06'
+
+
 
 -- 1. Borrar de detallePolizaEgreso todas las partidas de las pólizas del mes
 DELETE FROM detallePolizaEgreso
@@ -293,3 +299,48 @@ DELETE FROM polizasEgresos
 WHERE strftime('%Y-%m', 
     substr(fecha, 7) || '-' || substr(fecha, 4, 2) || '-' || substr(fecha, 1, 2)
 ) = '2025-06';
+
+
+
+INSERT INTO partidasEgresos (
+    "CABM ACTUALIZADO",
+    "TIPO",
+    "PARTIDA ESPECÍFICA",
+    "CLAVE CUCoP",
+    "DESCRIPCIÓN",
+    "NIVEL",
+    "CABM ANTERIOR",
+    "UNIDAD  DE MEDIDA (sugerida)"
+)
+VALUES (
+    'P3920209202',
+    2,
+    39202,
+    39202,
+    'Otros impuestos y derechos',
+    4,
+    NULL,
+    'Servicio'
+);
+
+
+INSERT INTO partidasEgresos (
+    "CABM ACTUALIZADO",
+    "TIPO",
+    "PARTIDA ESPECÍFICA",
+    "CLAVE CUCoP",
+    "DESCRIPCIÓN",
+    "NIVEL",
+    "CABM ANTERIOR",
+    "UNIDAD  DE MEDIDA (sugerida)"
+)
+VALUES (
+    'C3920200001',
+    2,
+    39202,
+    39202001,
+    'Otros impuestos y derechos',
+    5,
+    NULL,
+    'Servicio'
+);
