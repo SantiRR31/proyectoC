@@ -1,15 +1,17 @@
-CREATE TABLE polizasEgresos (
+CREATE TABLE polizasEgresos(
     id_poliza INTEGER PRIMARY KEY AUTOINCREMENT,
     no_poliza TEXT UNIQUE,         
     fecha DATE NOT NULL,
     monto REAL NOT NULL,
     nombre TEXT NOT NULL,
     tipo_pago TEXT NOT NULL,
-    clave_ref TEXT ,
+    clave_ref TEXT,
     denominacion TEXT,
     observaciones TEXT,
-    no_cheque TEXT
+    no_cheque TEXT,
+    estado TEXT  
 );
+
 
 create table if not exists detallePolizaEgreso (
     "id_poliza" intager not null,
@@ -34,9 +36,9 @@ drop table detallePolizaEgreso;
 drop table polizasEgresos;
 
 -- Renombre la tabla 
-ALTER TABLE detallePolizaEgreso RENAME TO detallePolizaEgreso_old;
+ALTER TABLE polizasEgresos RENAME TO polizasEgresos_old;
 -- ver el sql usado para crear la tabla 
-SELECT sql FROM sqlite_master WHERE type='table' AND name='partidasEgresos';
+SELECT sql FROM sqlite_master WHERE type='table' AND name='polizasEgresos';
 -- Ver las tablas existentes
 .tables
 -- 
@@ -136,7 +138,7 @@ SELECT * FROM polizasEgresos;
 
 drop table partidasEgresos_old;
 
-drop table polizasEgresos_old;
+drop table polizasEgresos;
 
 
 CREATE TABLE detallePolizaEgreso (
@@ -344,3 +346,36 @@ VALUES (
     NULL,
     'Servicio'
 );
+
+
+
+INSERT INTO polizasEgresos (
+    id_poliza,
+    no_poliza,
+    fecha,
+    monto,
+    nombre,
+    tipo_pago,
+    clave_ref,
+    denominacion,
+    observaciones,
+    no_cheque,
+    estado
+)
+SELECT 
+    id_poliza,
+    no_poliza,
+    fecha,
+    monto,
+    nombre,
+    tipo_pago,
+    clave_ref,
+    denominacion,
+    observaciones,
+    no_cheque,
+    'activo' AS estado
+FROM polizasEgresos_old;
+
+
+
+select * from polizasEgresos;

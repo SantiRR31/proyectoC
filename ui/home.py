@@ -3,10 +3,10 @@ import tkinter as tk
 from tkinter import messagebox
 import customtkinter as ctk
 from styles.styles import *
+from ui.detalle_egresos import mostrar_detalles_egresos
 from ui.inicio_content import mostrar_inicio
 from ui.egresos import mostrar_formulario_egresos
 from ui.formIngresosDiarios import mostrar_formulario_ingresos
-from ui.infRealIngresos import mostrar_informe_real_ingresos
 from ui.ajustes import mostrar_ajustes
 from ui.detalleIngresos import mostrar_detalles_ingresos, estilo_tabla
 from PIL import Image, ImageTk
@@ -181,9 +181,9 @@ def lanzar_ventana_principal():
         limpiar_contenido(contenedor)
         mostrar_formulario_egresos(contenedor)
         
-    def abrir_informe_real_ingresos(contenedor):
+    def abrir_det_Egresos(contenedor):
         limpiar_contenido(contenedor)
-        mostrar_informe_real_ingresos(contenedor)
+        mostrar_detalles_egresos(contenedor)
         
     def abrir_det_ingresos(contenedor):
         limpiar_contenido(contenedor)
@@ -229,56 +229,13 @@ def lanzar_ventana_principal():
         ruta_absoluta("assets/coin.png"),  
         lambda: abrir_formulario(frame_contenido)
     )
-    btn_clientes_sidebar = create_sidebar_btn(
+    btn_Egresos_sidebar = create_sidebar_btn(
         sidebar, 
         "Egresos", 
         ruta_absoluta("assets/wallet.png"),  
         lambda: abrir_formulario_egresos(frame_contenido)
     )
     
-    # Sección Reportes
-    ctk.CTkLabel(
-        sidebar, 
-        text="REPORTES", 
-        font=CTkFont("Arial", 11, "bold"), 
-        text_color=("#64748b", "#94a3b8")
-    ).pack(pady=(15, 5), anchor="w", padx=20)
-    
-    separator = ctk.CTkFrame(
-        sidebar, 
-        height=1, 
-        fg_color=COLOR_TEXTO_APARTADO
-    )
-    separator.pack(fill="x", pady=2, padx=15)
-    
-    btn_reportes_sidebar = create_sidebar_btn(
-        sidebar, 
-        "Reportes", 
-        ruta_absoluta("assets/bar.png"), 
-        lambda: None
-    )
-    
-    # Sección Informes
-    ctk.CTkLabel(
-        sidebar, 
-        text="INFORMES", 
-        font=CTkFont("Arial", 11, "bold"), 
-        text_color=COLOR_TEXTO_APARTADO_SECUNDARIO
-    ).pack(pady=(15, 5), anchor="w", padx=20)
-    
-    separator = ctk.CTkFrame(
-        sidebar, 
-        height=1, 
-        fg_color=COLOR_TEXTO_APARTADO
-    )
-    separator.pack(fill="x", pady=2, padx=15)
-    
-    btn_inf_real_sidebar = create_sidebar_btn(
-        sidebar, 
-        "Informe Real", 
-        ruta_absoluta("assets/notepad.png"),  
-        lambda: abrir_informe_real_ingresos(frame_contenido)
-    )
     
     separator = ctk.CTkFrame(
         sidebar, 
@@ -290,7 +247,7 @@ def lanzar_ventana_principal():
     # Sección Visualizacion
     ctk.CTkLabel(
         sidebar, 
-        text="DETALLES DE INGRESOS", 
+        text="DETALLES", 
         font=CTkFont("Arial", 11, "bold"), 
         text_color= COLOR_TEXTO_APARTADO_SECUNDARIO
     ).pack(pady=(15, 5), anchor="w", padx=20)
@@ -300,6 +257,13 @@ def lanzar_ventana_principal():
         "Ver Ingresos", 
         ruta_absoluta("assets/lookup.png"),  
         lambda: abrir_det_ingresos(frame_contenido)
+    )
+    
+    btn_detalles_egre = create_sidebar_btn(
+        sidebar,
+        "Ver Egresos",
+        ruta_absoluta("assets/lookup.png"),
+        lambda:abrir_det_Egresos(frame_contenido)
     )
 
     # Espacio flexible antes de los botones inferiores
