@@ -2227,6 +2227,10 @@
    'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
    'copia\\ui\\ajustes.py',
    'PYMODULE'),
+  ('ui.detalleIngresos',
+   'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
+   'copia\\ui\\detalleIngresos.py',
+   'PYMODULE'),
   ('ui.egresos',
    'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
    'copia\\ui\\egresos.py',

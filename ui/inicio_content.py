@@ -16,6 +16,7 @@ from utils.rutas import ruta_absoluta
 from utils.rutas import ruta_absoluta
 from utils.utils import abrir_carpeta
 from utils.config_utils import cargar_config
+from functions.genObservaciones import seleccionar_poliza
 
 config = cargar_config()
 

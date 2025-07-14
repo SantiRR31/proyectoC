@@ -1,7 +1,8 @@
 import os
 import json
 from utils.rutas import ruta_absoluta
-CONFIG_PATH = ruta_absoluta("config.json")
+import sys
+#CONFIG_PATH = ruta_absoluta("config.json")
 
 DEFAULT_CONFIG = {
     "carpeta_destino": "~/Documentos/Cecati122/Polizas",
@@ -13,6 +14,15 @@ DEFAULT_CONFIG = {
     "color_theme": "blue",
     "no_cecati": "000"
 }
+
+def obtener_ruta_config():
+    if getattr(sys, 'frozen', False):
+        base_path = os.path.dirname(sys.executable)
+    else:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, "config.json")
+
+CONFIG_PATH = obtener_ruta_config()
 
 def cargar_config():
     config = {}

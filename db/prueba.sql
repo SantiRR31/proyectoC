@@ -1,3 +1,2 @@
 
-
-DELETE FROM detallePolizaIngreso WHERE id BETWEEN 101 AND 140;
+DROP TABLE polizasIngresos_backup;

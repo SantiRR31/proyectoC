@@ -408,7 +408,7 @@ def mostrar_formulario_ingresos(frame_padre):
                 return
 
             cursor.execute("""
-                INSERT OR REPLACE INTO polizasIngresos (fecha, noPoliza, banco, importe, nota)
+                INSERT INTO polizasIngresos (fecha, noPoliza, banco, importe, nota)
                 VALUES (?, ?, ?, ?, ?)
             """, (fecha, no, banco, float(importe), nota_texto))
 
