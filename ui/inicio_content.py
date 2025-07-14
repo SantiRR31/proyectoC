@@ -14,6 +14,7 @@ from utils.egresos_utils import confirmar_y_generar_egresos, confirmar_y_generar
 from utils.rutas import ruta_absoluta
 from utils.utils import abrir_carpeta
 from utils.config_utils import cargar_config
+from functions.genObservaciones import seleccionar_poliza
 
 config = cargar_config()
 
@@ -463,7 +464,7 @@ def mostrar_inicio(contenedor):
     tarjetas_info = [
         ("Ingresos", "assets/coin.png", ("#10b981", "#059669"), ["Registrar", "Consultar", "Exportar"], "Opciones", None),
         ("Egresos", "assets/wallet.png", ("#ef4444", "#dc2626"), ["LIBRO DE REGISTRO DE EGRESOS"], "Opciones", {"LIBRO DE REGISTRO DE EGRESOS": lambda:confirmar_y_generar_egresos(contenedor_principal=contenedor)}),
-        ("Informes", "assets/web.png", ("#8b5cf6", "#7c3aed"), ["Ver", "Descargar"], "Opciones", None),
+        ("Notas Comperco y Ocomi", "assets/web.png", ("#8b5cf6", "#7c3aed"), ["Generar"], "Opciones", {"Generar": seleccionar_poliza}),
         ("Inf. Consolidado de Ingresos", "assets/excel.png", ("#0081a8", "#0f6580"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar2}),
         ("Auxiliar Bancario", "assets/coin.png", ("#f59e0b", "#d97706"), ["Generar"], "Opciones", {"Generar": confirmar_aux}),
         ("Inf. Consolidado de egresos", "assets/excel.png", ("#f68b83","#f68b83"), ["Generar"],"Opciones", {"Generar": lambda: confirmar_y_generar_consolidado(contenedor_principal=contenedor)}),

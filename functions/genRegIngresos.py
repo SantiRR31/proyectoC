@@ -2,6 +2,7 @@ from datetime import datetime
 import sqlite3
 import os
 import xlwings as xw
+from utils.rutas import ruta_absoluta
 from tkinter import messagebox
 
 meses = {
@@ -53,7 +54,7 @@ def generar_reporte_xlwings():
 
         # Abrir Excel
         app = xw.App(visible=False)
-        wb = app.books.open("assets/plantillaLibroIngresos.xls")
+        wb = app.books.open(ruta_absoluta("assets/plantillaLibroIngresos.xls"))
 
         # Seleccionar hoja del mes
         try:
