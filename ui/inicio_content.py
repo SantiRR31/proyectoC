@@ -1,4 +1,7 @@
 import customtkinter as ctk
+from informes.consolidado_egre import confirmar_y_generar_consolidado
+from informes.inf_real_egre import confirmar_y_generar_infReal
+from informes.lib_regis_egresos import confirmar_y_generar_egresos
 from styles.styles import *
 from PIL import Image
 from customtkinter import CTkImage
@@ -10,7 +13,6 @@ import threading
 from dotenv import load_dotenv
 import os
 from utils.rutas import ruta_absoluta
-from utils.egresos_utils import confirmar_y_generar_egresos, confirmar_y_generar_consolidado, confirmar_y_generar_infReal
 from utils.rutas import ruta_absoluta
 from utils.utils import abrir_carpeta
 from utils.config_utils import cargar_config
@@ -19,164 +21,14 @@ config = cargar_config()
 
 def mostrar_inicio(contenedor):
     # Configuración del contenedor principal con gradiente sutil
-    contenedor.configure(fg_color=("#f8fafc", "#1a1a1a"))
     
     # Frame interno para mejor organización
-    main_frame = ctk.CTkFrame(contenedor, fg_color="transparent")
-    main_frame.pack(fill="both", expand=True, padx=20, pady=20)
-
-    # Encabezado moderno
-    header_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
-    header_frame.pack(fill="x", pady=(0, 20))
-
-    # Título con efecto moderno
-    titulo = ctk.CTkLabel(
-        header_frame, 
-        text="Sistema de Gestión CECATI 122",
-        font=("Arial", 24, "bold"),
-        text_color=TEXT_PRIMARY
-    )
-    titulo.pack(pady=(10, 5))
-
-    # Subtítulo con estilo minimalista
-    subtitulo = ctk.CTkLabel(
-        header_frame, 
-        text="Panel principal del sistema administrativo",
-        font=("Arial", 14),
-        text_color=("#6b7280", "#9ca3af")
-    )
-    subtitulo.pack()
-
-    # Sección de widgets superiores
-    top_info_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
-    top_info_frame.pack(fill="x", pady=(0, 20))
-
-    # Widget de fecha y hora moderno
-    datetime_frame = ctk.CTkFrame(top_info_frame, fg_color=("#ffffff", "#2a2a2a"), corner_radius=12)
-    datetime_frame.pack(side="left", padx=10)
-    
-    # Contenedor para fecha y botón
-    fecha_container = ctk.CTkFrame(datetime_frame, fg_color="transparent")
-    fecha_container.pack(pady=(10, 0), padx=10, fill="x")
-
-    # Icono de calendario moderno
-    calendar_path = ruta_absoluta(os.path.join("assets", "calendar1.png"))
-    try:
-        if os.path.exists(calendar_path):
-            calendar_icon = ctk.CTkImage(
-                light_image=Image.open(calendar_path),
-                dark_image=Image.open(calendar_path),
-                size=(24, 24)
-            )
-        else:
-            raise FileNotFoundError
-    except Exception as e:
-        print(f"[Error] No se pudo cargar el icono: {str(e)}")
-        calendar_icon = None
-        calendar_text = "📅"
-    else:
-        calendar_text = ""
-
-    calendario_btn = ctk.CTkButton(
-        fecha_container,
-        text=calendar_text,
-        image=calendar_icon,
-        width=30,
-        height=30,
-        corner_radius=8,
+    main_frame = ctk.CTkScrollableFrame(
+        master=contenedor,
         fg_color="transparent",
-        hover_color=("#e5e7eb", "#3d3d3d"),
-        command=lambda: mostrar_calendario(fecha_label)
+        scrollbar_button_color="#4b5563",  # opcional, puedes personalizar colores
+        scrollbar_button_hover_color="#6b7280"
     )
-    calendario_btn.pack(side="right")
-
-    fecha_actual = datetime.datetime.now().strftime("%d/%m/%Y")
-    fecha_label = ctk.CTkLabel(
-        fecha_container,
-        text=fecha_actual,
-        font=("Arial", 14, "bold"),
-        text_color=("#111827", "#f9fafb")
-    )
-    fecha_label.pack(side="left", padx=(0, 10))
-
-    hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
-    hora_label = ctk.CTkLabel(
-        datetime_frame,
-        text=hora_actual,
-        font=("Arial", 16, "bold"),
-        text_color=("#3b82f6", "#60a5fa")
-    )
-    hora_label.pack(pady=(0, 10), padx=10)
-
-    def actualizar_hora():
-        ahora = datetime.datetime.now()
-        hora_label.configure(text=ahora.strftime("%H:%M:%S"))
-        hora_label.after(1000, actualizar_hora)
-    
-    actualizar_hora()
-
-    # Widget de clima modernizado
-    clima_frame = ctk.CTkFrame(top_info_frame, fg_color=("#ffffff", "#2a2a2a"), corner_radius=12)
-    clima_frame.pack(side="left", padx=10)
-    
-    clima_content = ctk.CTkFrame(clima_frame, fg_color="transparent")
-    clima_content.pack(pady=10, padx=10)
-
-    clima_icon_label = ctk.CTkLabel(clima_content, text="", width=40, height=40)
-    clima_icon_label.pack(side="left", padx=(0, 10))
-
-    clima_text_frame = ctk.CTkFrame(clima_content, fg_color="transparent")
-    clima_text_frame.pack(side="left")
-
-    ciudad_label = ctk.CTkLabel(
-        clima_text_frame,
-        text="Tequisquiapan",
-        font=("Arial", 12, "bold"),
-        text_color=("#111827", "#f9fafb")
-    )
-    ciudad_label.pack(anchor="w")
-
-    temp_label = ctk.CTkLabel(
-        clima_text_frame,
-        text="Cargando...",
-        font=("Arial", 14),
-        text_color=("#3b82f6", "#60a5fa")
-    )
-    temp_label.pack(anchor="w")
-
-    detalles_label = ctk.CTkLabel(
-        clima_text_frame,
-        text="",
-        font=("Arial", 11),
-        text_color=("#6b7280", "#9ca3af")
-    )
-    detalles_label.pack(anchor="w")
-
-    # Widget de estado del sistema moderno
-    estado_frame = ctk.CTkFrame(top_info_frame, fg_color=("#ffffff", "#2a2a2a"), corner_radius=12)
-    estado_frame.pack(side="right", padx=10)
-
-    estado_icon = ctk.CTkLabel(
-        estado_frame,
-        text="✓",
-        font=("Arial", 24),
-        text_color=("#10b981", "#059669")
-    )
-    estado_icon.pack(pady=(10, 5))
-
-    estado_label = ctk.CTkLabel(
-        estado_frame,
-        text="Sistema Operativo",
-        font=("Arial", 12, "bold"),
-        text_color=("#6b7280", "#9ca3af")
-    )
-    estado_label.pack(pady=(0, 10))
-
-def mostrar_inicio(contenedor):
-    # Configuración del contenedor principal con gradiente sutil
-    
-    # Frame interno para mejor organización
-    main_frame = ctk.CTkFrame(contenedor, fg_color="transparent")
     main_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
     # Encabezado con sombra y mejor jerarquía visual
@@ -393,6 +245,10 @@ def mostrar_inicio(contenedor):
 
     # En el lugar donde inicias el clima:
     actualizar_clima(inicial=True)  # Iniciar el ciclo
+    
+    
+    
+    # --------------------------------------------------------------------------------------
 
     def crear_tarjeta_moderna_con_menu(parent, nombre, icono, color, opciones, boton_texto="Opciones", command=None):
         tarjeta = ctk.CTkFrame(
@@ -455,25 +311,82 @@ def mostrar_inicio(contenedor):
         tarjeta.bind("<Leave>", on_leave)
     
         return tarjeta
+    
+    egresos_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+    egresos_frame.pack(fill="x", pady= 10)
+    
+    titulo_egresos_ingresos = ctk.CTkLabel(
+        egresos_frame,
+        text="Egresos",
+        font=("Arial", 18, "bold"),
+        text_color="#ffffff",
+        anchor="w",
+    )
+    titulo_egresos_ingresos.pack(anchor="w", padx=10, pady=(0, 10))
+
+    tarjetas_egresos = ctk.CTkFrame(egresos_frame, fg_color="transparent")
+    tarjetas_egresos.pack(fill="x", padx=10)
+
+    tarjetas_ei_info = [
+        ("Egresos", "assets/wallet.png", ("#ef4444", "#dc2626"), ["LIBRO DE REGISTRO DE EGRESOS"], "Opciones", {"LIBRO DE REGISTRO DE EGRESOS": lambda:confirmar_y_generar_egresos(contenedor_principal=contenedor)}),
+        ("Inf. Consolidado de egresos", "assets/excel.png", ("#f68b83","#f68b83"), ["Generar"],"Opciones", {"Generar": lambda: confirmar_y_generar_consolidado(contenedor_principal=contenedor)}),
+        ("Inf. Real de egresos", "assets/excel.png", ("#55b1bf","#55b1bf"), ["Generar"], "Opciones", {"Generar": lambda: confirmar_y_generar_infReal(contenedor_principal = contenedor)})
+    ]
+
+    columnas = 4
+    
+    for col in range(columnas):
+            tarjetas_egresos.grid_columnconfigure(col, weight=1)
+            
+    for idx, (nombre, icono, color, opciones, boton_texto, comandos) in enumerate(tarjetas_ei_info):
+        fila = idx // columnas
+        columna = idx % columnas
+
+        def menu_command(opcion, cmd=comandos, nombre_local=nombre):
+            if cmd and opcion in cmd and callable(cmd[opcion]):
+                cmd[opcion]()
+            else:
+                print(f"{nombre_local}: {opcion}")
+
+        tarjeta = crear_tarjeta_moderna_con_menu(
+            parent=tarjetas_egresos,
+            nombre=nombre,
+            icono=ruta_absoluta(icono),
+            color=color,
+            opciones=opciones,
+            boton_texto=boton_texto,
+            command=menu_command
+        )
+        tarjeta.grid(row=fila, column=columna, padx=15, pady=15, sticky="nsew")
+ 
+ 
+ 
+    ingresos_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+    ingresos_frame.pack(fill="x", pady= 10)
+    
+    titulo_ingresos = ctk.CTkLabel(
+        ingresos_frame,
+        text="Egresos",
+        font=("Arial", 18, "bold"),
+        text_color="#ffffff",
+        anchor="w",
+    )
+    titulo_ingresos.pack(anchor="w", padx=10, pady=(0, 10))
         
     # Sección de tarjetas con diseño más profesional
-    tarjetas_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
-    tarjetas_frame.pack(fill="x", pady=20)
+    tarjetas_ingresos = ctk.CTkFrame(ingresos_frame, fg_color="transparent")
+    tarjetas_ingresos.pack(fill="x", pady=20)
 
     tarjetas_info = [
         ("Ingresos", "assets/coin.png", ("#10b981", "#059669"), ["Registrar", "Consultar", "Exportar"], "Opciones", None),
-        ("Egresos", "assets/wallet.png", ("#ef4444", "#dc2626"), ["LIBRO DE REGISTRO DE EGRESOS"], "Opciones", {"LIBRO DE REGISTRO DE EGRESOS": lambda:confirmar_y_generar_egresos(contenedor_principal=contenedor)}),
-        ("Informes", "assets/web.png", ("#8b5cf6", "#7c3aed"), ["Ver", "Descargar"], "Opciones", None),
         ("Inf. Consolidado de Ingresos", "assets/excel.png", ("#0081a8", "#0f6580"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar2}),
         ("Auxiliar Bancario", "assets/coin.png", ("#f59e0b", "#d97706"), ["Generar"], "Opciones", {"Generar": confirmar_aux}),
-        ("Inf. Consolidado de egresos", "assets/excel.png", ("#f68b83","#f68b83"), ["Generar"],"Opciones", {"Generar": lambda: confirmar_y_generar_consolidado(contenedor_principal=contenedor)}),
-        ("Inf. Real de egresos", "assets/excel.png", ("#55b1bf","#55b1bf"), ["Generar"], "Opciones", {"Generar": lambda: confirmar_y_generar_infReal(contenedor_principal = contenedor)})
     ]
     
     columnas = 4
     
     for col in range(columnas):
-            tarjetas_frame.grid_columnconfigure(col, weight=1)
+            tarjetas_ingresos.grid_columnconfigure(col, weight=1)
             
     for idx, (nombre, icono, color, opciones, boton_texto, comandos) in enumerate(tarjetas_info):
         fila = idx // columnas
@@ -486,7 +399,7 @@ def mostrar_inicio(contenedor):
                 print(f"{nombre_local}: {opcion}")
 
         tarjeta = crear_tarjeta_moderna_con_menu(
-            parent=tarjetas_frame,
+            parent=tarjetas_ingresos,
             nombre=nombre,
             icono=ruta_absoluta(icono),
             color=color,
@@ -495,7 +408,9 @@ def mostrar_inicio(contenedor):
             command=menu_command
         )
         tarjeta.grid(row=fila, column=columna, padx=15, pady=15, sticky="nsew")
-        
+      
+#-------------------------  
+   
     # boton para abrir la carpeta de informes
     acciones_frame = ctk.CTkFrame(
         contenedor,

@@ -20,7 +20,8 @@ class PolizaEgreso:
         clave_ref=None,      # opcional
         denominacion=None,
         observaciones=None,
-        no_cheque=None       # opcional
+        no_cheque=None,       # opcional
+        estado=None
     ):
         self.poliza_id = poliza_id 
         self.fecha = fecha
@@ -32,6 +33,7 @@ class PolizaEgreso:
         self.denominacion = denominacion
         self.observaciones = observaciones
         self.no_cheque = no_cheque
+        self.estado = estado
         self.conceptos = []  # Lista de ConceptoEgreso
 
     def agregar_concepto(self, concepto: ConceptoEgreso):
@@ -44,5 +46,9 @@ class PolizaEgreso:
         return faltantes
 
 
+    def esta_cancelada(self):
+        return self.estado == "cancelado"
+
     def __repr__(self):
-        return f"<PolizaEgreso fecha={self.fecha} monto={self.monto} conceptos={len(self.conceptos)}>"
+        estado = f", estado={self.estado}" if self.estado else ""
+        return f"<PolizaEgreso fecha={self.fecha} monto={self.monto} conceptos={len(self.conceptos)}{estado}>"

@@ -3,6 +3,9 @@ import threading
 import tkinter as tk
 from tkinter import messagebox
 import customtkinter as ctk
+from functions.genRegIngresos import confirmar_y_generar
+from informes.poliza import guardar_egresos, guardar_pdf
+from utils.rutas import ruta_absoluta
 import xlwings as xw
 from db.egresosDB import *
 from tkcalendar import DateEntry

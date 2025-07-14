@@ -93,8 +93,9 @@ def inrtar_poliza_egreso(poliza):
             "clave_ref",
             "denominacion",
             "observaciones",
-            "no_cheque"
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            "no_cheque",
+            "estado"
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''',
         (
             poliza.poliza_id,
@@ -105,7 +106,8 @@ def inrtar_poliza_egreso(poliza):
             getattr (poliza, "clave_ref", None),
             poliza.denominacion, 
             poliza.observaciones,
-            getattr(poliza, "no_cheque", None)
+            getattr(poliza, "no_cheque", None),
+            poliza.estado or "activo"
         )
     )
     # Obtener el id de la póliza recién insertada (si es autoincremental)
@@ -191,7 +193,8 @@ def consultar_poliza_por_no(no_poliza):
         clave_ref=poliza_row[6],
         denominacion=poliza_row[7],
         observaciones=poliza_row[8],
-        no_cheque=poliza_row[9]
+        no_cheque=poliza_row[9],
+        estado = poliza_row[10]
     )
     id_poliza = poliza_row[0]
 
@@ -230,7 +233,7 @@ def obtener_polizas_egresos_mes(mes_actual):
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT fecha, no_poliza, id_poliza, tipo_pago, no_cheque
+        SELECT fecha, no_poliza, id_poliza, tipo_pago, no_cheque, estado
         FROM polizasEgresos
         WHERE strftime('%Y-%m', 
             substr(fecha, 7) || '-' || substr(fecha, 4, 2) || '-' || substr(fecha, 1, 2)
@@ -333,3 +336,51 @@ def obtener_partidas_mesagrupasa (mes_actual):
     cur = conn.cursor()
     cur.execute(query, (mes_actual,))
     return cur.fetchall()
+
+
+def obtener_polizas_egresos():
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT id_poliza, no_poliza, fecha, monto, nombre, estado
+        FROM polizasEgresos
+        ORDER BY fecha DESC
+    ''')
+    filas = cursor.fetchall()
+    conn.close()
+    return filas
+
+def cancelar_poliza_por_id(id_poliza):
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute('''
+        UPDATE polizasEgresos
+        SET estado = 'cancelado'
+        WHERE id_poliza = ?
+    ''', (id_poliza,))
+    conn.commit()
+    conn.close()
+
+
+def obtener_polizas_egresos_filtrado(mes=None, anio=None):
+    conn = conectar()
+    cursor = conn.cursor()
+
+    if mes and anio:
+        cursor.execute('''
+            SELECT id_poliza, no_poliza, fecha, monto, nombre, estado
+            FROM polizasEgresos
+            WHERE strftime('%m', fecha) = ? AND strftime('%Y', fecha) = ?
+            ORDER BY fecha DESC
+        ''', (f"{int(mes):02d}", str(anio)))
+    else:
+        cursor.execute('''
+            SELECT id_poliza, no_poliza, fecha, monto, nombre, estado
+            FROM polizasEgresos
+            ORDER BY fecha DESC
+        ''')
+
+    filas = cursor.fetchall()
+    conn.close()
+    return filas
+
