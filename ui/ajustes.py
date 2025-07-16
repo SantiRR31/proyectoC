@@ -18,10 +18,12 @@ def mostrar_ajustes(frame_contenido):
         widget.destroy()
         
     config = cargar_config()
-    carpeta_destino = tk.StringVar(value=config.get("carpeta_destino", "~/Documentos/Cecati122/Polizas"))
-    clave_cecati = tk.StringVar(value=config.get("clave_cecati", "22DBT0005P"))
-    banco_caja = tk.StringVar(value=config.get("banco_caja", "BANORTE"))
-    no_cecati = tk.StringVar(value=config.get("no_cecati", "0000"))
+    carpeta_destino = tk.StringVar(value=config.get("carpeta_destino"))
+    clave_cecati = tk.StringVar(value=config.get("clave_cecati"))
+    banco_caja = tk.StringVar(value=config.get("banco_caja",))
+    no_cecati = tk.StringVar(value=config.get("no_cecati",))
+    no_cuenta = tk.StringVar(value=config.get("no_cuenta"))
+    
 
     def selecionar_carpeta():
         carpeta = fd.askdirectory(title="Seleccionar carpeta de destino")
@@ -40,6 +42,10 @@ def mostrar_ajustes(frame_contenido):
     def actualizar_noCecati(nuevo_no):
         no_cecati.set(nuevo_no)
         actualizar_config("no_cecati",nuevo_no)
+        
+    def actualizar_noCuenta(nuevo_no):
+        no_cuenta.set(nuevo_no)
+        actualizar_config("no_cuenta", nuevo_no)
 
     # Título principal
     ctk.CTkLabel(
@@ -100,6 +106,11 @@ def mostrar_ajustes(frame_contenido):
     crear_fila_ajuste(
         seccion_datos, 3, "No cecati:", no_cecati,
         lambda: abrir_ventana_edicion(frame_contenido, "Cambiar No Cecati", "No actual:", no_cecati, "Nuevo No:", actualizar_noCecati, maxlen=10)
+    )
+    
+    crear_fila_ajuste (
+        seccion_datos, 4 , "Numero de Cuenta:", no_cuenta,
+        lambda: abrir_ventana_edicion(frame_contenido,"Cambiar Numero de cuenta", "Numero de cuenta actual:", no_cuenta, "Nuevo numero de cuenta:", actualizar_noCuenta, maxlen= 10)
     )
     
     seccion_datos.grid_columnconfigure(1, weight=1)

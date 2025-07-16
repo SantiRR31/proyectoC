@@ -1,4 +1,7 @@
 import customtkinter as ctk
+from informes.Auxi_acre_div import confirmar_y_generar_Auxiliar_acree
+from informes.aux_bancario import confirmar_y_generar_aux_bancario
+from informes.aux_deudores_div import confirmar_y_generar_aux_deudor
 from informes.consolidado_egre import confirmar_y_generar_consolidado
 from informes.inf_real_egre import confirmar_y_generar_infReal
 from informes.lib_regis_egresos import confirmar_y_generar_egresos
@@ -253,65 +256,66 @@ def mostrar_inicio(contenedor):
 
     def crear_tarjeta_moderna_con_menu(parent, nombre, icono, color, opciones, boton_texto="Opciones", command=None):
         tarjeta = ctk.CTkFrame(
-            parent, 
+            parent,
             fg_color=color[0],
-            corner_radius=16,
-            border_width=2,
-            border_color=color[1],
-            width=200, 
-            height=220,  # Aumentado para espacio del botón
+            corner_radius=20,
+            border_width=0,
+            width=240,
+            height=180,
         )
+
         icono_frame = ctk.CTkFrame(
             tarjeta,
-            width=60,
-            height=60,
-            corner_radius=12,
-            fg_color=( "#ffffff","#18181b")
+            width=48,
+            height=48,
+            corner_radius=24,
+            fg_color=("#ffffff", "#18181b")
         )
-        icono_frame.pack(pady=(20, 15))
-        
+        icono_frame.pack(pady=(15, 10))
+
         try:
-            icon_img = ctk.CTkImage(Image.open(icono), size=(32, 32))
+            icon_img = ctk.CTkImage(Image.open(icono), size=(28, 28))
             ctk.CTkLabel(icono_frame, image=icon_img, text="").place(relx=0.5, rely=0.5, anchor="center")
         except:
-            ctk.CTkLabel(icono_frame, text="📊", font=("Arial", 24)).place(relx=0.5, rely=0.5, anchor="center")
-    
-    # titulo 
+            ctk.CTkLabel(icono_frame, text="📊", font=("Arial", 20)).place(relx=0.5, rely=0.5, anchor="center")
+
         titulo = ctk.CTkLabel(
             tarjeta,
-            text = nombre,
-            font=("Arial", 16, "bold"),
-            text_color = "#fff",
-            wraplength=150,
+            text=nombre,
+            font=("Segoe UI", 14, "bold"),
+            text_color="#ffffff",
+            wraplength=160,
             justify="center"
         )
         titulo.pack(pady=(0, 8))
-        
+
         if not opciones:
             opciones = ["Próximamente"]
-    
+
         menu = ctk.CTkOptionMenu(
             tarjeta,
             values=opciones,
             fg_color=color[1],
             button_color=color[0],
-            dropdown_fg_color= "#23232a",
-            dropdown_text_color= "#fff",
-            font = ("Arial", 12),
-            width = 140,
+            dropdown_fg_color="#2a2d32",
+            dropdown_text_color="#ffffff",
+            font=("Segoe UI", 12),
+            width=140,
             command=command
         )
         menu.set(boton_texto)
-        menu.pack(pady=(0,18))
-    
+        menu.pack(pady=(0, 10))
+
         def on_enter(e):
             tarjeta.configure(fg_color=color[1])
+
         def on_leave(e):
             tarjeta.configure(fg_color=color[0])
+
         tarjeta.bind("<Enter>", on_enter)
         tarjeta.bind("<Leave>", on_leave)
-    
         return tarjeta
+
     
     egresos_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
     egresos_frame.pack(fill="x", pady= 10)
@@ -367,7 +371,7 @@ def mostrar_inicio(contenedor):
     
     titulo_ingresos = ctk.CTkLabel(
         ingresos_frame,
-        text="Egresos",
+        text="Ingresos",
         font=("Arial", 18, "bold"),
         text_color="#ffffff",
         anchor="w",
@@ -409,8 +413,62 @@ def mostrar_inicio(contenedor):
             command=menu_command
         )
         tarjeta.grid(row=fila, column=columna, padx=15, pady=15, sticky="nsew")
+        
+        
+    
+    auxil_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+    auxil_frame.pack(fill="x", pady= 10)
+    
+    titulo_auxil = ctk.CTkLabel(
+        auxil_frame,
+        text="Auxiliares",
+        font=("Arial", 18, "bold"),
+        text_color="#ffffff",
+        anchor="w",
+    )
+    titulo_auxil.pack(anchor="w", padx=10, pady=(0, 10))
+        
+    # Sección de tarjetas con diseño más profesional
+    tarjetas_auxil = ctk.CTkFrame(auxil_frame, fg_color="transparent")
+    tarjetas_auxil.pack(fill="x", pady=20)
+
+    tarjetas_info = [
+        ("Aux. Bancario", "assets/coin.png", ("#10b981", "#059669"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar_aux_bancario}),
+        ("Aux. Acreedores diversos", "assets/excel.png", ("#0081a8", "#0f6580"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar_Auxiliar_acree}),
+        ("Aux. deudores diversos", "assets/coin.png", ("#f59e0b", "#d97706"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar_aux_deudor}),
+    ]
+    
+    columnas = 4
+    
+    for col in range(columnas):
+            tarjetas_auxil.grid_columnconfigure(col, weight=1)
+            
+    for idx, (nombre, icono, color, opciones, boton_texto, comandos) in enumerate(tarjetas_info):
+        fila = idx // columnas
+        columna = idx % columnas
+
+        def menu_command(opcion, cmd=comandos, nombre_local=nombre):
+            if cmd and opcion in cmd and callable(cmd[opcion]):
+                cmd[opcion]()
+            else:
+                print(f"{nombre_local}: {opcion}")
+
+        tarjeta = crear_tarjeta_moderna_con_menu(
+            parent=tarjetas_auxil,
+            nombre=nombre,
+            icono=ruta_absoluta(icono),
+            color=color,
+            opciones=opciones,
+            boton_texto=boton_texto,
+            command=menu_command
+        )
+        tarjeta.grid(row=fila, column=columna, padx=15, pady=15, sticky="nsew")        
+        
+        
+        
       
-#-------------------------  
+#-------------------------
+    
    
     # boton para abrir la carpeta de informes
     acciones_frame = ctk.CTkFrame(

@@ -379,3 +379,21 @@ FROM polizasEgresos_old;
 
 
 select * from polizasEgresos;
+
+
+SELECT d.cargo, p.fecha, p.no_poliza
+FROM detallePolizaEgreso d
+JOIN polizasEgresos p ON d.id_poliza = p.id_poliza
+WHERE d."PARTIDA ESPECÍFICA" = 120
+  AND strftime('%Y-%m', substr(p.fecha, 7) || '-' || substr(p.fecha, 4, 2) || '-' || substr(p.fecha, 1, 2)) = '2025-06'
+
+
+SELECT pi.importe as cargo , pi.fecha 
+from polizasIngresos pi
+where exists (
+    SELECT 1
+    FROM detallePolizaIngreso dpi
+    WHERE dpi.id_poliza = pi.id_poliza
+      AND dpi."PARTIDA ESPECÍFICA" = 120
+)
+  AND strftime('%Y-%m', substr(pi.fecha, 7) || '-' || substr(pi.fecha, 4, 2) || '-' || substr(pi.fecha, 1, 2)) = '2025-06';

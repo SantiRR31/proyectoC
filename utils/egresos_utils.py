@@ -184,7 +184,14 @@ def ejecutar_con_loading(funcion, btn_guardar, btn_descargar, contenedor_princip
     
     
 def mostrar_loading_y_ejecutar(funcion, contenedor_principal, *args, **kwargs):
-        
+    # Si no hay contenedor principal, ejecuta sin animación y sin after
+    if contenedor_principal is None:
+        try:
+            funcion(*args, **kwargs)
+        except Exception as e:
+            messagebox.showerror("Error", f"Ocurrió un error:\n{e}")
+        return
+
     anim = AnimacionDescarga(contenedor_principal)
     anim.grab_set()
 

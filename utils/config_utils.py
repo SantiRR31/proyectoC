@@ -12,7 +12,8 @@ DEFAULT_CONFIG = {
     "state": "normal",
     "appearance_mode": "dark",
     "color_theme": "blue",
-    "no_cecati": "000"
+    "no_cecati": "000",
+    "no_cuenta" : "1234567890"
 }
 
 def obtener_ruta_config():
