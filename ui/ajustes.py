@@ -23,7 +23,7 @@ def mostrar_ajustes(frame_contenido):
     banco_caja = tk.StringVar(value=config.get("banco_caja",))
     no_cecati = tk.StringVar(value=config.get("no_cecati",))
     no_cuenta = tk.StringVar(value=config.get("no_cuenta"))
-    cuenta_cheques = tk.StringVar(value=config.get("no_cuenta"))
+    cuenta_cheques = tk.StringVar(value=config.get("cuenta_cheques"))
     
 
     def selecionar_carpeta():
