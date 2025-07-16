@@ -153,7 +153,7 @@ def eliminar_registro(id_registro, frame_padre):
         
         try:
             fecha_obj = datetime.strptime(fecha,"%d/%m/%Y")
-            mes = fecha_obj.strftime('%b').lower()
+            mes = fecha_obj.strftime('%b').replace('.', '').lower()
             anio = fecha_obj.year
             
             nombre_archivo = f"Poliza_ingresos_{mes}_{anio}.xlsx"

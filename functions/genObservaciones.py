@@ -12,6 +12,7 @@ def seleccionar_poliza():
     ventana.title("Seleccionar Poliza")
     ventana.geometry("300x300")
     ventana.resizable(False, False)
+    ventana.grab_set()
     
     ctk.CTkLabel(ventana, text="Selecciona el numero de poliza:").pack(pady=(20,10))
     
@@ -35,7 +36,7 @@ def seleccionar_poliza():
         mes = combo_mes.get()
         anio = combo_anio.get()
         
-        print("Buscando con:", dia, mes, anio)
+        #print("Buscando con:", dia, mes, anio)
         
         partes=[]
         
@@ -60,7 +61,7 @@ def seleccionar_poliza():
             resultados = [row[0] for row in cursor.fetchall()]
             conn.close()
             
-            print("Resultados encontrados:", resultados)
+            #print("Resultados encontrados:", resultados)
         
             if resultados:
                 combo_poliza.configure(values=resultados)

@@ -7,6 +7,7 @@ import sys
 DEFAULT_CONFIG = {
     "carpeta_destino": "~/Documentos/Cecati122/Polizas",
     "clave_cecati": "22DBT0005P",
+    "cuenta_cheques":"1056897860",
     "banco_caja": "BANORTE",
     "geometry": "1280x720+100+100",
     "state": "normal",

@@ -15,6 +15,7 @@ import psutil, time
 from utils.config_utils import cargar_config
 from utils.rutas import ruta_absoluta
 import shutil
+import calendar
 
 CONFIG_PATH = "config.json"
 
@@ -229,15 +230,16 @@ def mostrar_formulario_ingresos(frame_padre):
     
             # Obtener mes/año actual
             fech_act = datetime.now()
-            mes = fech_act.strftime('%b').lower()
+            mes_num = fecha_ingresada.month
+            mes_nombre = calendar.month_abbr[mes_num].replace('.', '').lower()
             anio = fech_act.year
-            poliza_final = f"{noPoliza}/{mes}/{anio}"
+            poliza_final = f"{noPoliza}/{mes_nombre}/{anio}"
         
             # Configurar rutas PRIMERO (antes de abrir Excel)
             carpetaBase = r"C:\Cecati122"
             carpeta_descargas = os.path.join(carpetaBase, "PolizasDeIngresos")
             os.makedirs(carpeta_descargas, exist_ok=True)
-            nombre_archivo = f"Poliza_ingresos_{mes}_{anio}.xlsx"
+            nombre_archivo = f"Poliza_ingresos_{mes_nombre}_{anio}.xlsx"
             ruta_completa = os.path.join(carpeta_descargas, nombre_archivo)
         
             app = xw.App(visible=False)  # Iniciar Excel primero
@@ -428,7 +430,11 @@ def mostrar_formulario_ingresos(frame_padre):
             messagebox.showinfo("Éxito", "Datos guardados correctamente.")
         
         except Exception as e:
-            messagebox.showerror("Error al guardar", f"Ocurrió un error: {e}")
+            if "UNIQUE constraint failed" in str(e):
+                messagebox.showerror("Error al guardar", "Ya existe una póliza registrada con el mismo número y fecha.\n" f"Ocurrió un error: {e}")
+            else:
+                messagebox.showerror("Error al guardar", f"Ocurrió un error: {e}")
+            raise
 
     # si queremos fucionar los votones de guardar y de descargar
     def guardar_descargar():

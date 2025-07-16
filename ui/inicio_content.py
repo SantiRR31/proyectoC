@@ -5,6 +5,7 @@ from informes.aux_deudores_div import confirmar_y_generar_aux_deudor
 from informes.consolidado_egre import confirmar_y_generar_consolidado
 from informes.inf_real_egre import confirmar_y_generar_infReal
 from informes.lib_regis_egresos import confirmar_y_generar_egresos
+from informes.inf_real_ingresos import confirmar_y_generar_inf_real_ingresos
 from styles.styles import *
 from PIL import Image
 from customtkinter import CTkImage
@@ -335,7 +336,8 @@ def mostrar_inicio(contenedor):
     tarjetas_ei_info = [
         ("Egresos", "assets/wallet.png", ("#ef4444", "#dc2626"), ["LIBRO DE REGISTRO DE EGRESOS"], "Opciones", {"LIBRO DE REGISTRO DE EGRESOS": lambda:confirmar_y_generar_egresos(contenedor_principal=contenedor)}),
         ("Inf. Consolidado de egresos", "assets/excel.png", ("#f68b83","#f68b83"), ["Generar"],"Opciones", {"Generar": lambda: confirmar_y_generar_consolidado(contenedor_principal=contenedor)}),
-        ("Inf. Real de egresos", "assets/excel.png", ("#55b1bf","#55b1bf"), ["Generar"], "Opciones", {"Generar": lambda: confirmar_y_generar_infReal(contenedor_principal = contenedor)})
+        ("Inf. Real de egresos", "assets/excel.png", ("#55b1bf","#55b1bf"), ["Generar"], "Opciones", {"Generar": lambda: confirmar_y_generar_infReal(contenedor_principal = contenedor)}),
+        ("Notas en COMPERCO y OCOMI", "assets/excel2.png", ("#4ade80", "#22c55e"), ["Insertar"], "Opciones", {"Insertar": seleccionar_poliza})
     ]
 
     columnas = 4
@@ -386,6 +388,7 @@ def mostrar_inicio(contenedor):
         ("Ingresos", "assets/coin.png", ("#10b981", "#059669"), ["Registrar", "Consultar", "Exportar"], "Opciones", None),
         ("Inf. Consolidado de Ingresos", "assets/excel.png", ("#0081a8", "#0f6580"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar2}),
         ("Auxiliar Bancario", "assets/coin.png", ("#f59e0b", "#d97706"), ["Generar"], "Opciones", {"Generar": confirmar_aux}),
+        ("Inf. Real de Ingresos", "assets/excel.png", ("#55b1bf","#55b1bf"), ["Generar"], "Opciones", {"Generar": lambda: confirmar_y_generar_inf_real_ingresos(contenedor_principal = contenedor)})
     ]
     
     columnas = 4
