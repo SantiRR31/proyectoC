@@ -18,4 +18,7 @@ CREATE TABLE polizasIngresos (
     importe REAL,
     nota TEXT
 )
+DELETE FROM detallePolizaIngreso;
+
+DELETE from polizasIngresos;
 

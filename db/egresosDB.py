@@ -1,3 +1,4 @@
+import sqlite3
 from db.conexion import conectar
 from models.egresomodelos import PolizaEgreso, ConceptoEgreso
 
@@ -76,65 +77,82 @@ def obtener_partida_especifica_por_clave(clave_cucop):
     conn.close()
     return resultado[0] if resultado else ""
 
+
+
+
 def inrtar_poliza_egreso(poliza):
     conn = conectar()
     if conn is None or not poliza:
         return "Error de conexion o poliza vacia"
     cursor = conn.cursor()
     # Insertar la póliza principal
-    cursor.execute(
-        '''
-        INSERT INTO polizasEgresos (
-            "no_poliza",
-            "fecha",
-            "monto",
-            "nombre",
-            "tipo_pago",
-            "clave_ref",
-            "denominacion",
-            "observaciones",
-            "no_cheque",
-            "estado"
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''',
-        (
-            poliza.poliza_id,
-            poliza.fecha,
-            poliza.monto,
-            poliza.nombre, 
-            poliza.tipo_pago, 
-            getattr (poliza, "clave_ref", None),
-            poliza.denominacion, 
-            poliza.observaciones,
-            getattr(poliza, "no_cheque", None),
-            poliza.estado or "activo"
-        )
-    )
-    # Obtener el id de la póliza recién insertada (si es autoincremental)
-    id_poliza = cursor.lastrowid
-
-    # Insertar los detalles (conceptos)
-    for concepto in poliza.conceptos:
+    try:
         cursor.execute(
             '''
-            INSERT INTO detallePolizaEgreso (
-                id_poliza, 
-                "CLAVE CUCoP", 
-                cargo,
-                "PARTIDA ESPECÍFICA"
-            ) VALUES (?, ?, ?, ?)
+            INSERT INTO polizasEgresos (
+                "no_poliza",
+                "fecha",
+                "monto",
+                "nombre",
+                "tipo_pago",
+                "clave_ref",
+                "denominacion",
+                "observaciones",
+                "no_cheque",
+                "estado"
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''',
-            (id_poliza, 
-             concepto.clave_cucop, 
-             concepto.cargo,
-             concepto.partida_especifica
-             )
+            (
+                poliza.poliza_id,
+                poliza.fecha,
+                poliza.monto,
+                poliza.nombre, 
+                poliza.tipo_pago, 
+                getattr (poliza, "clave_ref", None),
+                poliza.denominacion, 
+                poliza.observaciones,
+                getattr(poliza, "no_cheque", None),
+                poliza.estado or "activo"
+            )
         )
+        # Obtener el id de la póliza recién insertada (si es autoincremental)
+        id_poliza = cursor.lastrowid
 
-    conn.commit()
-    conn.close()
-    return "Póliza y detalles insertados correctamente"
+        # Insertar los detalles (conceptos)
+        for concepto in poliza.conceptos:
+            cursor.execute(
+                '''
+                INSERT INTO detallePolizaEgreso (
+                    id_poliza, 
+                    "CLAVE CUCoP", 
+                    cargo,
+                    "PARTIDA ESPECÍFICA"
+                ) VALUES (?, ?, ?, ?)
+                ''',
+                (id_poliza, 
+                concepto.clave_cucop, 
+                concepto.cargo,
+                concepto.partida_especifica
+                )
+            )
 
+        conn.commit()
+        conn.close()
+        return "Póliza y detalles insertados correctamente"
+    except sqlite3.IntegrityError as e:
+        conn.rollback()
+        if "UNIQUE constraint failed: polizasEgresos.no_poliza" in str(e):
+            return f"Ya existe una póliza con el número '{poliza.poliza_id}'."
+        else:
+            return f"Error de integridad: {str(e)}"    
+    except sqlite3.OperationalError as e:
+        conn.rollback()
+        return f"Error operativo: {str(e)}"
+    except Exception as e:
+        conn.rollback()
+        return f"Error inesperado: {str(e)}"
+    finally:
+        conn.close()
 
     
 def obtener_siguiente_no_poliza_mes(fecha):

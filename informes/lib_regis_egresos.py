@@ -148,7 +148,7 @@ def generar_reporte_egresos_xlwings(mes_anio=None):
             sht.range(f"A{rango_fin + 1}:A{rango_fin + filas_extra}").api.EntireRow.Insert()
 
         # Escribir datos de pólizas
-        for idx, (fecha, no_poliza, id_poliza, tipo_pago, no_cheque) in enumerate(polizas_mes):
+        for idx, (fecha, no_poliza, id_poliza, tipo_pago, no_cheque, estado) in enumerate(polizas_mes):
             fila = fila_inicio + idx
             fecha_dt = datetime.strptime(fecha, "%d/%m/%Y")
             sht.range(f"A{fila}").value = fecha_dt
@@ -157,8 +157,15 @@ def generar_reporte_egresos_xlwings(mes_anio=None):
 
             cargos = obtener_conceptos_por_partida_especifica(id_poliza)
             for col_idx, partida in enumerate(partidas_mes):
-                valor = cargos.get(partida, 0)
-                sht.range((fila, col_inicio + col_idx)).value = "" if valor == 0 else valor
+                if estado.lower() == "cancelado" and col_idx == 0:
+                    # Solo en la primera columna de importes
+                    sht.range((fila, col_inicio + col_idx)).value = "cancelado"
+                elif estado.lower() == "cancelado":
+                    # Las demás columnas quedan vacías
+                    sht.range((fila, col_inicio + col_idx)).value = ""
+                else:
+                    valor = cargos.get(partida, 0)
+                    sht.range((fila, col_inicio + col_idx)).value = "" if valor == 0 else valor
 
         # Guardar archivo en carpeta de salida
         carpeta_salida = os.path.join(config["carpeta_destino"], "InformesDeEgresos")
