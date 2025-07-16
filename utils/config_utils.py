@@ -14,7 +14,7 @@ DEFAULT_CONFIG = {
     "appearance_mode": "dark",
     "color_theme": "blue",
     "no_cecati": "000",
-    "no_cuenta" : "1234567890"
+    "no_cuenta" : "1234567890",
     "cuenta_cheques": "1056897860"
 }
 

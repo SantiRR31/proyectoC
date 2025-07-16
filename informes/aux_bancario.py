@@ -2,6 +2,7 @@ from datetime import datetime
 from tkinter import ttk, messagebox
 import customtkinter as ctk
 #from db.egresosDb import obtener_partidas_mesagrupasa, agrupar_partidas_por_grupo, obtener_total_acreedores, obtener_total_deudores
+from db.auxDB import obte_poliz_egre, obte_poliz_ingre
 from utils.egresos_utils import mostrar_loading_y_ejecutar
 from utils.egresos_utils import cargar_config
 import gc 
@@ -83,8 +84,15 @@ def gen_Aux_acre_div(mes_anio= None):
         dia = hoy.strftime("%d")
         mes_excel = hoy.strftime("%m")
         anio_excel = hoy.strftime("%Y")
-        
         #partidas_mes
+        
+        polizas_egresos = obte_poliz_egre(mes_actual)
+        poliza_ingresos = obte_poliz_ingre(mes_actual)
+        print (f"Polizas Egresos: {polizas_egresos}")
+        print (f"Polizas Ingresos: {poliza_ingresos}")
+        if not polizas_egresos and not poliza_ingresos:
+            messagebox.showwarning("Sin datos", "No hay datos para generar el auxiliar bancario.")
+            return
         
         app = xw.App(visible=False)
         wb= app.books.open("assets/plantillas/Auxiliar Bancario.xls")
@@ -104,10 +112,7 @@ def gen_Aux_acre_div(mes_anio= None):
         
         
         carpeta_salida = os.path.join(config["carpeta_destino"], "Auxiliares", "Bancario")
-        os.makedirs(carpeta_salida, exist_ok=True)
-        
-        
-        
+        os.makedirs(carpeta_salida, exist_ok=True)    
         archivo_salida = os.path.join(carpeta_salida, f"Auxiliar_Bancario{mes_abrev}_{anio_corto}.xlsx")
         wb.save(archivo_salida)
         messagebox.showinfo("Reporte generado", f"El Auxiliar bancario se ha generado:\n{archivo_salida}")
