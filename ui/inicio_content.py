@@ -2,6 +2,7 @@ import customtkinter as ctk
 from informes.consolidado_egre import confirmar_y_generar_consolidado
 from informes.inf_real_egre import confirmar_y_generar_infReal
 from informes.lib_regis_egresos import confirmar_y_generar_egresos
+from informes.inf_real_ingresos import confirmar_y_generar_inf_real_ingresos
 from styles.styles import *
 from PIL import Image
 from customtkinter import CTkImage
@@ -383,6 +384,7 @@ def mostrar_inicio(contenedor):
         ("Ingresos", "assets/coin.png", ("#10b981", "#059669"), ["Registrar", "Consultar", "Exportar"], "Opciones", None),
         ("Inf. Consolidado de Ingresos", "assets/excel.png", ("#0081a8", "#0f6580"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar2}),
         ("Auxiliar Bancario", "assets/coin.png", ("#f59e0b", "#d97706"), ["Generar"], "Opciones", {"Generar": confirmar_aux}),
+        ("Inf. Real de Ingresos", "assets/excel.png", ("#55b1bf","#55b1bf"), ["Generar"], "Opciones", {"Generar": lambda: confirmar_y_generar_inf_real_ingresos(contenedor_principal = contenedor)})
     ]
     
     columnas = 4

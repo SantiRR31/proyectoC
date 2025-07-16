@@ -22,6 +22,7 @@ def mostrar_ajustes(frame_contenido):
     clave_cecati = tk.StringVar(value=config.get("clave_cecati", "22DBT0005P"))
     banco_caja = tk.StringVar(value=config.get("banco_caja", "BANORTE"))
     no_cecati = tk.StringVar(value=config.get("no_cecati", "0000"))
+    cuenta_cheques = tk.StringVar(value=config.get("cuenta_cheques", "1086897860"))
 
     def selecionar_carpeta():
         carpeta = fd.askdirectory(title="Seleccionar carpeta de destino")
@@ -40,6 +41,10 @@ def mostrar_ajustes(frame_contenido):
     def actualizar_noCecati(nuevo_no):
         no_cecati.set(nuevo_no)
         actualizar_config("no_cecati",nuevo_no)
+        
+    def actualizar_cuentaCheques(nueva_cta):
+        cuenta_cheques.set(nueva_cta)
+        actualizar_config("cuenta_cheques",nueva_cta)
 
     # Título principal
     ctk.CTkLabel(
@@ -84,7 +89,9 @@ def mostrar_ajustes(frame_contenido):
             text="Cambiar",
             width=90,
             corner_radius=8,
-            command=abrir_ventana_callback
+            command=abrir_ventana_callback,
+            fg_color="#d10d2f",
+            hover_color="#d93954",
     ).grid(row=row, column=2, padx=10, pady=10)
 
     crear_fila_ajuste(
@@ -102,6 +109,10 @@ def mostrar_ajustes(frame_contenido):
         lambda: abrir_ventana_edicion(frame_contenido, "Cambiar No Cecati", "No actual:", no_cecati, "Nuevo No:", actualizar_noCecati, maxlen=10)
     )
     
+    crear_fila_ajuste(
+        seccion_datos, 4, "Cuenta de cheques:", cuenta_cheques,
+        lambda: abrir_ventana_edicion(frame_contenido, "Cambiar Cuenta de cheques", "Cuenta actual:", cuenta_cheques, "Nueva cuenta:", actualizar_cuentaCheques, maxlen=10)
+    )
     seccion_datos.grid_columnconfigure(1, weight=1)
 
     # Separador visual
@@ -339,10 +350,10 @@ def abrir_ventana_edicion(frame_contenido, titulo, label_actual, variable_actual
             actualizar_callback(nuevo_valor)
             ventana.destroy()
 
-    frame_botones = ctk.CTkFrame(ventana)
+    frame_botones = ctk.CTkFrame(ventana, fg_color="transparent")
     frame_botones.grid(row=4, column=0, pady=20)
 
-    ctk.CTkButton(frame_botones, text="Guardar", command=guardar).pack(side="left", padx=10)
-    ctk.CTkButton(frame_botones, text="Cancelar", command=ventana.destroy).pack(side="left", padx=10)
+    ctk.CTkButton(frame_botones, text="Guardar", command=guardar, fg_color="#d10d2f", hover_color="#d93954").pack(side="left", padx=10)
+    ctk.CTkButton(frame_botones, text="Cancelar", command=ventana.destroy, fg_color="#d10d2f", hover_color="#d93954").pack(side="left", padx=10)
 
     ventana.grid_columnconfigure(0, weight=1)

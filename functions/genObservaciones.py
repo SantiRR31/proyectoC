@@ -12,6 +12,7 @@ def seleccionar_poliza():
     ventana.title("Seleccionar Poliza")
     ventana.geometry("300x300")
     ventana.resizable(False, False)
+    ventana.grab_set()
     
     ctk.CTkLabel(ventana, text="Selecciona el numero de poliza:").pack(pady=(20,10))
     
