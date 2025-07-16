@@ -397,3 +397,31 @@ where exists (
       AND dpi."PARTIDA ESPECÍFICA" = 120
 )
   AND strftime('%Y-%m', substr(pi.fecha, 7) || '-' || substr(pi.fecha, 4, 2) || '-' || substr(pi.fecha, 1, 2)) = '2025-06';
+
+SELECT 
+    p.fecha,
+    p.nombre,
+    p.tipo_pago,
+    p.no_cheque,
+    p.monto
+FROM polizasEgresos p
+WHERE strftime('%Y-%m', 
+    substr(p.fecha, 7) || '-' || substr(p.fecha, 4, 2) || '-' || substr(p.fecha, 1, 2)
+) = '2025-06';
+
+
+select * from polizasEgresos
+where strftime('%Y-%m', 
+    substr(fecha, 7) || '-' || substr(fecha, 4, 2) || '-' || substr(fecha, 1, 2)
+) = '2025-06';
+
+
+update polizasEgresos
+set tipo_pago = 'TRANSF. ELECTRÓNICA'
+where id_poliza = 36;
+
+SELECT p.fecha, SUM(d.abono) as total_abono
+    FROM detallePolizaIngreso d
+    JOIN polizasIngresos p ON d.noPoliza = p.noPoliza
+    WHERE substr(p.fecha, 7, 4) || '-' || substr(p.fecha, 4, 2) || '-' || substr(p.fecha, 1, 2) >= '2025-06'
+        AND substr(p.fecha, 7, 4) || '-' || substr(p.fecha, 4, 2) || '-' || substr(p.fecha, 1, 2) < '2025-06'
