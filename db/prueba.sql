@@ -1,10 +1,10 @@
 
-SELECT pi.importe AS cargo, pi.fecha
-FROM polizasIngresos pi
-WHERE EXISTS (
-    SELECT 1
-    FROM detallePolizaIngreso dpi
-    WHERE dpi.noPoliza = pi.noPoliza
-      AND dpi.clave = '330'
-)
-ORDER BY pi.fecha;
+SELECT 
+            substr(p.fecha, 1, 10) AS fecha,
+            'DEPOSITO' AS descripcion,
+            d.abono AS cargo,
+            p.noPoliza
+        FROM detallePolizaIngreso d
+        JOIN polizasIngresos p ON d.noPoliza = p.noPoliza
+        WHERE substr(p.fecha, 4, 2) = ? AND substr(p.fecha, 7, 4) = ?
+        ORDER BY DATE(substr(p.fecha, 7, 4) || '-' || substr(p.fecha, 4, 2) || '-' || substr(p.fecha, 1, 2)) ASC

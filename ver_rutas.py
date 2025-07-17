@@ -1,25 +1,34 @@
 import sqlite3
 
-def obtener_totales_ingresos_debug(mes_anio):
-    conn = sqlite3.connect("prueba.db")  # Ruta según tu caso real
+def obtener_totales_depositos_por_poliza(mes_anio):
+    conn = sqlite3.connect("prueba.db")
     cursor = conn.cursor()
-    cursor.execute("""
-        SELECT clave, SUM(abono)
-        FROM detallePolizaIngreso
-        WHERE substr(fecha, 4, 2) = ? AND substr(fecha, 7, 4) = ?
-        GROUP BY clave
-        ORDER BY clave;
-    """, (mes_anio.split('-')[1], mes_anio.split('-')[0]))
+
+    query = """
+        SELECT 
+            substr(p.fecha, 1, 10) AS fecha,
+            'DEPOSITO' AS descripcion,
+            SUM(d.abono) AS cargo,
+            p.noPoliza
+        FROM detallePolizaIngreso d
+        JOIN polizasIngresos p ON d.noPoliza = p.noPoliza
+        WHERE substr(p.fecha, 4, 2) = ? AND substr(p.fecha, 7, 4) = ?
+        GROUP BY p.fecha, p.noPoliza
+        ORDER BY DATE(substr(p.fecha, 7, 4) || '-' || substr(p.fecha, 4, 2) || '-' || substr(p.fecha, 1, 2)) ASC
+    """
+
+    mes = mes_anio.split('-')[1]
+    anio = mes_anio.split('-')[0]
+
+    cursor.execute(query, (mes, anio))
     resultados = cursor.fetchall()
     conn.close()
-    
+
     print(f"Resultados para {mes_anio}:")
     for fila in resultados:
-        print(f"Clave: {fila[0]} | Total: {fila[1]}")
-    
+        print(f"Fecha: {fila[0]} | Descripción: {fila[1]} | Cargo: {fila[2]} | NoPoliza: {fila[3]}")
+
     return resultados
 
-# Ejemplo de ejecución manual
 if __name__ == "__main__":
-    obtener_totales_ingresos_debug("2025-07")
-
+    obtener_totales_depositos_por_poliza("2025-06")

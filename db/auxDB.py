@@ -101,14 +101,22 @@ def obte_poliz_egre(mes_anio):
 def obte_poliz_ingre(mes_anio):
   conn = conectar_db()
   cursor = conn.cursor()
+  
+  anio, mes = mes_anio.split('-') 
+  
   query = """
-    SELECT p.fecha, SUM(d.abono) as total_abono
-    FROM detallePolizaIngreso d
-    JOIN polizasIngresos p ON d.noPoliza = p.noPoliza
-    WHERE substr(p.fecha, 7, 4) || '-' || substr(p.fecha, 4, 2) || '-' || substr(p.fecha, 1, 2) >= ?
-        AND substr(p.fecha, 7, 4) || '-' || substr(p.fecha, 4, 2) || '-' || substr(p.fecha, 1, 2) < ?
-    """
-  cursor.execute(query, (mes_anio, mes_anio))
+      SELECT 
+          substr(p.fecha, 1, 10) AS fecha,
+          'DEPOSITO' AS descripcion,
+          SUM(d.abono) AS cargo,
+          p.noPoliza
+      FROM detallePolizaIngreso d
+      JOIN polizasIngresos p ON d.noPoliza = p.noPoliza
+      WHERE substr(p.fecha, 4, 2) = ? AND substr(p.fecha, 7, 4) = ?
+      GROUP BY p.fecha, p.noPoliza
+      ORDER BY DATE(substr(p.fecha, 7, 4) || '-' || substr(p.fecha, 4, 2) || '-' || substr(p.fecha, 1, 2)) ASC
+  """
+  cursor.execute(query, (mes, anio))
   resultados = cursor.fetchall()
   conn.close()
   return resultados

@@ -70,7 +70,15 @@ def confirmar_y_generar_aux_bancario(contenedor_principal=None):
 
     ctk.CTkButton(btn_frame, text="Generar mes seleccionado", command=generar_reporte_seleccionado, width=140).pack(side="left", padx=10)
     ctk.CTkButton(btn_frame, text="Generar mes actual", command=generar_reporte_actual, width=120).pack(side="left", padx=10)
-
+    
+def formatear_fecha_string(fecha_str):
+    partes = fecha_str.split("/")
+    if len(partes) == 3:
+        dia = partes[0].zfill(2)
+        mes = partes[1].zfill(2)
+        anio = partes[2]
+        return f"{dia}/{mes}/{anio}"
+    return fecha_str
 
 def gen_Aux_acre_div(mes_anio= None):
     app = None
@@ -110,6 +118,41 @@ def gen_Aux_acre_div(mes_anio= None):
         anio_corto = anio[-2:]      # '2025' -> '25'
         sht.range("V4").value = f"{mes_abrev}-{anio_corto}"
         
+        # ------------------------
+        
+        # Unificar y ordenar listas
+        lista_combinada = []
+        for fila in polizas_egresos:
+            fecha_normalizada = formatear_fecha_string(fila[0])
+            lista_combinada.append({
+                "fecha": datetime.strptime(fecha_normalizada, "%d/%m/%Y"),
+                "descripcion": f"{fila[1]} {fila[2]}".strip(),
+                "ingreso": None,
+                "egreso": fila[4]
+            })
+
+        for fila in poliza_ingresos:
+            fecha_normalizada = formatear_fecha_string(fila[0])
+            lista_combinada.append({
+                "fecha": datetime.strptime(fecha_normalizada, "%d/%m/%Y"),
+                "descripcion": fila[1],
+                "ingreso": fila[2],
+                "egreso": None
+            })
+        
+        lista_combinada.sort(key=lambda x: x["fecha"])
+
+        # Insertar datos en Excel desde fila 16
+        fila_excel = 16
+        for item in lista_combinada:
+            sht.range(f"B{fila_excel}").value = f"'{item['fecha'].strftime('%d/%m/%Y')}"
+            sht.range(f"G{fila_excel}").value = item["descripcion"]
+            if item["ingreso"] is not None:
+                sht.range(f"AF{fila_excel}").value = item["ingreso"]
+            if item["egreso"] is not None:
+                sht.range(f"AL{fila_excel}").value = item["egreso"]
+            fila_excel += 1
+            
         
         carpeta_salida = os.path.join(config["carpeta_destino"], "Auxiliares", "Bancario")
         os.makedirs(carpeta_salida, exist_ok=True)    
