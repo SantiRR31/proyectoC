@@ -1,6 +1,6 @@
 from datetime import datetime
 import customtkinter as ctk
-from db.egresosDB import cancelar_poliza_por_id, obtener_polizas_egresos, obtener_polizas_egresos_filtrado
+from db.egresosDB import cancelar_poliza_por_id, obtener_polizas_egresos_filtrado
 from styles.styles import FUENTE_FORMULARIO_T
 from tkinter import ttk
 

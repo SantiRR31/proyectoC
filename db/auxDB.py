@@ -10,7 +10,7 @@ def obtener_partidas_120_por_mes(mes_anio):
     conn = conectar()
     cursor = conn.cursor()
     query = """
-        SELECT d.cargo, p.fecha
+        SELECT d.cargo, p.fecha, p.nombre, p.no_poliza
         FROM detallePolizaEgreso d
         JOIN polizasEgresos p ON d.id_poliza = p.id_poliza
         WHERE d."PARTIDA ESPECÍFICA" = 120

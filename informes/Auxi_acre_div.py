@@ -20,7 +20,7 @@ meses = {
 def confirmar_y_generar_Auxiliar_acree(contenedor_principal=None):
     ventana = ctk.CTkToplevel()
     ventana.title("Generar informe auxiliar de acreedores")
-    ventana.geometry("340x180")
+    ventana.geometry("340x220")
     ventana.resizable(False, False)
     ventana.grab_set()
     
@@ -39,26 +39,51 @@ def confirmar_y_generar_Auxiliar_acree(contenedor_principal=None):
     
     mes_var = ctk.StringVar(value=meses_lista[mes_actual-1])
     anio_var = ctk.StringVar(value=str(anio_actual))
-    
+    saldo_var = ctk.StringVar(value="")
+
     mes_cb = ttk.Combobox(frame, values=meses_lista, textvariable=mes_var, state="readonly", width=14)
     mes_cb.grid(row=0, column=0, padx=8)
     anio_cb = ttk.Combobox(frame, values=[str(a) for a in range(anio_actual-5, anio_actual+2)], textvariable=anio_var, width=8, state="readonly")
     anio_cb.grid(row=0, column=1, padx=8)
-    
+
+    saldo_frame = ctk.CTkFrame(ventana, fg_color="transparent")
+    saldo_frame.pack(pady=4)
+    ctk.CTkLabel(saldo_frame, text="Saldo inicial:", font=("Arial", 12)).grid(row=0, column=0, padx=8)
+    saldo_entry = ctk.CTkEntry(saldo_frame, textvariable=saldo_var, width=120)
+    saldo_entry.grid(row=0, column=1, padx=8)
+
     def generar_reporte_seleccionado():
+        saldo_inicial = saldo_var.get().strip()
+        if not saldo_inicial:
+            messagebox.showerror("Error", "Debe ingresar el saldo inicial.")
+            return
+        try:
+            saldo_inicial_float = float(saldo_inicial)
+        except ValueError:
+            messagebox.showerror("Error", "El saldo inicial debe ser un número.")
+            return
         mes_idx = meses_lista.index(mes_var.get()) + 1
         anio = int(anio_var.get())
         mes_str = f"{anio}-{mes_idx:02d}"
         ventana.destroy()
         mostrar_loading_y_ejecutar(
-            lambda: gen_Aux_acre_div(mes_str),
+            lambda: gen_Aux_acre_div(saldo_inicial_float, mes_str),
             contenedor_principal=contenedor_principal,
         )
 
     def generar_reporte_actual():
+        saldo_inicial = saldo_var.get().strip()
+        if not saldo_inicial:
+            messagebox.showerror("Error", "Debe ingresar el saldo inicial.")
+            return
+        try:
+            saldo_inicial_float = float(saldo_inicial)
+        except ValueError:
+            messagebox.showerror("Error", "El saldo inicial debe ser un número.")
+            return
         ventana.destroy()
         mostrar_loading_y_ejecutar(
-            gen_Aux_acre_div,
+            lambda: gen_Aux_acre_div(saldo_inicial_float),
             contenedor_principal=contenedor_principal,
         )
 
@@ -66,10 +91,10 @@ def confirmar_y_generar_Auxiliar_acree(contenedor_principal=None):
     btn_frame.pack(pady=18)
 
     ctk.CTkButton(btn_frame, text="Generar mes seleccionado", command=generar_reporte_seleccionado, width=140).pack(side="left", padx=10)
-    ctk.CTkButton(btn_frame, text="Generar mes actual", command=generar_reporte_actual, width=120).pack(side="left", padx=10)
-
-
-def gen_Aux_acre_div(mes_anio= None):
+    ctk.CTkButton(btn_frame, text="Generar mes actual", command=generar_reporte_actual, width=120).pack(side="left", padx = 10)
+    
+    
+def gen_Aux_acre_div(saldo_inicial, mes_anio=None):
     app = None
     wb = None
     try: 
@@ -108,6 +133,7 @@ def gen_Aux_acre_div(mes_anio= None):
         anio_corto = anio[-2:]      # '2025' -> '25'
         sht.range("V3").value = f"{mes_abrev}-{anio_corto}"
         sht.range("AO4").value = config['clave_cecati']
+        sht.range("AP9").value = saldo_inicial
         
         def fecha_a_yyyymmdd(fecha):
             if "/" in fecha:

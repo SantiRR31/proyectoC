@@ -110,7 +110,6 @@ def gen_Aux_acre_div(mes_anio= None):
         anio_corto = anio[-2:]      # '2025' -> '25'
         sht.range("V4").value = f"{mes_abrev}-{anio_corto}"
         
-        
         carpeta_salida = os.path.join(config["carpeta_destino"], "Auxiliares", "Bancario")
         os.makedirs(carpeta_salida, exist_ok=True)    
         archivo_salida = os.path.join(carpeta_salida, f"Auxiliar_Bancario{mes_abrev}_{anio_corto}.xlsx")

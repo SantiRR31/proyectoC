@@ -11,8 +11,6 @@ from datetime import datetime
 from tkinter import messagebox
 from functions.genRegIngresos import generar_reporte_xlwings
 
-
-
 def mostrar_detalles_ingresos(frame_padre):
     #if not hasattr(mostrar_detalles_ingresos, "refresco"):
     
