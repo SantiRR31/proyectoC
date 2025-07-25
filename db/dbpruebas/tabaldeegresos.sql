@@ -13,13 +13,21 @@ CREATE TABLE polizasEgresos(
 );
 
 
-create table if not exists detallePolizaEgreso (
-    "id_poliza" intager not null,
-    "CLAVE CUCoP" text not null,
-    cargo real not null,
-    FOREIGN KEY (id_poliza) REFERENCES polizasEgresos(id_poliza),
+
+CREATE TABLE detallePolizaEgreso (
+    id_poliza INTEGER NOT NULL,
+    "CLAVE CUCoP" INTEGER NOT NULL,
+    cargo REAL NOT NULL,
+    "PARTIDA ESPECÍFICA" INTEGER NOT NULL,
+    FOREIGN KEY (id_poliza) REFERENCES polizasEgresos(id_poliza) ON DELETE CASCADE,
     FOREIGN KEY ("CLAVE CUCoP") REFERENCES partidasEgresos("CLAVE CUCoP")
 );
+
+
+INSERT INTO detallePolizaEgreso (id_poliza, "CLAVE CUCoP", cargo, "PARTIDA ESPECÍFICA")
+SELECT id_poliza, "CLAVE CUCoP", cargo, "PARTIDA ESPECÍFICA"
+FROM detallePolizaEgreso_old;
+
 
 CREATE TABLE partidasEgresos (
     "CABM ACTUALIZADO" TEXT PRIMARY KEY,
@@ -33,16 +41,21 @@ CREATE TABLE partidasEgresos (
 );
 
 drop table detallePolizaEgreso;
-drop table polizasEgresos;
+drop table ;
 
 -- Renombre la tabla 
-ALTER TABLE polizasEgresos RENAME TO polizasEgresos_old;
+ALTER TABLE detallePolizaEgreso RENAME TO detallePolizaEgreso_old;
 -- ver el sql usado para crear la tabla 
-SELECT sql FROM sqlite_master WHERE type='table' AND name='polizasEgresos';
+SELECT sql FROM sqlite_master WHERE type='table' AND name='detallePolizaEgreso';
 -- Ver las tablas existentes
 .tables
 -- 
 select * from partidasEgresos;
+
+
+
+
+
 
 
 
@@ -425,3 +438,13 @@ SELECT p.fecha, SUM(d.abono) as total_abono
     JOIN polizasIngresos p ON d.noPoliza = p.noPoliza
     WHERE substr(p.fecha, 7, 4) || '-' || substr(p.fecha, 4, 2) || '-' || substr(p.fecha, 1, 2) >= '2025-06'
         AND substr(p.fecha, 7, 4) || '-' || substr(p.fecha, 4, 2) || '-' || substr(p.fecha, 1, 2) < '2025-06'
+
+
+DELETE from detallePolizaEgreso
+where id_poliza = "03/jul./2025";
+
+
+DELETE FROM detallePolizaEgreso
+WHERE typeof(id_poliza) != 'integer';
+
+

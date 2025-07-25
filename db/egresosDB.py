@@ -103,7 +103,7 @@ def inrtar_poliza_egreso(poliza):
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''',
             (
-                poliza.poliza_id,
+                poliza.no_poliza,
                 poliza.fecha,
                 poliza.monto,
                 poliza.nombre, 
@@ -202,7 +202,7 @@ def consultar_poliza_por_no(no_poliza):
 
     # Crear el objeto PolizaEgreso
     poliza = PolizaEgreso(
-        poliza_id=poliza_row[1],   # no_poliza
+        no_poliza=poliza_row[1],   # no_poliza
         fecha=poliza_row[2],
         monto=poliza_row[3],
         montoletr="",  # Puedes calcularlo si lo necesitas
@@ -368,17 +368,16 @@ def obtener_polizas_egresos():
     conn.close()
     return filas
 
-def cancelar_poliza_por_id(id_poliza):
+def cambiar_estado_poliza_id(id_poliza,nuevo_estado):
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute('''
         UPDATE polizasEgresos
-        SET estado = 'cancelado'
+        SET estado = ?
         WHERE id_poliza = ?
-    ''', (id_poliza,))
+    ''', (nuevo_estado,id_poliza,))
     conn.commit()
     conn.close()
-
 
 def obtener_polizas_egresos_filtrado(mes=None, anio=None):
     conn = conectar()
@@ -388,17 +387,115 @@ def obtener_polizas_egresos_filtrado(mes=None, anio=None):
         cursor.execute('''
             SELECT id_poliza, no_poliza, fecha, monto, nombre, estado
             FROM polizasEgresos
-            WHERE strftime('%m', fecha) = ? AND strftime('%Y', fecha) = ?
-            ORDER BY fecha DESC
+            WHERE SUBSTR(fecha, 4, 2) = ? AND SUBSTR(fecha, 7, 4) = ?
+            ORDER BY CAST(SUBSTR(no_poliza, 1, 2) AS INTEGER) ASC
         ''', (f"{int(mes):02d}", str(anio)))
     else:
         cursor.execute('''
             SELECT id_poliza, no_poliza, fecha, monto, nombre, estado
             FROM polizasEgresos
-            ORDER BY fecha DESC
+            ORDER BY CAST(SUBSTR(no_poliza, 1, 2) AS INTEGER) ASC
         ''')
 
     filas = cursor.fetchall()
+    
+    #print(f"DEBUG Pólizas filtradas ({mes}/{anio}): {filas}")
+
     conn.close()
     return filas
 
+
+def obtener_poliza_completa(id_poliza):
+    conn = conectar()
+    cursor = conn.cursor()
+
+    # Obtener datos de cabecera
+    cursor.execute("""
+        SELECT id_poliza, no_poliza,fecha, monto, nombre, tipo_pago,
+               clave_ref, denominacion, observaciones, no_cheque, estado
+        FROM polizasEgresos
+        WHERE id_poliza = ?
+    """, (id_poliza,))
+    fila = cursor.fetchone()
+
+    if not fila:
+        return None
+
+    poliza = PolizaEgreso(
+        poliza_id=fila[0],
+        no_poliza=fila[1],      
+        fecha=fila[2],
+        monto=fila[3], 
+        nombre=fila[4],
+        tipo_pago=fila[5],
+        clave_ref=fila[6],
+        denominacion=fila[7],
+        observaciones=fila[8],
+        no_cheque=fila[9],
+        estado=fila[10]
+    )
+
+    # Obtener conceptos asociados
+    cursor.execute("""
+        SELECT d."CLAVE CUCoP", p.DESCRIPCIÓN, p."PARTIDA ESPECÍFICA", d.cargo
+        FROM detallePolizaEgreso d
+        JOIN partidasEgresos p ON d."CLAVE CUCoP" = p."CLAVE CUCoP"
+        WHERE d.id_poliza = ?
+    """, (id_poliza,))
+
+    for concepto in cursor.fetchall():
+        c = ConceptoEgreso(
+            clave_cucop=concepto[0],
+            descripcion=concepto[1],
+            partida_especifica=concepto[2],
+            cargo=concepto[3]
+        )
+        poliza.agregar_concepto(c)
+
+    conn.close()
+    return poliza
+
+
+def actualizar_poliza(poliza: PolizaEgreso):
+    print("Actualizando póliza:", poliza.no_poliza)
+
+    conn = conectar()
+    cursor = conn.cursor()
+    try:
+        if poliza.poliza_id:
+            cursor.execute("""
+                UPDATE polizasEgresos SET
+                    no_poliza=?, fecha=?, monto=?, nombre=?, tipo_pago=?,
+                    clave_ref=?, denominacion=?, observaciones=?, no_cheque=?, estado=?
+                WHERE id_poliza = ?
+            """, (
+                poliza.no_poliza, poliza.fecha, poliza.monto, poliza.nombre, poliza.tipo_pago,
+                poliza.clave_ref, poliza.denominacion, poliza.observaciones,
+                poliza.no_cheque, poliza.estado, poliza.poliza_id
+            ))
+            cursor.execute("DELETE FROM detallePolizaEgreso WHERE id_poliza = ?", (poliza.poliza_id,))
+            for concepto in poliza.conceptos:
+                cursor.execute("""
+                    INSERT INTO detallePolizaEgreso (id_poliza, "CLAVE CUCoP", "PARTIDA ESPECÍFICA", cargo)
+                    VALUES (?, ?, ?, ?)
+                """, (poliza.poliza_id, concepto.clave_cucop, concepto.partida_especifica, concepto.cargo))
+        conn.commit()
+        return True
+    except Exception as e:
+        print("Error al actualizar:", e)
+        return False
+    finally:
+        conn.close()
+        
+        
+def eliminar_poliza(id_poliza: int):
+    conn = conectar()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("PRAGMA foreign_keys = ON")  # Activa FK para cascada
+        cursor.execute("DELETE FROM polizasEgresos WHERE id_poliza = ?", (id_poliza,))
+        conn.commit()
+    except Exception as e:
+        print("Error al eliminar póliza:", e)
+    finally:
+        conn.close()
