@@ -65,76 +65,81 @@ def insertar_entradas_en_hoja(hoja, conceptos, fila_inicial=18):
         return False
 
 def guardar_egresos(poliza):
+    app = None
+    wb = None
     try:
         app = xw.App(visible=False)
-        # Archivo por mes
         fecha_dt = datetime.strptime(poliza.fecha, "%d/%m/%Y")
         nombre_archivo = f"egresos_{fecha_dt.strftime('%b_%Y').lower()}.xlsx"
         ruta_descargas = os.path.join(config["carpeta_destino"], "PolizasDeEgresos")
         os.makedirs(ruta_descargas, exist_ok=True)
         ruta_archivo = os.path.join(ruta_descargas, nombre_archivo)
 
-        # Si el archivo existe, ábrelo; si no, crea uno nuevo desde la plantilla
         if os.path.exists(ruta_archivo):
-            wb = xw.Book(ruta_archivo)
+            wb = app.books.open(ruta_archivo)
         else:
             wb = app.books.open(ruta_absoluta("assets/plantillas/egresos.xlsx"))
 
-        nombre_hoja = obtener_nombre_hoja(poliza.poliza_id)
+        nombre_hoja = obtener_nombre_hoja(poliza.no_poliza)
         nombres_hojas = [sheet.name for sheet in wb.sheets]
+
         if nombre_hoja not in nombres_hojas:
-            # Copia la hoja plantilla (ajusta el nombre según tu plantilla)
-            nombre_plantilla = "01 ene 2025"  # o el nombre real de tu hoja plantilla
+            nombre_plantilla = "01 ene 2025"
             if nombre_plantilla in nombres_hojas:
                 hoja_plantilla = wb.sheets[nombre_plantilla]
                 hoja_nueva = hoja_plantilla.copy(after=wb.sheets[-1])
                 hoja_nueva.name = nombre_hoja
             else:
-                # Si no hay plantilla, crea una hoja en blanco como fallback
                 hoja_nueva = wb.sheets.add(nombre_hoja)
         hoja = wb.sheets[nombre_hoja]
+
         asignar_valores_en_hoja(hoja, poliza)
 
         if not insertar_entradas_en_hoja(hoja, poliza.conceptos):
-            wb.close()
             return
 
         wb.save(ruta_archivo)
         messagebox.showinfo("Éxito", f"Archivo guardado en: {ruta_archivo}")
-        wb.close()
     except Exception as e:
         print("Error al guardar:", e)
-        messagebox.showerror("Error", f"No se pudo guardar la información.\n{e}")
         traceback.print_exc()
+        messagebox.showerror("Error", f"No se pudo guardar la información.\n{e}")
     finally:
         if wb is not None:
             wb.close()
         if app is not None:
             app.quit()
+
                 
 def guardar_pdf(poliza):
+    app = None
+    wb = None
     try:
         if not validar_campos_obligatorios_obj(poliza):
             return
         app = xw.App(visible=False)
         wb = app.books.open(ruta_absoluta("assets/plantillas/egresos.xlsx"))
         hoja = wb.sheets["01 ene 2025"]
-        
+
         asignar_valores_en_hoja(hoja, poliza)
 
         if not insertar_entradas_en_hoja(hoja, poliza.conceptos):
-            wb.close()
             return
 
         fecha_actual = obtener_fecha_actual().replace("/", "-")
         nombre_archivo = f"Poliza_Egresos_{fecha_actual}.pdf"
-        ruta_descargas = os.path.expanduser(config["carpeta_destino"],"PolizasDeEgresos")
+        ruta_descargas = os.path.join(config["carpeta_destino"], "PolizasDeEgresos")
         os.makedirs(ruta_descargas, exist_ok=True)
         ruta_pdf = os.path.join(ruta_descargas, nombre_archivo)
 
-        hoja.api.ExportAsFixedFormat(0, ruta_pdf)  # 0 = PDF
-        wb.close()
+        hoja.api.ExportAsFixedFormat(0, ruta_pdf)
         messagebox.showinfo("Éxito", f"PDF guardado en: {ruta_pdf}")
     except Exception as e:
         print("Error al exportar PDF:", e)
+        traceback.print_exc()
         messagebox.showerror("Error", f"No se pudo exportar como PDF.\n{e}")
+    finally:
+        if wb is not None:
+            wb.close()
+        if app is not None:
+            app.quit()
