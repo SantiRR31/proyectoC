@@ -8,7 +8,7 @@ from ui.inicio_content import mostrar_inicio
 from ui.egresos import mostrar_formulario_egresos
 from ui.formIngresosDiarios import mostrar_formulario_ingresos
 from ui.ajustes import mostrar_ajustes
-from ui.detalleIngresos import mostrar_detalles_ingresos, estilo_tabla
+#from ui.detalleIngresos import mostrar_detalles_ingresos, estilo_tabla
 from PIL import Image, ImageTk
 from customtkinter import CTkImage, CTkFont
 import json
@@ -122,7 +122,7 @@ def lanzar_ventana_principal():
         return btn
 
     # ---------------- SIDEBAR MODERNO ----------------
-    sidebar = ctk.CTkFrame(
+    sidebar = ctk.CTkScrollableFrame(
         main_container, 
         width=240, 
         fg_color=COLOR_CONT_PRIMARIO, 

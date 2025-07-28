@@ -60,7 +60,10 @@ def mostrar_ajustes(frame_contenido):
     ).pack(pady=(20, 10))
 
     # Card principal
-    contenedor_principal = ctk.CTkFrame(frame_contenido, corner_radius=18, fg_color=("#faf7f6", "#191919"))
+    contenedor_principal = ctk.CTkScrollableFrame(
+        frame_contenido, 
+        fg_color="transparent"
+    )
     contenedor_principal.pack(fill="both", expand=True, padx=30, pady=20)
 
     # Sección de datos institucionales
