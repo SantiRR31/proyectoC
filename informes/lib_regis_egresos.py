@@ -4,6 +4,7 @@ from db.egresosDB import obtener_conceptos_por_partida_especifica, obtener_parti
 from utils.config_utils import cargar_config
 import customtkinter as ctk
 from utils.egresos_utils import mostrar_loading_y_ejecutar
+from utils.rutas import ruta_absoluta
 import xlwings as xw
 import gc
 import os
@@ -95,7 +96,7 @@ def generar_reporte_egresos_xlwings(mes_anio=None):
 
         # Abrir Excel de forma segura
         app = xw.App(visible=False)
-        wb = app.books.open("assets/plantillas/LibroDeEgresos.xls")
+        wb = app.books.open(ruta_absoluta("assets/plantillas/LibroDeEgresos.xls"))
 
         # Crear hoja si no existe
         nombre_hoja_plantilla = "mar 2025"

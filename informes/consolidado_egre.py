@@ -6,6 +6,7 @@ from utils.config_utils import cargar_config
 from utils.egresos_utils import mostrar_loading_y_ejecutar
 import os
 import gc
+from utils.rutas import ruta_absoluta
 import xlwings as xw
 import re
 
@@ -85,7 +86,7 @@ def generar_informe_consolidado_egresos(mes_anio=None):
         
         # Abrir plantilla
         app = xw.App(visible=False)
-        wb = app.books.open("assets/plantillas/ConsolidadoEgresos.xls")
+        wb = app.books.open(ruta_absoluta("assets/plantillas/ConsolidadoEgresos.xls"))
         sht = wb.sheets[0]  # O el nombre de la hoja
 
         # Llenar datos generales

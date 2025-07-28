@@ -92,6 +92,10 @@ def guardar_egresos(poliza):
             else:
                 hoja_nueva = wb.sheets.add(nombre_hoja)
         hoja = wb.sheets[nombre_hoja]
+        
+        nombre_hoja = obtener_nombre_hoja(poliza.no_poliza)
+        hoja = reemplazar_hoja_si_existe(wb, nombre_hoja)
+
 
         asignar_valores_en_hoja(hoja, poliza)
 
@@ -143,3 +147,23 @@ def guardar_pdf(poliza):
             wb.close()
         if app is not None:
             app.quit()
+            
+def reemplazar_hoja_si_existe(wb, nombre_hoja, nombre_plantilla="01 ene 2025"):
+    nombres_existentes = [sheet.name for sheet in wb.sheets]
+
+    # Si ya existe la hoja, elimínala
+    if nombre_hoja in nombres_existentes:
+        hoja_existente = wb.sheets[nombre_hoja]
+        hoja_existente.delete()
+
+    # Si existe la hoja plantilla, la copiamos
+    if nombre_plantilla in nombres_existentes:
+        hoja_plantilla = wb.sheets[nombre_plantilla]
+        hoja_nueva = hoja_plantilla.copy(after=wb.sheets[-1])
+        hoja_nueva.name = nombre_hoja
+    else:
+        # Si no hay plantilla, crear hoja en blanco
+        hoja_nueva = wb.sheets.add(name=nombre_hoja)
+
+    return hoja_nueva
+
