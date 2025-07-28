@@ -237,12 +237,7 @@ def lanzar_ventana_principal():
     )
     
     
-    separator = ctk.CTkFrame(
-        sidebar, 
-        height=1, 
-        fg_color=COLOR_TEXTO_APARTADO
-    )
-    separator.pack(fill="x", pady=2, padx=15)
+    
     
     # Sección Visualizacion
     ctk.CTkLabel(
@@ -251,6 +246,13 @@ def lanzar_ventana_principal():
         font=CTkFont("Arial", 11, "bold"), 
         text_color= COLOR_TEXTO_APARTADO_SECUNDARIO
     ).pack(pady=(15, 5), anchor="w", padx=20)
+    
+    separator = ctk.CTkFrame(
+        sidebar, 
+        height=1, 
+        fg_color=COLOR_TEXTO_APARTADO
+    )
+    separator.pack(fill="x", pady=2, padx=15)
     
     btn_detalles_ing = create_sidebar_btn(
         sidebar, 
@@ -265,11 +267,20 @@ def lanzar_ventana_principal():
         ruta_absoluta("assets/icons/details.png"),
         lambda:abrir_det_Egresos(frame_contenido)
     )
-
-    # Espacio flexible antes de los botones inferiores
-    spacer = ctk.CTkLabel(sidebar, text="")
-    spacer.pack(fill="y", expand=True)
-
+    
+    ctk.CTkLabel(
+        sidebar, 
+        text="OTRAS OPCIONES", 
+        font=CTkFont("Arial", 11, "bold"), 
+        text_color= COLOR_TEXTO_APARTADO_SECUNDARIO
+    ).pack(pady=(15, 5), anchor="w", padx=20)
+    
+    separator = ctk.CTkFrame(
+        sidebar, 
+        height=1, 
+        fg_color=COLOR_TEXTO_APARTADO
+    )
+    separator.pack(fill="x", pady=2, padx=15)
     # Botones inferiores
     btn_config = create_sidebar_btn(
         sidebar, 
