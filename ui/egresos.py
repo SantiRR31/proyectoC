@@ -45,14 +45,12 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
     for i in range(4):
         seccion_poliza.grid_columnconfigure(i, weight=1, uniform="poliza")
 
+    entrada_id = ctk.CTkEntry(contenedor_principal)
+    entrada_id.pack_forget()  # siempre oculto
 
-
-# Campo oculto: poliza_id
     if poliza_editar:
-        entrada_id = ctk.CTkEntry(contenedor_principal)
         entrada_id.insert(0, str(poliza_editar.poliza_id))
-        entrada_id.configure(state="disabled")  # opcional: deshabilitado
-        entrada_id.pack_forget()  # oculto visualmente
+        entrada_id.configure(state="disabled")  # opcional: deshabilitar
 
     # Fila 1: Fecha y Número de Póliza
     ctk.CTkLabel(
@@ -644,9 +642,11 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
     )
     abrir_carp.grid(row=0, column=6, padx=5, sticky="e")
 
-    # Diccionario con los campos del formulario
+    if poliza_editar:
+        entrada_id.insert(0, poliza_editar.poliza_id)
+
     form = {
-        "poliza_id": entrada_id,  # Campo oculto
+        "poliza_id": entrada_id,
         "no_poliza": no_poliza,
         "fecha": fecha_policia,
         "nombre": nombre,
@@ -657,7 +657,8 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
         "observaciones": observaciones_entry,
         "denominacion": denominacion_entry,
         "no_cheque": no_cheque_entry,  
-    }      
+    }
+          
          
     def mostrar_menu_descarga(form, entradas):
         menu = tk.Menu(None, tearoff=0)

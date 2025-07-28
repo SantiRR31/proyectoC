@@ -44,7 +44,7 @@ def crear_treeview_polizas(parent, modo_tema="light"):
     scroll_y = ttk.Scrollbar(frame_tree, orient="vertical")
     scroll_y.pack(side="right", fill="y")
 
-    tree = ttk.Treeview(frame_tree, columns=columnas, show="headings", height=15, yscrollcommand=scroll_y.set)
+    tree = ttk.Treeview(frame_tree, columns=columnas, show="headings", height=10, yscrollcommand=scroll_y.set)
     scroll_y.config(command=tree.yview)
 
     for col in columnas:
@@ -155,12 +155,11 @@ def mostrar_detalles_egresos(frame_padre):
             messagebox.showinfo("Éxito", "Póliza eliminada correctamente.")
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo eliminar la póliza.\nDetalles: {e}")
+    
 
         
-        
-        
     boton_frame = ctk.CTkFrame(frame_padre, fg_color="transparent")
-    boton_frame.pack(pady=10)
+    boton_frame.pack(side="bottom", fill="x", pady=10)
 
     boton_estado = ctk.CTkButton(
         boton_frame,
