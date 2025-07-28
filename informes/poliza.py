@@ -13,7 +13,7 @@ config = cargar_config()
 def asignar_valores_en_hoja(hoja, poliza):
     campos_a_celdas = {
         "fecha": "AQ8",
-        "poliza_id": "AX5",
+        "no_poliza": "AX5",
         "nombre": "A9",
         "monto": "AO9",
         "montoletr": "A10",
@@ -28,7 +28,8 @@ def asignar_valores_en_hoja(hoja, poliza):
         if campo == "clave_ref":
             if poliza.tipo_pago == "CHEQUE":
                 valor = f"NO. DE CHEQUE {poliza.no_cheque or ''}"
-            elif poliza.tipo_pago == "TRANSF. ELECTRÓNICA":                valor = f"CLAVE DE RASTREO {poliza.clave_ref or ''}"
+            elif poliza.tipo_pago == "TRANSF. ELECTRÓNICA":                
+                valor = f"CLAVE DE RASTREO {poliza.clave_ref or ''}"
             else:
                 valor = ""
         if campo == "fecha":
