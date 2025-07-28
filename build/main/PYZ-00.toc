@@ -871,6 +871,10 @@
    'c:\\users\\santi\\appdata\\local\\programs\\python\\python39\\lib\\datetime.py',
    'PYMODULE'),
   ('db', '-', 'PYMODULE'),
+  ('db.auxDB',
+   'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
+   'copia\\db\\auxDB.py',
+   'PYMODULE'),
   ('db.conexion',
    'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
    'copia\\db\\conexion.py',
@@ -1076,6 +1080,10 @@
    'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
    'copia\\functions\\funcions.py',
    'PYMODULE'),
+  ('functions.genObservaciones',
+   'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
+   'copia\\functions\\genObservaciones.py',
+   'PYMODULE'),
   ('functions.genRegIngresos',
    'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
    'copia\\functions\\genRegIngresos.py',
@@ -1169,6 +1177,39 @@
    'PYMODULE'),
   ('importlib.util',
    'c:\\users\\santi\\appdata\\local\\programs\\python\\python39\\lib\\importlib\\util.py',
+   'PYMODULE'),
+  ('informes', '-', 'PYMODULE'),
+  ('informes.Auxi_acre_div',
+   'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
+   'copia\\informes\\Auxi_acre_div.py',
+   'PYMODULE'),
+  ('informes.aux_bancario',
+   'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
+   'copia\\informes\\aux_bancario.py',
+   'PYMODULE'),
+  ('informes.aux_deudores_div',
+   'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
+   'copia\\informes\\aux_deudores_div.py',
+   'PYMODULE'),
+  ('informes.consolidado_egre',
+   'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
+   'copia\\informes\\consolidado_egre.py',
+   'PYMODULE'),
+  ('informes.inf_real_egre',
+   'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
+   'copia\\informes\\inf_real_egre.py',
+   'PYMODULE'),
+  ('informes.inf_real_ingresos',
+   'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
+   'copia\\informes\\inf_real_ingresos.py',
+   'PYMODULE'),
+  ('informes.lib_regis_egresos',
+   'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
+   'copia\\informes\\lib_regis_egresos.py',
+   'PYMODULE'),
+  ('informes.poliza',
+   'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
+   'copia\\informes\\poliza.py',
    'PYMODULE'),
   ('inspect',
    'c:\\users\\santi\\appdata\\local\\programs\\python\\python39\\lib\\inspect.py',
@@ -2231,6 +2272,10 @@
    'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
    'copia\\ui\\detalleIngresos.py',
    'PYMODULE'),
+  ('ui.detalle_egresos',
+   'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
+   'copia\\ui\\detalle_egresos.py',
+   'PYMODULE'),
   ('ui.egresos',
    'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
    'copia\\ui\\egresos.py',
@@ -2242,10 +2287,6 @@
   ('ui.home',
    'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
    'copia\\ui\\home.py',
-   'PYMODULE'),
-  ('ui.infRealIngresos',
-   'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
-   'copia\\ui\\infRealIngresos.py',
    'PYMODULE'),
   ('ui.inicio_content',
    'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '

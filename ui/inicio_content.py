@@ -1,4 +1,5 @@
 import customtkinter as ctk
+import tkinter as tk
 from informes.Auxi_acre_div import confirmar_y_generar_Auxiliar_acree
 from informes.aux_bancario import confirmar_y_generar_aux_bancario
 from informes.aux_deudores_div import confirmar_y_generar_aux_deudor
@@ -216,7 +217,11 @@ def mostrar_inicio(contenedor):
         else:
             clima_text_label.configure(text="Clima no disponible")
 
+    after_id = None
+    clima_after_clima_id = None
+    
     def obtener_clima_seguro():
+        global after_id
         try:
             datos = obtener_clima_datos()
         except Exception as e:
@@ -224,17 +229,40 @@ def mostrar_inicio(contenedor):
             datos = None
 
         def actualizar_si_existe():
-            if clima_frame.winfo_exists():
-                actualizar_gui_con_clima(datos)
+            try:
+                if clima_frame.winfo_exists():
+                    actualizar_gui_con_clima(datos)
+                    #actualizar_clima()
+            except tk.TclError:
+                print("No se pudo actualizar: clima_frame fue destruido.")
 
         try:
-            clima_frame.after(0, actualizar_si_existe)
-        except RuntimeError:
-            print("No se pudo actualizar la GUI: clima_frame ya no existe.")
+             # Antes de usar after, revisamos si clima_frame sigue existiendo
+            if clima_frame.winfo_exists():
+                after_id = clima_frame.after(6000, actualizar_si_existe)
+        except tk.TclError:
+            print("No se pudo programar la actualización: clima_frame ya no existe.")
+            
+    def on_close():
+        global after_id
+        if after_id:
+            try:
+                clima_frame.after_cancel(after_id)
+            except Exception:
+                pass
+        if clima_after_clima_id:
+            try:
+                clima_frame.after_cancel(clima_after_clima_id)
+            except Exception:
+                pass
+        #root.destroy()  # o clima_frame.winfo_toplevel().destroy()
+
+    #root.protocol("WM_DELETE_WINDOW", on_close)
 
 
 
     def actualizar_clima(inicial=False):
+        global clima_after_clima_id
         # ⚠️ Si ya cerraste la ventana, no lances más hilos
         if not clima_frame.winfo_exists():
             return
@@ -246,7 +274,7 @@ def mostrar_inicio(contenedor):
         if inicial:
             clima_frame.after(2000, lambda: actualizar_clima())
         else:
-            clima_frame.after(1800000, lambda: actualizar_clima())
+            clima_after_clima_id =  clima_frame.after(1800000, lambda: actualizar_clima())
 
     # En el lugar donde inicias el clima:
     actualizar_clima(inicial=True)  # Iniciar el ciclo
@@ -269,13 +297,15 @@ def mostrar_inicio(contenedor):
             tarjeta,
             width=48,
             height=48,
-            corner_radius=24,
-            fg_color=("#ffffff", "#18181b")
+            corner_radius=10,
+            fg_color="transparent",
+            #fg_color=("#ffffff", "#18181b"),
+            #border_radius=2
         )
         icono_frame.pack(pady=(15, 10))
 
         try:
-            icon_img = ctk.CTkImage(Image.open(icono), size=(28, 28))
+            icon_img = ctk.CTkImage(Image.open(icono), size=(64, 64))
             ctk.CTkLabel(icono_frame, image=icon_img, text="").place(relx=0.5, rely=0.5, anchor="center")
         except:
             ctk.CTkLabel(icono_frame, text="📊", font=("Arial", 20)).place(relx=0.5, rely=0.5, anchor="center")
@@ -325,7 +355,7 @@ def mostrar_inicio(contenedor):
         egresos_frame,
         text="Egresos",
         font=("Arial", 18, "bold"),
-        text_color="#ffffff",
+        text_color=("#2a2d32", "#ffffff"),
         anchor="w",
     )
     titulo_egresos_ingresos.pack(anchor="w", padx=10, pady=(0, 10))
@@ -335,9 +365,9 @@ def mostrar_inicio(contenedor):
 
     tarjetas_ei_info = [
         ("Egresos", "assets/wallet.png", ("#ef4444", "#dc2626"), ["LIBRO DE REGISTRO DE EGRESOS"], "Opciones", {"LIBRO DE REGISTRO DE EGRESOS": lambda:confirmar_y_generar_egresos(contenedor_principal=contenedor)}),
-        ("Inf. Consolidado de egresos", "assets/excel.png", ("#f68b83","#f68b83"), ["Generar"],"Opciones", {"Generar": lambda: confirmar_y_generar_consolidado(contenedor_principal=contenedor)}),
-        ("Inf. Real de egresos", "assets/excel.png", ("#55b1bf","#55b1bf"), ["Generar"], "Opciones", {"Generar": lambda: confirmar_y_generar_infReal(contenedor_principal = contenedor)}),
-        ("Notas en COMPERCO y OCOMI", "assets/excel2.png", ("#4ade80", "#22c55e"), ["Insertar"], "Opciones", {"Insertar": seleccionar_poliza})
+        ("Inf. Consolidado de egresos", "assets/excel2.png", ("#ef4444", "#dc2626"), ["Generar"],"Opciones", {"Generar": lambda: confirmar_y_generar_consolidado(contenedor_principal=contenedor)}),
+        ("Inf. Real de egresos", "assets/excel2.png", ("#ef4444", "#dc2626"), ["Generar"], "Opciones", {"Generar": lambda: confirmar_y_generar_infReal(contenedor_principal = contenedor)}),
+        ("Notas en COMPERCO y OCOMI", "assets/excel2.png", ("#ef4444", "#dc2626"), ["Insertar"], "Opciones", {"Insertar": seleccionar_poliza})
     ]
 
     columnas = 4
@@ -375,7 +405,7 @@ def mostrar_inicio(contenedor):
         ingresos_frame,
         text="Ingresos",
         font=("Arial", 18, "bold"),
-        text_color="#ffffff",
+        text_color=("#2a2d32", "#ffffff"),
         anchor="w",
     )
     titulo_ingresos.pack(anchor="w", padx=10, pady=(0, 10))
@@ -386,9 +416,9 @@ def mostrar_inicio(contenedor):
 
     tarjetas_info = [
         ("Ingresos", "assets/coin.png", ("#10b981", "#059669"), ["Registrar", "Consultar", "Exportar"], "Opciones", None),
-        ("Inf. Consolidado de Ingresos", "assets/excel.png", ("#0081a8", "#0f6580"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar2}),
-        ("Auxiliar Bancario", "assets/coin.png", ("#f59e0b", "#d97706"), ["Generar"], "Opciones", {"Generar": confirmar_aux}),
-        ("Inf. Real de Ingresos", "assets/excel.png", ("#55b1bf","#55b1bf"), ["Generar"], "Opciones", {"Generar": lambda: confirmar_y_generar_inf_real_ingresos(contenedor_principal = contenedor)})
+        ("Inf. Consolidado de Ingresos", "assets/excel2.png", ("#10b981", "#059669"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar2}),
+        ("Auxiliar Bancario", "assets/coin.png", ("#10b981", "#059669"), ["Generar"], "Opciones", {"Generar": confirmar_aux}),
+        ("Inf. Real de Ingresos", "assets/excel2.png", ("#10b981", "#059669"), ["Generar"], "Opciones", {"Generar": lambda: confirmar_y_generar_inf_real_ingresos(contenedor_principal = contenedor)})
     ]
     
     columnas = 4
@@ -426,7 +456,7 @@ def mostrar_inicio(contenedor):
         auxil_frame,
         text="Auxiliares",
         font=("Arial", 18, "bold"),
-        text_color="#ffffff",
+        text_color=("#2a2d32", "#ffffff"),
         anchor="w",
     )
     titulo_auxil.pack(anchor="w", padx=10, pady=(0, 10))
@@ -436,8 +466,8 @@ def mostrar_inicio(contenedor):
     tarjetas_auxil.pack(fill="x", pady=20)
 
     tarjetas_info = [
-        ("Aux. Bancario", "assets/coin.png", ("#10b981", "#059669"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar_aux_bancario}),
-        ("Aux. Acreedores diversos", "assets/excel.png", ("#0081a8", "#0f6580"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar_Auxiliar_acree}),
+        ("Aux. Bancario", "assets/coin.png", ("#f59e0b", "#d97706"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar_aux_bancario}),
+        ("Aux. Acreedores diversos", "assets/excel2.png", ("#f59e0b", "#d97706"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar_Auxiliar_acree}),
         ("Aux. deudores diversos", "assets/coin.png", ("#f59e0b", "#d97706"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar_aux_deudor}),
     ]
     

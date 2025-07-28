@@ -5880,6 +5880,7 @@ imported by:
  &#8226;   <a href="#requests.cookies">requests.cookies</a>
  &#8226;   <a href="#ssl">ssl</a>
  &#8226;   <a href="#tkcalendar.calendar_">tkcalendar.calendar_</a>
+ &#8226;   <a href="#ui.formIngresosDiarios">ui.formIngresosDiarios</a>
  &#8226;   <a href="#zoneinfo._zoneinfo">zoneinfo._zoneinfo</a>
 
   </div>
@@ -9039,12 +9040,20 @@ imported by:
  &#8226;   <a href="#customtkinter.windows">customtkinter.windows</a>
  &#8226;   <a href="#customtkinter.windows.widgets.core_widget_classes.ctk_base_class">customtkinter.windows.widgets.core_widget_classes.ctk_base_class</a>
  &#8226;   <a href="#functions.funcions">functions.funcions</a>
+ &#8226;   <a href="#functions.genObservaciones">functions.genObservaciones</a>
+ &#8226;   <a href="#informes.Auxi_acre_div">informes.Auxi_acre_div</a>
+ &#8226;   <a href="#informes.aux_bancario">informes.aux_bancario</a>
+ &#8226;   <a href="#informes.aux_deudores_div">informes.aux_deudores_div</a>
+ &#8226;   <a href="#informes.consolidado_egre">informes.consolidado_egre</a>
+ &#8226;   <a href="#informes.inf_real_egre">informes.inf_real_egre</a>
+ &#8226;   <a href="#informes.inf_real_ingresos">informes.inf_real_ingresos</a>
+ &#8226;   <a href="#informes.lib_regis_egresos">informes.lib_regis_egresos</a>
  &#8226;   <a href="#ui.ajustes">ui.ajustes</a>
  &#8226;   <a href="#ui.detalleIngresos">ui.detalleIngresos</a>
+ &#8226;   <a href="#ui.detalle_egresos">ui.detalle_egresos</a>
  &#8226;   <a href="#ui.egresos">ui.egresos</a>
  &#8226;   <a href="#ui.formIngresosDiarios">ui.formIngresosDiarios</a>
  &#8226;   <a href="#ui.home">ui.home</a>
- &#8226;   <a href="#ui.infRealIngresos">ui.infRealIngresos</a>
  &#8226;   <a href="#ui.inicio_content">ui.inicio_content</a>
  &#8226;   <a href="#utils.egresos_utils">utils.egresos_utils</a>
  &#8226;   <a href="#widgets.widgets">widgets.widgets</a>
@@ -10237,6 +10246,7 @@ imports:
   <div class="import">
 imported by:
     <a href="#cryptography.hazmat.primitives.serialization.ssh">cryptography.hazmat.primitives.serialization.ssh</a>
+ &#8226;   <a href="#models.egresomodelos">models.egresomodelos</a>
  &#8226;   <a href="#packaging._tokenizer">packaging._tokenizer</a>
  &#8226;   <a href="#urllib3.contrib.emscripten.request">urllib3.contrib.emscripten.request</a>
  &#8226;   <a href="#urllib3.contrib.emscripten.response">urllib3.contrib.emscripten.response</a>
@@ -10273,9 +10283,18 @@ imported by:
  &#8226;   <a href="#db.egresosDB">db.egresosDB</a>
  &#8226;   <a href="#email.utils">email.utils</a>
  &#8226;   <a href="#functions.funcions">functions.funcions</a>
+ &#8226;   <a href="#functions.genObservaciones">functions.genObservaciones</a>
  &#8226;   <a href="#functions.genRegIngresos">functions.genRegIngresos</a>
  &#8226;   <a href="#http.cookiejar">http.cookiejar</a>
  &#8226;   <a href="#http.server">http.server</a>
+ &#8226;   <a href="#informes.Auxi_acre_div">informes.Auxi_acre_div</a>
+ &#8226;   <a href="#informes.aux_bancario">informes.aux_bancario</a>
+ &#8226;   <a href="#informes.aux_deudores_div">informes.aux_deudores_div</a>
+ &#8226;   <a href="#informes.consolidado_egre">informes.consolidado_egre</a>
+ &#8226;   <a href="#informes.inf_real_egre">informes.inf_real_egre</a>
+ &#8226;   <a href="#informes.inf_real_ingresos">informes.inf_real_ingresos</a>
+ &#8226;   <a href="#informes.lib_regis_egresos">informes.lib_regis_egresos</a>
+ &#8226;   <a href="#informes.poliza">informes.poliza</a>
  &#8226;   <a href="#pkg_resources._vendor.pyparsing">pkg_resources._vendor.pyparsing</a>
  &#8226;   <a href="#plistlib">plistlib</a>
  &#8226;   <a href="#psutil">psutil</a>
@@ -10284,7 +10303,7 @@ imported by:
  &#8226;   <a href="#setuptools._vendor.pyparsing">setuptools._vendor.pyparsing</a>
  &#8226;   <a href="#sqlite3.dbapi2">sqlite3.dbapi2</a>
  &#8226;   <a href="#ui.detalleIngresos">ui.detalleIngresos</a>
- &#8226;   <a href="#ui.egresos">ui.egresos</a>
+ &#8226;   <a href="#ui.detalle_egresos">ui.detalle_egresos</a>
  &#8226;   <a href="#ui.formIngresosDiarios">ui.formIngresosDiarios</a>
  &#8226;   <a href="#ui.inicio_content">ui.inicio_content</a>
  &#8226;   <a href="#urllib3.connection">urllib3.connection</a>
@@ -10314,8 +10333,29 @@ imported by:
   <a target="code" href="-" type="text/plain"><tt>db</tt></a>
 <span class="moduletype">NamespacePackage</span>  <div class="import">
 imported by:
-    <a href="#db.conexion">db.conexion</a>
+    <a href="#db.auxDB">db.auxDB</a>
+ &#8226;   <a href="#db.conexion">db.conexion</a>
  &#8226;   <a href="#db.egresosDB">db.egresosDB</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="db.auxDB"></a>
+  <a target="code" href="///C:/Users/Santi/OneDrive/Escritorio/python/programaEscuela%20-%20copia/db/auxDB.py" type="text/plain"><tt>db.auxDB</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#db">db</a>
+ &#8226;   <a href="#db.conexion">db.conexion</a>
+ &#8226;   <a href="#sqlite3">sqlite3</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#informes.Auxi_acre_div">informes.Auxi_acre_div</a>
+ &#8226;   <a href="#informes.aux_bancario">informes.aux_bancario</a>
+ &#8226;   <a href="#informes.aux_deudores_div">informes.aux_deudores_div</a>
 
   </div>
 
@@ -10333,7 +10373,8 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#db.egresosDB">db.egresosDB</a>
+    <a href="#db.auxDB">db.auxDB</a>
+ &#8226;   <a href="#db.egresosDB">db.egresosDB</a>
 
   </div>
 
@@ -10348,12 +10389,16 @@ imports:
  &#8226;   <a href="#db">db</a>
  &#8226;   <a href="#db.conexion">db.conexion</a>
  &#8226;   <a href="#models.egresomodelos">models.egresomodelos</a>
+ &#8226;   <a href="#sqlite3">sqlite3</a>
 
   </div>
   <div class="import">
 imported by:
-    <a href="#ui.egresos">ui.egresos</a>
- &#8226;   <a href="#ui.infRealIngresos">ui.infRealIngresos</a>
+    <a href="#informes.consolidado_egre">informes.consolidado_egre</a>
+ &#8226;   <a href="#informes.inf_real_egre">informes.inf_real_egre</a>
+ &#8226;   <a href="#informes.lib_regis_egresos">informes.lib_regis_egresos</a>
+ &#8226;   <a href="#ui.detalle_egresos">ui.detalle_egresos</a>
+ &#8226;   <a href="#ui.egresos">ui.egresos</a>
  &#8226;   <a href="#utils.egresos_utils">utils.egresos_utils</a>
 
   </div>
@@ -14696,13 +14741,9 @@ imported by:
   <a name="functions"></a>
   <a target="code" href="-" type="text/plain"><tt>functions</tt></a>
 <span class="moduletype">NamespacePackage</span>  <div class="import">
-imports:
-    <a href="#functions.genRegIngresos">functions.genRegIngresos</a>
-
-  </div>
-  <div class="import">
 imported by:
     <a href="#functions.funcions">functions.funcions</a>
+ &#8226;   <a href="#functions.genObservaciones">functions.genObservaciones</a>
  &#8226;   <a href="#functions.genRegIngresos">functions.genRegIngresos</a>
  &#8226;   <a href="#ui.formIngresosDiarios">ui.formIngresosDiarios</a>
 
@@ -14733,8 +14774,32 @@ imports:
   <div class="import">
 imported by:
     <a href="#ui.formIngresosDiarios">ui.formIngresosDiarios</a>
- &#8226;   <a href="#ui.infRealIngresos">ui.infRealIngresos</a>
  &#8226;   <a href="#ui.inicio_content">ui.inicio_content</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="functions.genObservaciones"></a>
+  <a target="code" href="///C:/Users/Santi/OneDrive/Escritorio/python/programaEscuela%20-%20copia/functions/genObservaciones.py" type="text/plain"><tt>functions.genObservaciones</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#customtkinter">customtkinter</a>
+ &#8226;   <a href="#datetime">datetime</a>
+ &#8226;   <a href="#functions">functions</a>
+ &#8226;   <a href="#os">os</a>
+ &#8226;   <a href="#sqlite3">sqlite3</a>
+ &#8226;   <a href="#subprocess">subprocess</a>
+ &#8226;   <a href="#tkinter">tkinter</a>
+ &#8226;   <a href="#tkinter.messagebox">tkinter.messagebox</a>
+ &#8226;   <a href="#utils.rutas">utils.rutas</a>
+ &#8226;   <a href="#xlwings">xlwings</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#ui.inicio_content">ui.inicio_content</a>
 
   </div>
 
@@ -14757,8 +14822,8 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#functions">functions</a>
- &#8226;   <a href="#ui.detalleIngresos">ui.detalleIngresos</a>
+    <a href="#ui.detalleIngresos">ui.detalleIngresos</a>
+ &#8226;   <a href="#ui.egresos">ui.egresos</a>
  &#8226;   <a href="#ui.formIngresosDiarios">ui.formIngresosDiarios</a>
 
   </div>
@@ -14908,8 +14973,14 @@ imports:
   <div class="import">
 imported by:
     <a href="#_posixsubprocess">_posixsubprocess</a>
+ &#8226;   <a href="#informes.Auxi_acre_div">informes.Auxi_acre_div</a>
+ &#8226;   <a href="#informes.aux_bancario">informes.aux_bancario</a>
+ &#8226;   <a href="#informes.aux_deudores_div">informes.aux_deudores_div</a>
+ &#8226;   <a href="#informes.consolidado_egre">informes.consolidado_egre</a>
+ &#8226;   <a href="#informes.inf_real_egre">informes.inf_real_egre</a>
+ &#8226;   <a href="#informes.inf_real_ingresos">informes.inf_real_ingresos</a>
+ &#8226;   <a href="#informes.lib_regis_egresos">informes.lib_regis_egresos</a>
  &#8226;   <a href="#numpy.testing._private.utils">numpy.testing._private.utils</a>
- &#8226;   <a href="#utils.egresos_utils">utils.egresos_utils</a>
  &#8226;   <a href="#weakref">weakref</a>
 
   </div>
@@ -15516,6 +15587,7 @@ imports:
  &#8226;   <a href="#importlib._bootstrap_external">importlib._bootstrap_external</a>
  &#8226;   <a href="#importlib._common">importlib._common</a>
  &#8226;   <a href="#importlib.machinery">importlib.machinery</a>
+ &#8226;   <a href="#importlib.resources">importlib.resources</a>
  &#8226;   <a href="#sys">sys</a>
  &#8226;   <a href="#types">types</a>
  &#8226;   <a href="#warnings">warnings</a>
@@ -15750,6 +15822,7 @@ imports:
   <div class="import">
 imported by:
     <a href="#certifi.core">certifi.core</a>
+ &#8226;   <a href="#importlib">importlib</a>
  &#8226;   <a href="#urllib3.contrib.emscripten.fetch">urllib3.contrib.emscripten.fetch</a>
  &#8226;   <a href="#zoneinfo._common">zoneinfo._common</a>
  &#8226;   <a href="#zoneinfo._tzpath">zoneinfo._tzpath</a>
@@ -15791,6 +15864,240 @@ imported by:
  &#8226;   <a href="#setuptools.extern">setuptools.extern</a>
  &#8226;   <a href="#setuptools.py34compat">setuptools.py34compat</a>
  &#8226;   <a href="#zipfile">zipfile</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="informes"></a>
+  <a target="code" href="-" type="text/plain"><tt>informes</tt></a>
+<span class="moduletype">NamespacePackage</span>  <div class="import">
+imported by:
+    <a href="#informes.Auxi_acre_div">informes.Auxi_acre_div</a>
+ &#8226;   <a href="#informes.aux_bancario">informes.aux_bancario</a>
+ &#8226;   <a href="#informes.aux_deudores_div">informes.aux_deudores_div</a>
+ &#8226;   <a href="#informes.consolidado_egre">informes.consolidado_egre</a>
+ &#8226;   <a href="#informes.inf_real_egre">informes.inf_real_egre</a>
+ &#8226;   <a href="#informes.inf_real_ingresos">informes.inf_real_ingresos</a>
+ &#8226;   <a href="#informes.lib_regis_egresos">informes.lib_regis_egresos</a>
+ &#8226;   <a href="#informes.poliza">informes.poliza</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="informes.Auxi_acre_div"></a>
+  <a target="code" href="///C:/Users/Santi/OneDrive/Escritorio/python/programaEscuela%20-%20copia/informes/Auxi_acre_div.py" type="text/plain"><tt>informes.Auxi_acre_div</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#customtkinter">customtkinter</a>
+ &#8226;   <a href="#datetime">datetime</a>
+ &#8226;   <a href="#db.auxDB">db.auxDB</a>
+ &#8226;   <a href="#gc">gc</a>
+ &#8226;   <a href="#informes">informes</a>
+ &#8226;   <a href="#os">os</a>
+ &#8226;   <a href="#re">re</a>
+ &#8226;   <a href="#tkinter">tkinter</a>
+ &#8226;   <a href="#tkinter.messagebox">tkinter.messagebox</a>
+ &#8226;   <a href="#tkinter.ttk">tkinter.ttk</a>
+ &#8226;   <a href="#utils.egresos_utils">utils.egresos_utils</a>
+ &#8226;   <a href="#xlwings">xlwings</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#ui.inicio_content">ui.inicio_content</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="informes.aux_bancario"></a>
+  <a target="code" href="///C:/Users/Santi/OneDrive/Escritorio/python/programaEscuela%20-%20copia/informes/aux_bancario.py" type="text/plain"><tt>informes.aux_bancario</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#customtkinter">customtkinter</a>
+ &#8226;   <a href="#datetime">datetime</a>
+ &#8226;   <a href="#db.auxDB">db.auxDB</a>
+ &#8226;   <a href="#gc">gc</a>
+ &#8226;   <a href="#informes">informes</a>
+ &#8226;   <a href="#os">os</a>
+ &#8226;   <a href="#re">re</a>
+ &#8226;   <a href="#tkinter">tkinter</a>
+ &#8226;   <a href="#tkinter.messagebox">tkinter.messagebox</a>
+ &#8226;   <a href="#tkinter.ttk">tkinter.ttk</a>
+ &#8226;   <a href="#utils.egresos_utils">utils.egresos_utils</a>
+ &#8226;   <a href="#xlwings">xlwings</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#ui.inicio_content">ui.inicio_content</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="informes.aux_deudores_div"></a>
+  <a target="code" href="///C:/Users/Santi/OneDrive/Escritorio/python/programaEscuela%20-%20copia/informes/aux_deudores_div.py" type="text/plain"><tt>informes.aux_deudores_div</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#customtkinter">customtkinter</a>
+ &#8226;   <a href="#datetime">datetime</a>
+ &#8226;   <a href="#db.auxDB">db.auxDB</a>
+ &#8226;   <a href="#gc">gc</a>
+ &#8226;   <a href="#informes">informes</a>
+ &#8226;   <a href="#os">os</a>
+ &#8226;   <a href="#tkinter">tkinter</a>
+ &#8226;   <a href="#tkinter.messagebox">tkinter.messagebox</a>
+ &#8226;   <a href="#tkinter.ttk">tkinter.ttk</a>
+ &#8226;   <a href="#utils.config_utils">utils.config_utils</a>
+ &#8226;   <a href="#utils.egresos_utils">utils.egresos_utils</a>
+ &#8226;   <a href="#xlwings">xlwings</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#ui.inicio_content">ui.inicio_content</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="informes.consolidado_egre"></a>
+  <a target="code" href="///C:/Users/Santi/OneDrive/Escritorio/python/programaEscuela%20-%20copia/informes/consolidado_egre.py" type="text/plain"><tt>informes.consolidado_egre</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#customtkinter">customtkinter</a>
+ &#8226;   <a href="#datetime">datetime</a>
+ &#8226;   <a href="#db.egresosDB">db.egresosDB</a>
+ &#8226;   <a href="#gc">gc</a>
+ &#8226;   <a href="#informes">informes</a>
+ &#8226;   <a href="#os">os</a>
+ &#8226;   <a href="#re">re</a>
+ &#8226;   <a href="#tkinter">tkinter</a>
+ &#8226;   <a href="#tkinter.messagebox">tkinter.messagebox</a>
+ &#8226;   <a href="#tkinter.ttk">tkinter.ttk</a>
+ &#8226;   <a href="#utils.config_utils">utils.config_utils</a>
+ &#8226;   <a href="#utils.egresos_utils">utils.egresos_utils</a>
+ &#8226;   <a href="#xlwings">xlwings</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#ui.inicio_content">ui.inicio_content</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="informes.inf_real_egre"></a>
+  <a target="code" href="///C:/Users/Santi/OneDrive/Escritorio/python/programaEscuela%20-%20copia/informes/inf_real_egre.py" type="text/plain"><tt>informes.inf_real_egre</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#customtkinter">customtkinter</a>
+ &#8226;   <a href="#datetime">datetime</a>
+ &#8226;   <a href="#db.egresosDB">db.egresosDB</a>
+ &#8226;   <a href="#gc">gc</a>
+ &#8226;   <a href="#informes">informes</a>
+ &#8226;   <a href="#os">os</a>
+ &#8226;   <a href="#tkinter">tkinter</a>
+ &#8226;   <a href="#tkinter.messagebox">tkinter.messagebox</a>
+ &#8226;   <a href="#tkinter.ttk">tkinter.ttk</a>
+ &#8226;   <a href="#utils.config_utils">utils.config_utils</a>
+ &#8226;   <a href="#utils.egresos_utils">utils.egresos_utils</a>
+ &#8226;   <a href="#utils.rutas">utils.rutas</a>
+ &#8226;   <a href="#xlwings">xlwings</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#ui.inicio_content">ui.inicio_content</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="informes.inf_real_ingresos"></a>
+  <a target="code" href="///C:/Users/Santi/OneDrive/Escritorio/python/programaEscuela%20-%20copia/informes/inf_real_ingresos.py" type="text/plain"><tt>informes.inf_real_ingresos</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#customtkinter">customtkinter</a>
+ &#8226;   <a href="#datetime">datetime</a>
+ &#8226;   <a href="#gc">gc</a>
+ &#8226;   <a href="#informes">informes</a>
+ &#8226;   <a href="#os">os</a>
+ &#8226;   <a href="#sqlite3">sqlite3</a>
+ &#8226;   <a href="#tkinter">tkinter</a>
+ &#8226;   <a href="#tkinter.messagebox">tkinter.messagebox</a>
+ &#8226;   <a href="#utils.config_utils">utils.config_utils</a>
+ &#8226;   <a href="#utils.rutas">utils.rutas</a>
+ &#8226;   <a href="#xlwings">xlwings</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#ui.inicio_content">ui.inicio_content</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="informes.lib_regis_egresos"></a>
+  <a target="code" href="///C:/Users/Santi/OneDrive/Escritorio/python/programaEscuela%20-%20copia/informes/lib_regis_egresos.py" type="text/plain"><tt>informes.lib_regis_egresos</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#customtkinter">customtkinter</a>
+ &#8226;   <a href="#datetime">datetime</a>
+ &#8226;   <a href="#db.egresosDB">db.egresosDB</a>
+ &#8226;   <a href="#gc">gc</a>
+ &#8226;   <a href="#informes">informes</a>
+ &#8226;   <a href="#os">os</a>
+ &#8226;   <a href="#tkinter">tkinter</a>
+ &#8226;   <a href="#tkinter.messagebox">tkinter.messagebox</a>
+ &#8226;   <a href="#tkinter.ttk">tkinter.ttk</a>
+ &#8226;   <a href="#utils.config_utils">utils.config_utils</a>
+ &#8226;   <a href="#utils.egresos_utils">utils.egresos_utils</a>
+ &#8226;   <a href="#xlwings">xlwings</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#ui.inicio_content">ui.inicio_content</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="informes.poliza"></a>
+  <a target="code" href="///C:/Users/Santi/OneDrive/Escritorio/python/programaEscuela%20-%20copia/informes/poliza.py" type="text/plain"><tt>informes.poliza</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#datetime">datetime</a>
+ &#8226;   <a href="#informes">informes</a>
+ &#8226;   <a href="#os">os</a>
+ &#8226;   <a href="#tkinter">tkinter</a>
+ &#8226;   <a href="#tkinter.messagebox">tkinter.messagebox</a>
+ &#8226;   <a href="#traceback">traceback</a>
+ &#8226;   <a href="#utils.config_utils">utils.config_utils</a>
+ &#8226;   <a href="#utils.egresos_utils">utils.egresos_utils</a>
+ &#8226;   <a href="#utils.rutas">utils.rutas</a>
+ &#8226;   <a href="#utils.utils">utils.utils</a>
+ &#8226;   <a href="#xlwings">xlwings</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#ui.egresos">ui.egresos</a>
 
   </div>
 
@@ -16125,7 +16432,6 @@ imported by:
  &#8226;   <a href="#requests.compat">requests.compat</a>
  &#8226;   <a href="#setuptools.msvc">setuptools.msvc</a>
  &#8226;   <a href="#ui.ajustes">ui.ajustes</a>
- &#8226;   <a href="#ui.egresos">ui.egresos</a>
  &#8226;   <a href="#ui.home">ui.home</a>
  &#8226;   <a href="#urllib3._request_methods">urllib3._request_methods</a>
  &#8226;   <a href="#urllib3.contrib.emscripten.fetch">urllib3.contrib.emscripten.fetch</a>
@@ -16489,7 +16795,9 @@ imported by:
   <a target="code" href="///C:/Users/Santi/OneDrive/Escritorio/python/programaEscuela%20-%20copia/models/egresomodelos.py" type="text/plain"><tt>models.egresomodelos</tt></a>
 <span class="moduletype">SourceModule</span>  <div class="import">
 imports:
-    <a href="#models">models</a>
+    <a href="#dataclasses">dataclasses</a>
+ &#8226;   <a href="#models">models</a>
+ &#8226;   <a href="#typing">typing</a>
 
   </div>
   <div class="import">
@@ -24107,6 +24415,7 @@ imported by:
  &#8226;   <a href="#fileinput">fileinput</a>
  &#8226;   <a href="#fnmatch">fnmatch</a>
  &#8226;   <a href="#functions.funcions">functions.funcions</a>
+ &#8226;   <a href="#functions.genObservaciones">functions.genObservaciones</a>
  &#8226;   <a href="#functions.genRegIngresos">functions.genRegIngresos</a>
  &#8226;   <a href="#genericpath">genericpath</a>
  &#8226;   <a href="#getopt">getopt</a>
@@ -24120,6 +24429,14 @@ imported by:
  &#8226;   <a href="#importlib._common">importlib._common</a>
  &#8226;   <a href="#importlib.metadata">importlib.metadata</a>
  &#8226;   <a href="#importlib.resources">importlib.resources</a>
+ &#8226;   <a href="#informes.Auxi_acre_div">informes.Auxi_acre_div</a>
+ &#8226;   <a href="#informes.aux_bancario">informes.aux_bancario</a>
+ &#8226;   <a href="#informes.aux_deudores_div">informes.aux_deudores_div</a>
+ &#8226;   <a href="#informes.consolidado_egre">informes.consolidado_egre</a>
+ &#8226;   <a href="#informes.inf_real_egre">informes.inf_real_egre</a>
+ &#8226;   <a href="#informes.inf_real_ingresos">informes.inf_real_ingresos</a>
+ &#8226;   <a href="#informes.lib_regis_egresos">informes.lib_regis_egresos</a>
+ &#8226;   <a href="#informes.poliza">informes.poliza</a>
  &#8226;   <a href="#inspect">inspect</a>
  &#8226;   <a href="#linecache">linecache</a>
  &#8226;   <a href="#locale">locale</a>
@@ -24242,7 +24559,6 @@ imported by:
  &#8226;   <a href="#tkinter.ttk">tkinter.ttk</a>
  &#8226;   <a href="#ui.ajustes">ui.ajustes</a>
  &#8226;   <a href="#ui.detalleIngresos">ui.detalleIngresos</a>
- &#8226;   <a href="#ui.egresos">ui.egresos</a>
  &#8226;   <a href="#ui.formIngresosDiarios">ui.formIngresosDiarios</a>
  &#8226;   <a href="#ui.home">ui.home</a>
  &#8226;   <a href="#ui.inicio_content">ui.inicio_content</a>
@@ -24254,7 +24570,6 @@ imported by:
  &#8226;   <a href="#urllib3.filepost">urllib3.filepost</a>
  &#8226;   <a href="#urllib3.util.ssl_">urllib3.util.ssl_</a>
  &#8226;   <a href="#utils.config_utils">utils.config_utils</a>
- &#8226;   <a href="#utils.egresos_utils">utils.egresos_utils</a>
  &#8226;   <a href="#utils.rutas">utils.rutas</a>
  &#8226;   <a href="#utils.utils">utils.utils</a>
  &#8226;   <a href="#uu">uu</a>
@@ -26555,6 +26870,9 @@ imported by:
  &#8226;   <a href="#http.cookies">http.cookies</a>
  &#8226;   <a href="#idna.core">idna.core</a>
  &#8226;   <a href="#importlib.metadata">importlib.metadata</a>
+ &#8226;   <a href="#informes.Auxi_acre_div">informes.Auxi_acre_div</a>
+ &#8226;   <a href="#informes.aux_bancario">informes.aux_bancario</a>
+ &#8226;   <a href="#informes.consolidado_egre">informes.consolidado_egre</a>
  &#8226;   <a href="#inspect">inspect</a>
  &#8226;   <a href="#ipaddress">ipaddress</a>
  &#8226;   <a href="#json.decoder">json.decoder</a>
@@ -26646,7 +26964,6 @@ imported by:
  &#8226;   <a href="#urllib3.util.retry">urllib3.util.retry</a>
  &#8226;   <a href="#urllib3.util.ssl_match_hostname">urllib3.util.ssl_match_hostname</a>
  &#8226;   <a href="#urllib3.util.url">urllib3.util.url</a>
- &#8226;   <a href="#utils.egresos_utils">utils.egresos_utils</a>
  &#8226;   <a href="#warnings">warnings</a>
  &#8226;   <a href="#win32timezone">win32timezone</a>
  &#8226;   <a href="#xlwings._xlmac">xlwings._xlmac</a>
@@ -28788,15 +29105,18 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#db.conexion">db.conexion</a>
+    <a href="#db.auxDB">db.auxDB</a>
+ &#8226;   <a href="#db.conexion">db.conexion</a>
+ &#8226;   <a href="#db.egresosDB">db.egresosDB</a>
  &#8226;   <a href="#functions.funcions">functions.funcions</a>
+ &#8226;   <a href="#functions.genObservaciones">functions.genObservaciones</a>
  &#8226;   <a href="#functions.genRegIngresos">functions.genRegIngresos</a>
+ &#8226;   <a href="#informes.inf_real_ingresos">informes.inf_real_ingresos</a>
  &#8226;   <a href="#sqlite3">sqlite3</a>
  &#8226;   <a href="#sqlite3.dbapi2">sqlite3.dbapi2</a>
  &#8226;   <a href="#sqlite3.dump">sqlite3.dump</a>
  &#8226;   <a href="#ui.detalleIngresos">ui.detalleIngresos</a>
  &#8226;   <a href="#ui.formIngresosDiarios">ui.formIngresosDiarios</a>
- &#8226;   <a href="#utils.egresos_utils">utils.egresos_utils</a>
 
   </div>
 
@@ -29133,9 +29453,9 @@ imports:
 imported by:
     <a href="#ui.ajustes">ui.ajustes</a>
  &#8226;   <a href="#ui.detalleIngresos">ui.detalleIngresos</a>
+ &#8226;   <a href="#ui.detalle_egresos">ui.detalle_egresos</a>
  &#8226;   <a href="#ui.egresos">ui.egresos</a>
  &#8226;   <a href="#ui.home">ui.home</a>
- &#8226;   <a href="#ui.infRealIngresos">ui.infRealIngresos</a>
  &#8226;   <a href="#ui.inicio_content">ui.inicio_content</a>
 
   </div>
@@ -29191,6 +29511,7 @@ imported by:
  &#8226;   <a href="#distutils.spawn">distutils.spawn</a>
  &#8226;   <a href="#distutils.util">distutils.util</a>
  &#8226;   <a href="#functions.funcions">functions.funcions</a>
+ &#8226;   <a href="#functions.genObservaciones">functions.genObservaciones</a>
  &#8226;   <a href="#http.server">http.server</a>
  &#8226;   <a href="#multiprocessing.util">multiprocessing.util</a>
  &#8226;   <a href="#numpy.f2py">numpy.f2py</a>
@@ -29778,7 +30099,6 @@ imported by:
  &#8226;   <a href="#setuptools._vendor.pyparsing">setuptools._vendor.pyparsing</a>
  &#8226;   <a href="#socketserver">socketserver</a>
  &#8226;   <a href="#subprocess">subprocess</a>
- &#8226;   <a href="#ui.egresos">ui.egresos</a>
  &#8226;   <a href="#ui.inicio_content">ui.inicio_content</a>
  &#8226;   <a href="#urllib3._collections">urllib3._collections</a>
  &#8226;   <a href="#urllib3.connection">urllib3.connection</a>
@@ -30018,7 +30338,16 @@ imported by:
  &#8226;   <a href="#customtkinter.windows.widgets.ctk_textbox">customtkinter.windows.widgets.ctk_textbox</a>
  &#8226;   <a href="#customtkinter.windows.widgets.scaling.scaling_tracker">customtkinter.windows.widgets.scaling.scaling_tracker</a>
  &#8226;   <a href="#functions.funcions">functions.funcions</a>
+ &#8226;   <a href="#functions.genObservaciones">functions.genObservaciones</a>
  &#8226;   <a href="#functions.genRegIngresos">functions.genRegIngresos</a>
+ &#8226;   <a href="#informes.Auxi_acre_div">informes.Auxi_acre_div</a>
+ &#8226;   <a href="#informes.aux_bancario">informes.aux_bancario</a>
+ &#8226;   <a href="#informes.aux_deudores_div">informes.aux_deudores_div</a>
+ &#8226;   <a href="#informes.consolidado_egre">informes.consolidado_egre</a>
+ &#8226;   <a href="#informes.inf_real_egre">informes.inf_real_egre</a>
+ &#8226;   <a href="#informes.inf_real_ingresos">informes.inf_real_ingresos</a>
+ &#8226;   <a href="#informes.lib_regis_egresos">informes.lib_regis_egresos</a>
+ &#8226;   <a href="#informes.poliza">informes.poliza</a>
  &#8226;   <a href="#tkcalendar.calendar_">tkcalendar.calendar_</a>
  &#8226;   <a href="#tkcalendar.dateentry">tkcalendar.dateentry</a>
  &#8226;   <a href="#tkcalendar.tooltip">tkcalendar.tooltip</a>
@@ -30032,10 +30361,10 @@ imported by:
  &#8226;   <a href="#tkinter.ttk">tkinter.ttk</a>
  &#8226;   <a href="#ui.ajustes">ui.ajustes</a>
  &#8226;   <a href="#ui.detalleIngresos">ui.detalleIngresos</a>
+ &#8226;   <a href="#ui.detalle_egresos">ui.detalle_egresos</a>
  &#8226;   <a href="#ui.egresos">ui.egresos</a>
  &#8226;   <a href="#ui.formIngresosDiarios">ui.formIngresosDiarios</a>
  &#8226;   <a href="#ui.home">ui.home</a>
- &#8226;   <a href="#ui.infRealIngresos">ui.infRealIngresos</a>
  &#8226;   <a href="#utils.egresos_utils">utils.egresos_utils</a>
  &#8226;   <a href="#utils.utils">utils.utils</a>
 
@@ -30147,11 +30476,20 @@ imports:
   <div class="import">
 imported by:
     <a href="#functions.funcions">functions.funcions</a>
+ &#8226;   <a href="#functions.genObservaciones">functions.genObservaciones</a>
  &#8226;   <a href="#functions.genRegIngresos">functions.genRegIngresos</a>
+ &#8226;   <a href="#informes.Auxi_acre_div">informes.Auxi_acre_div</a>
+ &#8226;   <a href="#informes.aux_bancario">informes.aux_bancario</a>
+ &#8226;   <a href="#informes.aux_deudores_div">informes.aux_deudores_div</a>
+ &#8226;   <a href="#informes.consolidado_egre">informes.consolidado_egre</a>
+ &#8226;   <a href="#informes.inf_real_egre">informes.inf_real_egre</a>
+ &#8226;   <a href="#informes.inf_real_ingresos">informes.inf_real_ingresos</a>
+ &#8226;   <a href="#informes.lib_regis_egresos">informes.lib_regis_egresos</a>
+ &#8226;   <a href="#informes.poliza">informes.poliza</a>
  &#8226;   <a href="#tkinter">tkinter</a>
  &#8226;   <a href="#tkinter.simpledialog">tkinter.simpledialog</a>
  &#8226;   <a href="#ui.detalleIngresos">ui.detalleIngresos</a>
- &#8226;   <a href="#ui.egresos">ui.egresos</a>
+ &#8226;   <a href="#ui.detalle_egresos">ui.detalle_egresos</a>
  &#8226;   <a href="#ui.formIngresosDiarios">ui.formIngresosDiarios</a>
  &#8226;   <a href="#ui.home">ui.home</a>
  &#8226;   <a href="#utils.egresos_utils">utils.egresos_utils</a>
@@ -30190,11 +30528,17 @@ imports:
 imported by:
     <a href="#customtkinter.windows.widgets.core_widget_classes.ctk_base_class">customtkinter.windows.widgets.core_widget_classes.ctk_base_class</a>
  &#8226;   <a href="#functions.funcions">functions.funcions</a>
+ &#8226;   <a href="#informes.Auxi_acre_div">informes.Auxi_acre_div</a>
+ &#8226;   <a href="#informes.aux_bancario">informes.aux_bancario</a>
+ &#8226;   <a href="#informes.aux_deudores_div">informes.aux_deudores_div</a>
+ &#8226;   <a href="#informes.consolidado_egre">informes.consolidado_egre</a>
+ &#8226;   <a href="#informes.inf_real_egre">informes.inf_real_egre</a>
+ &#8226;   <a href="#informes.lib_regis_egresos">informes.lib_regis_egresos</a>
  &#8226;   <a href="#tkcalendar.calendar_">tkcalendar.calendar_</a>
  &#8226;   <a href="#tkcalendar.dateentry">tkcalendar.dateentry</a>
  &#8226;   <a href="#tkcalendar.tooltip">tkcalendar.tooltip</a>
  &#8226;   <a href="#ui.detalleIngresos">ui.detalleIngresos</a>
- &#8226;   <a href="#utils.egresos_utils">utils.egresos_utils</a>
+ &#8226;   <a href="#ui.detalle_egresos">ui.detalle_egresos</a>
 
   </div>
 
@@ -30267,6 +30611,7 @@ imported by:
  &#8226;   <a href="#concurrent.futures.process">concurrent.futures.process</a>
  &#8226;   <a href="#doctest">doctest</a>
  &#8226;   <a href="#http.cookiejar">http.cookiejar</a>
+ &#8226;   <a href="#informes.poliza">informes.poliza</a>
  &#8226;   <a href="#logging">logging</a>
  &#8226;   <a href="#main.py">main.py</a>
  &#8226;   <a href="#multiprocessing.managers">multiprocessing.managers</a>
@@ -30287,7 +30632,6 @@ imported by:
  &#8226;   <a href="#unittest.case">unittest.case</a>
  &#8226;   <a href="#unittest.loader">unittest.loader</a>
  &#8226;   <a href="#unittest.result">unittest.result</a>
- &#8226;   <a href="#utils.egresos_utils">utils.egresos_utils</a>
  &#8226;   <a href="#warnings">warnings</a>
  &#8226;   <a href="#win32com.client.dynamic">win32com.client.dynamic</a>
  &#8226;   <a href="#win32com.server.dispatcher">win32com.server.dispatcher</a>
@@ -30576,6 +30920,7 @@ imported by:
  &#8226;   <a href="#idna.uts46data">idna.uts46data</a>
  &#8226;   <a href="#importlib.abc">importlib.abc</a>
  &#8226;   <a href="#importlib.resources">importlib.resources</a>
+ &#8226;   <a href="#models.egresomodelos">models.egresomodelos</a>
  &#8226;   <a href="#numpy._typing">numpy._typing</a>
  &#8226;   <a href="#numpy._typing._array_like">numpy._typing._array_like</a>
  &#8226;   <a href="#numpy._typing._char_codes">numpy._typing._char_codes</a>
@@ -30714,10 +31059,10 @@ imported by:
 imported by:
     <a href="#ui.ajustes">ui.ajustes</a>
  &#8226;   <a href="#ui.detalleIngresos">ui.detalleIngresos</a>
+ &#8226;   <a href="#ui.detalle_egresos">ui.detalle_egresos</a>
  &#8226;   <a href="#ui.egresos">ui.egresos</a>
  &#8226;   <a href="#ui.formIngresosDiarios">ui.formIngresosDiarios</a>
  &#8226;   <a href="#ui.home">ui.home</a>
- &#8226;   <a href="#ui.infRealIngresos">ui.infRealIngresos</a>
  &#8226;   <a href="#ui.inicio_content">ui.inicio_content</a>
 
   </div>
@@ -30780,31 +31125,55 @@ imported by:
 </div>
 
 <div class="node">
-  <a name="ui.egresos"></a>
-  <a target="code" href="///C:/Users/Santi/OneDrive/Escritorio/python/programaEscuela%20-%20copia/ui/egresos.py" type="text/plain"><tt>ui.egresos</tt></a>
+  <a name="ui.detalle_egresos"></a>
+  <a target="code" href="///C:/Users/Santi/OneDrive/Escritorio/python/programaEscuela%20-%20copia/ui/detalle_egresos.py" type="text/plain"><tt>ui.detalle_egresos</tt></a>
 <span class="moduletype">SourceModule</span>  <div class="import">
 imports:
     <a href="#customtkinter">customtkinter</a>
  &#8226;   <a href="#datetime">datetime</a>
  &#8226;   <a href="#db.egresosDB">db.egresosDB</a>
- &#8226;   <a href="#json">json</a>
- &#8226;   <a href="#models.egresomodelos">models.egresomodelos</a>
- &#8226;   <a href="#os">os</a>
  &#8226;   <a href="#styles.styles">styles.styles</a>
- &#8226;   <a href="#threading">threading</a>
- &#8226;   <a href="#tkcalendar">tkcalendar</a>
  &#8226;   <a href="#tkinter">tkinter</a>
  &#8226;   <a href="#tkinter.messagebox">tkinter.messagebox</a>
+ &#8226;   <a href="#tkinter.ttk">tkinter.ttk</a>
  &#8226;   <a href="#ui">ui</a>
- &#8226;   <a href="#utils.egresos_utils">utils.egresos_utils</a>
- &#8226;   <a href="#utils.utils">utils.utils</a>
- &#8226;   <a href="#widgets.widgets">widgets.widgets</a>
- &#8226;   <a href="#xlwings">xlwings</a>
+ &#8226;   <a href="#ui.egresos">ui.egresos</a>
 
   </div>
   <div class="import">
 imported by:
-    <a href="#ui.home">ui.home</a>
+    <a href="#ui.egresos">ui.egresos</a>
+ &#8226;   <a href="#ui.home">ui.home</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="ui.egresos"></a>
+  <a target="code" href="///C:/Users/Santi/OneDrive/Escritorio/python/programaEscuela%20-%20copia/ui/egresos.py" type="text/plain"><tt>ui.egresos</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#customtkinter">customtkinter</a>
+ &#8226;   <a href="#db.egresosDB">db.egresosDB</a>
+ &#8226;   <a href="#functions.genRegIngresos">functions.genRegIngresos</a>
+ &#8226;   <a href="#informes.poliza">informes.poliza</a>
+ &#8226;   <a href="#models.egresomodelos">models.egresomodelos</a>
+ &#8226;   <a href="#styles.styles">styles.styles</a>
+ &#8226;   <a href="#tkcalendar">tkcalendar</a>
+ &#8226;   <a href="#tkinter">tkinter</a>
+ &#8226;   <a href="#ui">ui</a>
+ &#8226;   <a href="#ui.detalle_egresos">ui.detalle_egresos</a>
+ &#8226;   <a href="#utils.egresos_utils">utils.egresos_utils</a>
+ &#8226;   <a href="#utils.rutas">utils.rutas</a>
+ &#8226;   <a href="#utils.utils">utils.utils</a>
+ &#8226;   <a href="#widgets.widgets">widgets.widgets</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#ui.detalle_egresos">ui.detalle_egresos</a>
+ &#8226;   <a href="#ui.home">ui.home</a>
 
   </div>
 
@@ -30817,6 +31186,7 @@ imported by:
 imports:
     <a href="#PIL">PIL</a>
  &#8226;   <a href="#PIL.Image">PIL.Image</a>
+ &#8226;   <a href="#calendar">calendar</a>
  &#8226;   <a href="#customtkinter">customtkinter</a>
  &#8226;   <a href="#datetime">datetime</a>
  &#8226;   <a href="#functions">functions</a>
@@ -30863,9 +31233,9 @@ imports:
  &#8226;   <a href="#ui">ui</a>
  &#8226;   <a href="#ui.ajustes">ui.ajustes</a>
  &#8226;   <a href="#ui.detalleIngresos">ui.detalleIngresos</a>
+ &#8226;   <a href="#ui.detalle_egresos">ui.detalle_egresos</a>
  &#8226;   <a href="#ui.egresos">ui.egresos</a>
  &#8226;   <a href="#ui.formIngresosDiarios">ui.formIngresosDiarios</a>
- &#8226;   <a href="#ui.infRealIngresos">ui.infRealIngresos</a>
  &#8226;   <a href="#ui.inicio_content">ui.inicio_content</a>
  &#8226;   <a href="#utils.config_utils">utils.config_utils</a>
  &#8226;   <a href="#utils.rutas">utils.rutas</a>
@@ -30874,29 +31244,6 @@ imports:
   <div class="import">
 imported by:
     <a href="#main.py">main.py</a>
-
-  </div>
-
-</div>
-
-<div class="node">
-  <a name="ui.infRealIngresos"></a>
-  <a target="code" href="///C:/Users/Santi/OneDrive/Escritorio/python/programaEscuela%20-%20copia/ui/infRealIngresos.py" type="text/plain"><tt>ui.infRealIngresos</tt></a>
-<span class="moduletype">SourceModule</span>  <div class="import">
-imports:
-    <a href="#customtkinter">customtkinter</a>
- &#8226;   <a href="#db.egresosDB">db.egresosDB</a>
- &#8226;   <a href="#functions.funcions">functions.funcions</a>
- &#8226;   <a href="#styles.styles">styles.styles</a>
- &#8226;   <a href="#tkinter">tkinter</a>
- &#8226;   <a href="#ui">ui</a>
- &#8226;   <a href="#utils.config_utils">utils.config_utils</a>
- &#8226;   <a href="#widgets.widgets">widgets.widgets</a>
-
-  </div>
-  <div class="import">
-imported by:
-    <a href="#ui.home">ui.home</a>
 
   </div>
 
@@ -30913,6 +31260,14 @@ imports:
  &#8226;   <a href="#datetime">datetime</a>
  &#8226;   <a href="#dotenv">dotenv</a>
  &#8226;   <a href="#functions.funcions">functions.funcions</a>
+ &#8226;   <a href="#functions.genObservaciones">functions.genObservaciones</a>
+ &#8226;   <a href="#informes.Auxi_acre_div">informes.Auxi_acre_div</a>
+ &#8226;   <a href="#informes.aux_bancario">informes.aux_bancario</a>
+ &#8226;   <a href="#informes.aux_deudores_div">informes.aux_deudores_div</a>
+ &#8226;   <a href="#informes.consolidado_egre">informes.consolidado_egre</a>
+ &#8226;   <a href="#informes.inf_real_egre">informes.inf_real_egre</a>
+ &#8226;   <a href="#informes.inf_real_ingresos">informes.inf_real_ingresos</a>
+ &#8226;   <a href="#informes.lib_regis_egresos">informes.lib_regis_egresos</a>
  &#8226;   <a href="#io">io</a>
  &#8226;   <a href="#os">os</a>
  &#8226;   <a href="#requests">requests</a>
@@ -30921,7 +31276,6 @@ imports:
  &#8226;   <a href="#tkcalendar">tkcalendar</a>
  &#8226;   <a href="#ui">ui</a>
  &#8226;   <a href="#utils.config_utils">utils.config_utils</a>
- &#8226;   <a href="#utils.egresos_utils">utils.egresos_utils</a>
  &#8226;   <a href="#utils.rutas">utils.rutas</a>
  &#8226;   <a href="#utils.utils">utils.utils</a>
 
@@ -32493,11 +32847,16 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#ui.ajustes">ui.ajustes</a>
+    <a href="#informes.aux_deudores_div">informes.aux_deudores_div</a>
+ &#8226;   <a href="#informes.consolidado_egre">informes.consolidado_egre</a>
+ &#8226;   <a href="#informes.inf_real_egre">informes.inf_real_egre</a>
+ &#8226;   <a href="#informes.inf_real_ingresos">informes.inf_real_ingresos</a>
+ &#8226;   <a href="#informes.lib_regis_egresos">informes.lib_regis_egresos</a>
+ &#8226;   <a href="#informes.poliza">informes.poliza</a>
+ &#8226;   <a href="#ui.ajustes">ui.ajustes</a>
  &#8226;   <a href="#ui.detalleIngresos">ui.detalleIngresos</a>
  &#8226;   <a href="#ui.formIngresosDiarios">ui.formIngresosDiarios</a>
  &#8226;   <a href="#ui.home">ui.home</a>
- &#8226;   <a href="#ui.infRealIngresos">ui.infRealIngresos</a>
  &#8226;   <a href="#ui.inicio_content">ui.inicio_content</a>
  &#8226;   <a href="#utils.egresos_utils">utils.egresos_utils</a>
 
@@ -32513,28 +32872,25 @@ imports:
     <a href="#customtkinter">customtkinter</a>
  &#8226;   <a href="#datetime">datetime</a>
  &#8226;   <a href="#db.egresosDB">db.egresosDB</a>
- &#8226;   <a href="#gc">gc</a>
  &#8226;   <a href="#math">math</a>
  &#8226;   <a href="#models.egresomodelos">models.egresomodelos</a>
- &#8226;   <a href="#os">os</a>
- &#8226;   <a href="#re">re</a>
- &#8226;   <a href="#sqlite3">sqlite3</a>
  &#8226;   <a href="#tkinter">tkinter</a>
  &#8226;   <a href="#tkinter.messagebox">tkinter.messagebox</a>
- &#8226;   <a href="#tkinter.ttk">tkinter.ttk</a>
- &#8226;   <a href="#traceback">traceback</a>
  &#8226;   <a href="#utils">utils</a>
  &#8226;   <a href="#utils.config_utils">utils.config_utils</a>
- &#8226;   <a href="#utils.rutas">utils.rutas</a>
  &#8226;   <a href="#utils.utils">utils.utils</a>
- &#8226;   <a href="#xlwings">xlwings</a>
- &#8226;   <a href="#xlwings.utils">xlwings.utils</a>
 
   </div>
   <div class="import">
 imported by:
-    <a href="#ui.egresos">ui.egresos</a>
- &#8226;   <a href="#ui.inicio_content">ui.inicio_content</a>
+    <a href="#informes.Auxi_acre_div">informes.Auxi_acre_div</a>
+ &#8226;   <a href="#informes.aux_bancario">informes.aux_bancario</a>
+ &#8226;   <a href="#informes.aux_deudores_div">informes.aux_deudores_div</a>
+ &#8226;   <a href="#informes.consolidado_egre">informes.consolidado_egre</a>
+ &#8226;   <a href="#informes.inf_real_egre">informes.inf_real_egre</a>
+ &#8226;   <a href="#informes.lib_regis_egresos">informes.lib_regis_egresos</a>
+ &#8226;   <a href="#informes.poliza">informes.poliza</a>
+ &#8226;   <a href="#ui.egresos">ui.egresos</a>
 
   </div>
 
@@ -32555,13 +32911,17 @@ imports:
 imported by:
     <a href="#db.conexion">db.conexion</a>
  &#8226;   <a href="#functions.funcions">functions.funcions</a>
+ &#8226;   <a href="#functions.genObservaciones">functions.genObservaciones</a>
  &#8226;   <a href="#functions.genRegIngresos">functions.genRegIngresos</a>
+ &#8226;   <a href="#informes.inf_real_egre">informes.inf_real_egre</a>
+ &#8226;   <a href="#informes.inf_real_ingresos">informes.inf_real_ingresos</a>
+ &#8226;   <a href="#informes.poliza">informes.poliza</a>
  &#8226;   <a href="#ui.ajustes">ui.ajustes</a>
+ &#8226;   <a href="#ui.egresos">ui.egresos</a>
  &#8226;   <a href="#ui.formIngresosDiarios">ui.formIngresosDiarios</a>
  &#8226;   <a href="#ui.home">ui.home</a>
  &#8226;   <a href="#ui.inicio_content">ui.inicio_content</a>
  &#8226;   <a href="#utils.config_utils">utils.config_utils</a>
- &#8226;   <a href="#utils.egresos_utils">utils.egresos_utils</a>
 
   </div>
 
@@ -32582,7 +32942,8 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#ui.egresos">ui.egresos</a>
+    <a href="#informes.poliza">informes.poliza</a>
+ &#8226;   <a href="#ui.egresos">ui.egresos</a>
  &#8226;   <a href="#ui.formIngresosDiarios">ui.formIngresosDiarios</a>
  &#8226;   <a href="#ui.inicio_content">ui.inicio_content</a>
  &#8226;   <a href="#utils.egresos_utils">utils.egresos_utils</a>
@@ -32937,7 +33298,6 @@ imported by:
  &#8226;   <a href="#ui.detalleIngresos">ui.detalleIngresos</a>
  &#8226;   <a href="#ui.egresos">ui.egresos</a>
  &#8226;   <a href="#ui.formIngresosDiarios">ui.formIngresosDiarios</a>
- &#8226;   <a href="#ui.infRealIngresos">ui.infRealIngresos</a>
 
   </div>
 
@@ -33686,11 +34046,18 @@ imports:
   <div class="import">
 imported by:
     <a href="#functions.funcions">functions.funcions</a>
+ &#8226;   <a href="#functions.genObservaciones">functions.genObservaciones</a>
  &#8226;   <a href="#functions.genRegIngresos">functions.genRegIngresos</a>
+ &#8226;   <a href="#informes.Auxi_acre_div">informes.Auxi_acre_div</a>
+ &#8226;   <a href="#informes.aux_bancario">informes.aux_bancario</a>
+ &#8226;   <a href="#informes.aux_deudores_div">informes.aux_deudores_div</a>
+ &#8226;   <a href="#informes.consolidado_egre">informes.consolidado_egre</a>
+ &#8226;   <a href="#informes.inf_real_egre">informes.inf_real_egre</a>
+ &#8226;   <a href="#informes.inf_real_ingresos">informes.inf_real_ingresos</a>
+ &#8226;   <a href="#informes.lib_regis_egresos">informes.lib_regis_egresos</a>
+ &#8226;   <a href="#informes.poliza">informes.poliza</a>
  &#8226;   <a href="#ui.detalleIngresos">ui.detalleIngresos</a>
- &#8226;   <a href="#ui.egresos">ui.egresos</a>
  &#8226;   <a href="#ui.formIngresosDiarios">ui.formIngresosDiarios</a>
- &#8226;   <a href="#utils.egresos_utils">utils.egresos_utils</a>
  &#8226;   <a href="#xlwings">xlwings</a>
  &#8226;   <a href="#xlwings._win32patch">xlwings._win32patch</a>
  &#8226;   <a href="#xlwings._xlmac">xlwings._xlmac</a>
@@ -34533,8 +34900,7 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#utils.egresos_utils">utils.egresos_utils</a>
- &#8226;   <a href="#xlwings">xlwings</a>
+    <a href="#xlwings">xlwings</a>
  &#8226;   <a href="#xlwings._xlmac">xlwings._xlmac</a>
  &#8226;   <a href="#xlwings._xlwindows">xlwings._xlwindows</a>
  &#8226;   <a href="#xlwings.conversion.pandas_conv">xlwings.conversion.pandas_conv</a>

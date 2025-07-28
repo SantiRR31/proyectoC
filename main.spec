@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('prueba.db', '.'), ('config.json', '.'), ('.env', '.'), ('widgets', 'widgets'), ('utils', 'utils'), ('ui', 'ui'), ('styles', 'styles'), ('functions', 'functions'), ('db', 'db'), ('assets', 'assets')],
+    datas=[('prueba.db', '.'), ('config.json', '.'), ('.env', '.'), ('widgets', 'widgets'), ('utils', 'utils'), ('ui', 'ui'), ('styles', 'styles'), ('functions', 'functions'), ('db', 'db'), ('assets', 'assets'), ('models', 'models'), ('informes', 'informes')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

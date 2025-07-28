@@ -189,15 +189,16 @@ def eliminar_registro(id_registro, frame_padre):
         
     mostrar_detalles_ingresos(frame_padre)  # Refrescar vista
         
-# Editar registro
 def editar_registro(id_registro, fecha_antigua, no_poliza_ant, banco_ant, importe_ant, nota_ant, frame_padre):
     ventana_editar = ctk.CTkToplevel()
     ventana_editar.title("Editar Registro")
-    ventana_editar.geometry("500x900")
-    ventana_editar.resizable(False, False)
+    ventana_editar.geometry("500x700")
     
+    # 🔁 SCROLLABLE FRAME GENERAL
+    frame_scroll_general = ctk.CTkScrollableFrame(ventana_editar, width=480, height=680)
+    frame_scroll_general.pack(padx=10, pady=10, fill="both", expand=True)
+
     entradas = {}
-    
     campos = {
         "Fecha (dd/mm/yyyy)": fecha_antigua,
         "No. Póliza": no_poliza_ant,
@@ -205,15 +206,15 @@ def editar_registro(id_registro, fecha_antigua, no_poliza_ant, banco_ant, import
         "Importe": str(importe_ant),
         "Nota": nota_ant,
     }
-    
+
     for campo, valor in campos.items():
-        ctk.CTkLabel(ventana_editar, text=campo + ":").pack(pady=(20, 0))
+        ctk.CTkLabel(frame_scroll_general, text=campo + ":").pack(pady=(20, 0))
         
         if campo == "Nota":
-            entrada = ctk.CTkTextbox(ventana_editar, height=100)
+            entrada = ctk.CTkTextbox(frame_scroll_general, height=100)
             entrada.insert("1.0", valor)
         else:
-            entrada = ctk.CTkEntry(ventana_editar)
+            entrada = ctk.CTkEntry(frame_scroll_general)
             entrada.insert(0, valor)
         
         entrada.pack(fill="x", padx=20)
@@ -221,46 +222,39 @@ def editar_registro(id_registro, fecha_antigua, no_poliza_ant, banco_ant, import
         
     entrada_importe = entradas["Importe"]
     entrada_importe.bind("<KeyRelease>", lambda event: actualizar_validacion())
-    
-    # ScrollableFrame para los abonos
-    frame_scroll = ctk.CTkScrollableFrame(ventana_editar, label_text="Abonos encontrados:", height=50)
-    frame_scroll.pack(fill="x", padx=20, pady=(30, 10))
 
-    # Encabezados
-    ctk.CTkLabel(frame_scroll, text="Clave", font=ctk.CTkFont(weight="bold")).grid(row=0, column=0, padx=10, pady=5, sticky="w")
-    ctk.CTkLabel(frame_scroll, text="Abono", font=ctk.CTkFont(weight="bold")).grid(row=0, column=1, padx=10, pady=5, sticky="w")
-        
-    # Diccionario para almacenar los entrys editables
-    entradas_detalles = []  # Guardaremos diccionarios por fila
+    # 🔁 FRAME DE ABONOS CON SCROLL (dentro del frame general)
+    frame_abonos = ctk.CTkFrame(frame_scroll_general)
+    frame_abonos.pack(fill="x", padx=20, pady=(30, 10))
     
+    ctk.CTkLabel(frame_abonos, text="Abonos encontrados:", font=ctk.CTkFont(size=14, weight="bold")).grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 10))
+
+    ctk.CTkLabel(frame_abonos, text="Clave", font=ctk.CTkFont(weight="bold")).grid(row=1, column=0, padx=10, pady=5, sticky="w")
+    ctk.CTkLabel(frame_abonos, text="Abono", font=ctk.CTkFont(weight="bold")).grid(row=1, column=1, padx=10, pady=5, sticky="w")
+        
+    entradas_detalles = []
+
     conn = sqlite3.connect("prueba.db")
     cursor = conn.cursor()
     cursor.execute("""
-            SELECT id, clave, abono
-            FROM detallePolizaIngreso
-            WHERE noPoliza = ? AND fecha = ?
-        """, (no_poliza_ant, fecha_antigua))
+        SELECT id, clave, abono
+        FROM detallePolizaIngreso
+        WHERE noPoliza = ? AND fecha = ?
+    """, (no_poliza_ant, fecha_antigua))
     detalles = cursor.fetchall()
-    
-    if detalles:
-    
-        # Agregar entradas por cada detalle
-        for i, (id, clave, abono) in enumerate(detalles, start=1):
-            #entrada_id = ctk.CTkEntry(frame_scroll)
-            #entrada_id.insert(0, id)
-            #entrada_id.grid(row=i, column=0, padx=10, pady=5)
-            
-            entrada_clave = ctk.CTkEntry(frame_scroll)
-            entrada_clave.insert(0, clave)
-            entrada_clave.grid(row=i, column=1, padx=10, pady=5)
 
-            entrada_abono = ctk.CTkEntry(frame_scroll)
+    if detalles:
+        for i, (id, clave, abono) in enumerate(detalles, start=2):
+            entrada_clave = ctk.CTkEntry(frame_abonos)
+            entrada_clave.insert(0, clave)
+            entrada_clave.grid(row=i, column=0, padx=10, pady=5)
+
+            entrada_abono = ctk.CTkEntry(frame_abonos)
             entrada_abono.insert(0, str(abono))
-            entrada_abono.grid(row=i, column=2, padx=10, pady=5)
-            
+            entrada_abono.grid(row=i, column=1, padx=10, pady=5)
+
             entrada_abono.bind("<KeyRelease>", lambda event: actualizar_validacion())
 
-            # Guardar las entradas con su id
             entradas_detalles.append({
                 "id": id,
                 "clave": entrada_clave,
@@ -268,26 +262,40 @@ def editar_registro(id_registro, fecha_antigua, no_poliza_ant, banco_ant, import
             })
     else:
         ctk.CTkLabel(
-            frame_scroll,
+            frame_abonos,
             text="(No se encontraron abonos relacionados.)",
             font=ctk.CTkFont(size=12, slant="italic"),
             text_color="gray"
-        ).grid(row=1, column=0, columnspan=2, padx=10, pady=10)
+        ).grid(row=2, column=0, columnspan=2, padx=10, pady=10)
+    
+    label_suma = ctk.CTkLabel(frame_scroll_general, text="Suma de abonos: $0.00")
+    label_suma.pack(pady=(20, 0))
+    
+    label_validacion = ctk.CTkLabel(frame_scroll_general, text="")
+    label_validacion.pack(pady=(0, 10))
+
+    def actualizar_validacion():
+        suma = 0.0
+        for detalle in entradas_detalles:
+            abono_str = detalle["abono"].get().strip()
+            try:
+                abono = float(abono_str)
+                suma += abono
+            except:
+                continue
+            
+        label_suma.configure(text=f"Suma de abonos: ${suma:.2f}")
         
-    #ctk.CTkLabel(
-    #    ventana_editar,
-    #    text=(
-    #    "Importante!\n\n"
-    #    "Si se ha equivocado en algún dato, se recomienda verificar el archivo generado.\n"
-    #    "Una vez rectificado el error, recomendamos borrar la hoja generada y volverla a generar,\n"
-    #    "así mismo también este registro.\n\n"
-    #    "La modificación en esta sección podría generar posibles problemas en futuros documentos.\n\n"
-    #    "Si necesita ayuda, contáctese con el equipo de soporte en la sección 'Ajustes'."),
-    #    text_color="red",
-    #    wraplength=450,
-    #    justify="left",
-    #    font=ctk.CTkFont(size=12, weight="bold")
-    #).pack(pady=(10, 0), padx=20)
+        try:
+            importe = float(entradas["Importe"].get().replace("$", "").replace(",", "").strip())
+            if round(suma, 2) == round(importe, 2):
+                label_validacion.configure(text="La suma de los abonos coincide con el importe", text_color="green")
+            else:
+                label_validacion.configure(text="La suma de los abonos NO coincide con el importe", text_color="red")
+        except:
+            label_validacion.configure(text="Importe no válido", text_color="orange")
+    
+    actualizar_validacion()
 
     def guardar():
         nueva_fecha = entradas["Fecha (dd/mm/yyyy)"].get()
@@ -297,7 +305,6 @@ def editar_registro(id_registro, fecha_antigua, no_poliza_ant, banco_ant, import
         nueva_nota = entradas["Nota"].get("1.0", "end").strip()
         
         suma_abonos = 0.0
-        
         for detalle in entradas_detalles:
             abono_text = detalle["abono"].get().strip()
             if not abono_text:
@@ -308,7 +315,7 @@ def editar_registro(id_registro, fecha_antigua, no_poliza_ant, banco_ant, import
                 messagebox.showerror("Error", f"El abono '{abono_text}' no es un número válido")
                 return
             suma_abonos += abono_valor
-            
+        
         try:
             importe_float = float(nuevo_importe)
         except ValueError:
@@ -359,46 +366,18 @@ def editar_registro(id_registro, fecha_antigua, no_poliza_ant, banco_ant, import
                     SET clave = ?, abono = ?
                     WHERE id = ?
                 """, (nueva_clave, nuevo_abono, id))
-            
+        
         conexion.commit()
         conexion.close()
         ventana_editar.destroy()
         mostrar_detalles_ingresos(frame_padre)
-        
-    label_suma = ctk.CTkLabel(ventana_editar, text="Suma de abonos: $0.00")
-    label_suma.pack(pady=(0,10))
     
-    label_validacion = ctk.CTkLabel(ventana_editar, text="")
-    label_validacion.pack(pady=(0,10))
-    
-    def actualizar_validacion():
-        suma = 0.0
-        for detalle in entradas_detalles:
-            abono_str = detalle["abono"].get().strip()
-            try:
-                abono = float(abono_str)
-                suma += abono
-            except:
-                continue
-            
-        label_suma.configure(text=f"Suma de abonos: ${suma:.2f}")
-        
-        try:
-            importe = float(entradas["Importe"].get().replace("$", "").replace(",", "").strip())
-            if round(suma, 2) == round(importe, 2):
-                label_validacion.configure(text="La suma de los abonos coincide con el importe", text_color="green")
-            else:
-                label_validacion.configure(text="La suma de los abonos NO coincide con el importe", text_color="red")
-        except:
-            label_validacion.configure(text="Importe no válido", text_color="orange")
-        
-    actualizar_validacion()    
-            
-    frame_botones = ctk.CTkFrame(ventana_editar, fg_color="transparent")
+    # ✅ BOTONES ABAJO (puedes moverlos dentro del frame_scroll_general si quieres que también se desplacen)
+    frame_botones = ctk.CTkFrame(frame_scroll_general, fg_color="transparent")
     frame_botones.pack(pady=(20, 10))
     ctk.CTkButton(frame_botones, text="Guardar cambios", fg_color="#008d62", hover_color="#2ca880", command=guardar).pack(side="left", padx=10)
     ctk.CTkButton(frame_botones, text="Cancelar", fg_color="#d10d2f", hover_color="#d93954", command=ventana_editar.destroy).pack(side="left", padx=10)
-    
+
 def actualizar_estilo_tabla(tabla):
     modo = ctk.get_appearance_mode()
     estilo_act = "Dark.Treeview" if modo == "Dark" else "Light.Treeview"

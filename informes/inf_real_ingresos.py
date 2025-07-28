@@ -84,6 +84,9 @@ def generar_informe_ingresos(mes_anio=None):
         mes_nombre = meses[int(mes)]
 
         partidas_mes = obtener_totales_ingresos(mes_actual)
+        if not partidas_mes:
+            messagebox.showwarning("Sin datos", "No hay datos de ingresos para el mes y año seleccionados.")
+            return
         partidas_por_grupo = agrupar_por_letra_clave(partidas_mes)
         total120 = next((total for clave, total in partidas_mes if clave == "120"), None)
         total330 = next((total for clave, total in partidas_mes if clave == "330"), None)
