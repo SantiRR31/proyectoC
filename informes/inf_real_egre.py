@@ -82,7 +82,7 @@ def generar_inf_real_egresos(mes_anio=None):
         partidas_mes = obtener_partidas_mesagrupasa(mes_actual)
         
         app = xw.App(visible=False)
-        wb = app.books.open("assets/plantillas/InformeReal.xls")
+        wb = app.books.open(ruta_absoluta("assets/plantillas/InformeReal.xls"))
         sht = wb.sheets[0]
         
         # llenar datos generales
