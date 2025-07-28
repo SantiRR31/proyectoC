@@ -251,7 +251,18 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
             clave_ref_label.grid(row=1, column=2, padx=(15, 5), pady=5, sticky="ew")
             clave_rastreo.grid(row=1, column=3, padx=(5, 15), pady=5, sticky="ew")
 
-    tipo_pago.configure(command=mostrar_campos_pago)
+    tipo_pago = ctk.CTkOptionMenu(
+        metodo_pago_frame,
+        values=["", "CHEQUE", "TRANSF. ELECTRÓNICA"],
+        font=FUENTE_TEXTO,
+        dropdown_font=FUENTE_TEXTO,
+        width=200,
+        command=lambda _: mostrar_campos_pago()  
+    )
+    tipo_pago.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
+    tipo_pago.set("CHEQUE")  
+    mostrar_campos_pago()     
+
 
     #-----------------------------------------------------------# Sección de conceptos -------------------------------------------------------------------------------------------
     
