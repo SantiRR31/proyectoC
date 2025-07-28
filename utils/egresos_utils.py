@@ -14,64 +14,77 @@ config = cargar_config()
 #----------------- Funciones de captura y validación de pólizas de egresos -----------------
 
 def capturar_poliza(form, entradas):
-    poliza_id = form["poliza_id"].get()
-    fecha = form["fecha"].get()
-    nombre = form["nombre"].get()
-    monto = form["cargo"].get()
-    montoletr = form["cargo_letras"].get()
-    tipo_pago = form["tipo_pago"].get()
-    clave_ref = form["clave_rastreo"].get()
-    denominacion = form["denominacion"].get()
-    observaciones = form["observaciones"].get()
-    no_cheque = None
-    if tipo_pago == "CHEQUE":
-        no_cheque = form["no_cheque"].get().strip() or None  
-    elif tipo_pago == "TRANSFERENCIA":
-        clave_ref = form["clave_rastreo"].get().strip() or None
-
-    poliza = PolizaEgreso(
-        poliza_id,
-        fecha,
-        monto,
-        montoletr,
-        nombre,
-        tipo_pago,
-        clave_ref,
-        denominacion,
-        observaciones,
-        no_cheque
-    )
-
-    total_conceptos = 0.0
-    for entrada_clave, entrada_desc, entrada_importe in entradas:
-        clave = entrada_clave.get().strip()
-        descripcion = entrada_desc.get()
-        try:
-            partida_especifica = obtener_partida_especifica_por_clave(int(clave))
-            cargo = float(entrada_importe.get())
-        except ValueError:
-            continue  # Ignora filas incompletas o con error
-        if clave and descripcion and cargo:
-            concepto = ConceptoEgreso(clave, descripcion, partida_especifica, cargo)
-            poliza.agregar_concepto(concepto)
-            total_conceptos += cargo
-
     try:
-        monto_float = float(monto)
-    except ValueError:
-        from tkinter import messagebox
-        messagebox.showerror("Error", "El monto general no es válido.")
-        return None
+        poliza_id = form["poliza_id"].get() or None
+        no_poliza = form["no_poliza"].get()
+        fecha = form["fecha"].get()
+        nombre = form["nombre"].get()
+        monto = form["cargo"].get()
+        tipo_pago = form["tipo_pago"].get()
+        monto_letra = form["monto_letra"].get() or None
+        clave_ref = form["clave_rastreo"].get()
+        denominacion = form["denominacion"].get()
+        observaciones = form["observaciones"].get()
+        no_cheque = None
 
-    if abs(monto_float - total_conceptos) > 0.01:
-        from tkinter import messagebox
-        messagebox.showerror(
-            "Totales no coinciden",
-            "El monto total de los conceptos no coincide con el monto general.\nPor favor verifica los datos."
+        if tipo_pago == "CHEQUE":
+            no_cheque = form["no_cheque"].get().strip() or None
+        elif tipo_pago == "TRANSFERENCIA":
+            clave_ref = form["clave_rastreo"].get().strip() or None
+
+        # Validación mínima
+        if not no_poliza or not fecha or not nombre:
+            messagebox.showerror("Campos incompletos", "Por favor completa todos los campos obligatorios.")
+            return None
+
+        poliza = PolizaEgreso(
+            poliza_id=poliza_id,
+            no_poliza=no_poliza,
+            fecha=fecha,
+            monto=monto,
+            monto_letra=monto_letra,
+            nombre=nombre,
+            tipo_pago=tipo_pago,
+            clave_ref=clave_ref,
+            denominacion=denominacion,
+            observaciones=observaciones,
+            no_cheque=no_cheque
         )
+
+        total_conceptos = 0.0
+        for entrada_clave, entrada_desc, entrada_importe in entradas:
+            clave = entrada_clave.get().strip()
+            descripcion = entrada_desc.get()
+            try:
+                partida_especifica = obtener_partida_especifica_por_clave(int(clave))
+                cargo = float(entrada_importe.get())
+            except ValueError:
+                continue
+            if clave and descripcion and cargo:
+                concepto = ConceptoEgreso(clave, descripcion, partida_especifica, cargo)
+                poliza.agregar_concepto(concepto)
+                total_conceptos += cargo
+
+        try:
+            monto_float = float(monto)
+        except ValueError:
+            messagebox.showerror("Error", "El monto general no es válido.")
+            return None
+
+        if abs(monto_float - total_conceptos) > 0.01:
+            messagebox.showerror(
+                "Totales no coinciden",
+                "El monto total de los conceptos no coincide con el monto general.\nPor favor verifica los datos."
+            )
+            return None
+
+        return poliza
+
+    except Exception as e:
+        print("Error al capturar la póliza:", e)
+        messagebox.showerror("Error", f"Ocurrió un error al capturar la póliza:\n{e}")
         return None
 
-    return poliza 
 
 
 def validar_campos_obligatorios_obj(poliza):
@@ -95,10 +108,6 @@ def obtener_valores_campos(form):
         "denominacion": form["denominacion"].get(),
         "observaciones": form["observaciones"].get(),
     }
-
-#------------------ Funciones de asignación y guardado de pólizas de egresos formatos pdf y -----------------
-
-
         
 #------------------ Animación de descarga y guardado -----------------
 
@@ -244,74 +253,6 @@ def generar_no_poliza_para_fecha(fecha):
     dia = dt.strftime("%d")
     return f"{consecutivo}/{mes}/{anio}"
 
-# egresos_utils.py
-
-def consultar_poliza(widgets, no_poliza):
-    print("Consultando póliza...")
-    poliza = consultar_poliza_por_no(no_poliza)
-    if poliza is None:
-        messagebox.showerror("No encontrado", "No se encontró la póliza.")
-        return
-    else :
-        print(f"Póliza encontrada: ")
-        print("No. Póliza:", poliza.poliza_id)
-        print("Fecha:", poliza.fecha)
-        print("Monto:", poliza.monto)
-        print("Monto Letra:", poliza.montoletr)
-        print("Nombre:", poliza.nombre)
-        print("Tipo de pago:", poliza.tipo_pago)
-        print("Clave/ref:", poliza.clave_ref)
-        print("Denominación:", poliza.denominacion)
-        print("Observaciones:", poliza.observaciones)
-        print("No. Cheque:", poliza.no_cheque)
-        print("Conceptos:")
-    for concepto in poliza.conceptos:
-        print("  ", concepto)
-    
-    for entry in widgets.get("entradas", []):
-        entry.configure(state="normal")
-
-# Asigna los valores a los campos del formulario
-    widgets.entradas["poliza_id"].delete(0, "end")
-    widgets.entradas["poliza_id"].insert(0, poliza.poliza_id)
-
-    widgets.entradas["fecha"].set_date(poliza.fecha) # Si usas DateEntry con .set()
-
-    widgets.entradas["nombre"].delete(0, "end")
-    widgets.entradas["nombre"].insert(0, poliza.nombre)
-
-    widgets.entradas["cargo"].delete(0, "end")
-    widgets.entradas["cargo"].insert(0, poliza.monto)
-
-    widgets.entradas["cargo_letras"].delete(0, "end")
-    widgets.entradas["cargo_letras"].insert(0, poliza.montoletr)
-
-    widgets.entradas["tipo_pago"].set(poliza.tipo_pago)
-
-    widgets.entradas["clave_rastreo"].delete(0, "end")
-    widgets["clave_rastreo"].insert(0, poliza.clave_ref or "")
-
-    widgets.entradas["denominacion"].delete(0, "end")
-    widgets.entradas["denominacion"].insert(0, poliza.denominacion or "")
-
-    widgets.entradas["observaciones"].delete(0, "end")
-    widgets.entradas["observaciones"].insert(0, poliza.observaciones or "")
-
-    if "no_cheque" in widgets and widgets.entradas["no_cheque"]:
-        widgets.entradas["no_cheque"].delete(0, "end")
-        widgets.entradas["no_cheque"].insert(0, poliza.no_cheque or "")
-
-def editar_poliza():
-    print("Editando póliza...")
-
-def eliminar_poliza():
-    print("Eliminando póliza...")
-
-def agregar_poliza():
-    print("Agregando nueva póliza...")
-
-def buscar_poliza():
-    print("Buscando póliza...")
 #------------------ Funciones de búsqueda y sugerencias -----------------
             
 def mostrar_sugerencias(event, entrada_desc, entrada_clave, lista_sugerencias):
@@ -439,70 +380,6 @@ def actualizar_total(entradas, total_entry, cargo_entry, validacion_label, valid
         )
 
 #------------------ Funciones de actualización de estado del formulario -----------------
-
-def actualizar_estado_formulario(modo: str, widgets: dict, campos=None, conceptos=None, btn_guardar=None, btn_descargar=None, btn_buscar=None):
-    desactivar = modo in ("Consultar", "Eliminar")
-
-    for entry in widgets.get("entradas", []):
-        # Si es el widget de No. de Póliza, siempre debe estar normal
-        if entry == widgets.get("no_poliza", None) or entry._name == "no_poliza":
-            entry.configure(state="normal")
-        elif entry == widgets["entradas"][1]:  # Suponiendo que no_poliza es el segundo en la lista
-            entry.configure(state="normal")
-        else:
-            entry.configure(state="normal" if not desactivar else "disabled")
-            if isinstance(entry, ctk.CTkEntry):
-                entry.configure(border_color="#3b82f6" if not desactivar else "#4b5563")
-
-    for boton in widgets.get("botones", []):
-        boton.configure(state="normal" if not desactivar else "disabled")
-        if desactivar:
-            boton.configure(fg_color="#6b7280")
-        else:
-            if boton.cget("text") == "💾 Guardar":
-                boton.configure(fg_color="#10b981", hover_color="#059669")
-            elif boton.cget("text") == "📥 Descargar":
-                boton.configure(fg_color="#3b82f6", hover_color="#2563eb")
-            elif boton.cget("text") == " Abrir Carpeta":
-                boton.configure(fg_color="#6b7280", hover_color="#4b5563")
-            else:
-                boton.configure(fg_color="#1f6aa5", hover_color="#103858")
-
-    for menu in widgets.get("menus", []):
-        try:
-            menu.configure(state="normal" if not desactivar else "disabled")
-        except Exception:
-            pass
-
-    # Validar campos obligatorios en modo agregar/editar
-    if modo in ("Agregar", "Editar"):
-        if campos is not None and conceptos is not None and btn_guardar and btn_descargar and btn_buscar:
-            actualizar_estado_botones(modo, campos, conceptos, btn_guardar, btn_descargar, btn_buscar)
-            
-def actualizar_estado_botones(modo, campos, conceptos, btn_guardar, btn_descargar, btn_buscar):
-    # Determina el estado deseado según el modo y la validación
-    if modo.lower() in ("agregar", "editar"):
-        campos_vacios = campos_obligatorios_vacios(campos, conceptos)
-        guardar_estado = "disabled" if campos_vacios else "normal"
-        descargar_estado = "disabled" if campos_vacios else "normal"
-        buscar_estado = "disabled" if modo.lower() == "agregar" else "normal"
-    elif modo.lower() in ("consultar", "eliminar"):
-        guardar_estado = "disabled"
-        descargar_estado = "disabled"
-        buscar_estado = "normal"
-    else:
-        guardar_estado = "normal"
-        descargar_estado = "normal"
-        buscar_estado = "normal"
-
-    # Solo actualiza si el estado realmente cambia
-    if btn_guardar.cget("state") != guardar_estado:
-        btn_guardar.configure(state=guardar_estado)
-    if btn_descargar.cget("state") != descargar_estado:
-        btn_descargar.configure(state=descargar_estado)
-    if btn_buscar.cget("state") != buscar_estado:
-        btn_buscar.configure(state=buscar_estado)
-        
         
 def campos_obligatorios_vacios(campos, conceptos):
     # Valida los campos fijos
@@ -513,5 +390,4 @@ def campos_obligatorios_vacios(campos, conceptos):
         if not entrada_clave.get().strip() or not entrada_desc.get().strip() or not entrada_importe.get().strip():
             return True
     return False
-
 

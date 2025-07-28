@@ -262,7 +262,7 @@ def lanzar_ventana_principal():
     btn_detalles_egre = create_sidebar_btn(
         sidebar,
         "Ver Egresos",
-        ruta_absoluta("assets/lookup.png"),
+        ruta_absoluta("assets/icons/details.png"),
         lambda:abrir_det_Egresos(frame_contenido)
     )
 

@@ -1,27 +1,19 @@
-import os
-import threading
 import tkinter as tk
-from tkinter import messagebox
 import customtkinter as ctk
 from functions.genRegIngresos import confirmar_y_generar
 from informes.poliza import guardar_egresos, guardar_pdf
 from utils.rutas import ruta_absoluta
-import xlwings as xw
 from db.egresosDB import *
 from tkcalendar import DateEntry
 from widgets.widgets import *
 from utils.utils import *
 from utils.egresos_utils import *
-from datetime import datetime
 from styles.styles import *
 from models.egresomodelos import *
 CONFIG_PATH = ruta_absoluta("config.json")
-import json
-    
 config = cargar_config()
 
-def mostrar_formulario_egresos(frame_padre):
-    modo = "agregar" 
+def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
     # Limpiar frame anterior
     for widget in frame_padre.winfo_children():
         widget.destroy()
@@ -45,60 +37,6 @@ def mostrar_formulario_egresos(frame_padre):
         text_color=TEXT_PRIMARY
     ).pack(side="left", padx=(10, 0))
 
-    # Botones de herramientas a la derecha
-    toolbar_frame = ctk.CTkFrame(titulo_frame, fg_color="transparent")
-    toolbar_frame.pack(side="right")
-
-    ctk.CTkButton(
-        toolbar_frame, 
-        text="Agregar",
-        image = CTkImage(Image.open(ruta_absoluta("assets/icons/plus.png")), size=(20, 18)),
-        width=50, 
-        command=lambda: (
-            actualizar_estado_formulario("Agregar",widgets,campos=campos_obligatorios,conceptos=entradas,btn_guardar=btn_guardar,btn_descargar=btn_descargar,btn_buscar=btn_buscar),
-            actualizar_estado_botones("Agregar", campos_obligatorios, entradas, btn_guardar, btn_descargar, btn_buscar),
-            bind_actualizacion(campos_obligatorios, entradas, "Agregar", btn_guardar, btn_descargar, btn_buscar),
-            agregar_poliza()
-        ),
-    fg_color="#22c55e"
-    ).pack(side="left", padx=5)
-
-    ctk.CTkButton(
-        toolbar_frame, 
-        text="Editar",
-        image= CTkImage(Image.open(ruta_absoluta("assets/icons/pencil.png")), size=(20, 18)),
-        width=50, 
-        command=lambda: (
-            actualizar_estado_formulario("Editar",widgets,campos=campos_obligatorios,conceptos=entradas,btn_guardar=btn_guardar,btn_descargar=btn_descargar,btn_buscar=btn_buscar),
-            actualizar_estado_botones("Editar", campos_obligatorios, entradas, btn_guardar, btn_descargar, btn_buscar),
-            bind_actualizacion(campos_obligatorios, entradas, "Editar", btn_guardar, btn_descargar, btn_buscar),
-            editar_poliza()
-            ), 
-        fg_color="#facc15").pack(side="left", padx=5)
-    ctk.CTkButton(
-        toolbar_frame, 
-        text="Eliminar",
-        image = CTkImage(Image.open(ruta_absoluta("assets/icons/trash.png")), size=(20, 18)), 
-        width=50,
-        command=lambda: (
-            actualizar_estado_formulario("Eliminar",widgets,campos=campos_obligatorios,conceptos=entradas,btn_guardar=btn_guardar,btn_descargar=btn_descargar,btn_buscar=btn_buscar),
-            actualizar_estado_botones("Eliminar", campos_obligatorios, entradas, btn_guardar, btn_descargar, btn_buscar),
-            bind_actualizacion(campos_obligatorios, entradas, "Eliminar", btn_guardar, btn_descargar, btn_buscar),
-            eliminar_poliza(),
-        ),  
-        fg_color="#ef4444").pack(side="left", padx=5)
-    ctk.CTkButton(
-        toolbar_frame, 
-        text="Consultar",
-        image=CTkImage(Image.open(ruta_absoluta("assets/icons/buscar.png")), size=(20, 18)), 
-        width=50,
-        command=lambda: (
-            actualizar_estado_formulario("Consultar",widgets,campos=campos_obligatorios,conceptos=entradas,btn_guardar=btn_guardar,btn_descargar=btn_descargar,btn_buscar=btn_buscar),
-            actualizar_estado_botones("Consultar", campos_obligatorios, entradas, btn_guardar, btn_descargar, btn_buscar),
-            bind_actualizacion(campos_obligatorios, entradas, "Consultar", btn_guardar, btn_descargar, btn_buscar),
-        ),
-        fg_color="#3b82f6").pack(side="left", padx=5)
-
     # Sección de datos de la póliza
     seccion_poliza = ctk.CTkFrame(contenedor_principal, **ESTILO_FRAME)
     seccion_poliza.pack(fill="x", pady=(0, 20), padx=5)
@@ -106,6 +44,15 @@ def mostrar_formulario_egresos(frame_padre):
     # Haz todas las columnas responsivas
     for i in range(4):
         seccion_poliza.grid_columnconfigure(i, weight=1, uniform="poliza")
+
+
+
+# Campo oculto: poliza_id
+    if poliza_editar:
+        entrada_id = ctk.CTkEntry(contenedor_principal)
+        entrada_id.insert(0, str(poliza_editar.poliza_id))
+        entrada_id.configure(state="disabled")  # opcional: deshabilitado
+        entrada_id.pack_forget()  # oculto visualmente
 
     # Fila 1: Fecha y Número de Póliza
     ctk.CTkLabel(
@@ -115,31 +62,11 @@ def mostrar_formulario_egresos(frame_padre):
         anchor="w"
     ).grid(row=0, column=0, padx=(15, 5), pady=10, sticky="ew")
     
-
     fecha_policia = DateEntry(
         seccion_poliza,
-        date_pattern="dd/mm/yyyy",
-        font=FUENTE_TEXTO,
-        locale="es_MX",
-        background="#18181b",           # Fondo general (casi negro)
-        foreground="#e0e7ef",           # Texto claro
-        borderwidth=1,
-        relief="flat",
-        selectbackground="#2563eb",     # Azul para selección
-        selectforeground="#ffffff",     # Texto blanco para selección
-        disabledbackground="#23232a",   # Fondo deshabilitado (gris oscuro)
-        disabledforeground="#6b7280",   # Texto deshabilitado (gris)
-        headersbackground="#1e293b",    # Fondo encabezados (azul oscuro)
-        headersforeground="#60a5fa",    # Texto encabezados (azul claro)
-        weekendbackground="#18181b",    # Fondo fines de semana (igual que fondo)
-        weekendforeground="#2563eb",    # Texto fines de semana (azul)
-        normalbackground="#18181b",     # Fondo días normales
-        normalforeground="#e0e7ef",     # Texto días normales
-        arrowcolor="#2563eb",           # Flechas azules
-        bordercolor="#23232a",          # Borde azul
-        showweeknumbers=False
-        )
-    fecha_policia.grid(row=0, column=1, padx=5, pady=10, sticky="ew")       # Oculta la columna de números de semana
+        **ESTILO_DATEENTRY
+    )
+    fecha_policia.grid(row=0, column=1, padx=5, pady=10, sticky="ew")     
 
     ctk.CTkLabel(
         seccion_poliza,
@@ -154,15 +81,6 @@ def mostrar_formulario_egresos(frame_padre):
         **ESTILO_ENTRADA
     )
     no_poliza.grid(row=0, column=3, padx=(5, 15), pady=10, sticky="ew")
-    
-    btn_buscar = ctk.CTkButton(
-        seccion_poliza, 
-        text="",
-        image=CTkImage(Image.open(ruta_absoluta("assets/icons/buscar.png")), size=(20, 18)), 
-        width=40,
-        command=lambda: consultar_poliza(widgets, no_poliza=no_poliza.get() if no_poliza.get() else None)
-        )
-    btn_buscar.place(relx=0.98, rely=0.07, anchor="ne")
 
     def actualizar_no_poliza(event=None):
         fecha = fecha_policia.get()
@@ -170,9 +88,9 @@ def mostrar_formulario_egresos(frame_padre):
         no_poliza.delete(0, "end")
         no_poliza.insert(0, no_poliza_valor)
         
-    actualizar_no_poliza()
-        
-    fecha_policia.bind("<<DateEntrySelected>>", actualizar_no_poliza)
+    if not poliza_editar:
+        actualizar_no_poliza()
+        fecha_policia.bind("<<DateEntrySelected>>", actualizar_no_poliza)
 
     # Separador visual
     separador = ctk.CTkFrame(
@@ -321,7 +239,7 @@ def mostrar_formulario_egresos(frame_padre):
     #clave_rastreo.configure(validate="key", validatecommand=(vcmdo, "%P"))
     clave_rastreo.bind("<KeyRelease>", lambda event: convertir_a_mayusculas(clave_rastreo, event))
 
-    def mostrar_campos_pago(*args):
+    def mostrar_campos_pago():
         # Ocultar ambos primero
         no_cheque_label.grid_forget()
         no_cheque_entry.grid_forget()
@@ -412,7 +330,7 @@ def mostrar_formulario_egresos(frame_padre):
                     entrada[2].focus_set()
                     break
         except Exception as e:
-            print(f"Error al selceccionar sugerencia:{e}")
+            print(f"Error al seleccionar sugerencia:{e}")
 
     def configurar_lista_sugerencias(entrada_desc, entrada_clave, ):
         lista_sugerencias = tk.Listbox(
@@ -529,14 +447,12 @@ def mostrar_formulario_egresos(frame_padre):
             placeholder_text="💰 Importe",
             **ESTILO_ENTRADA
         )
-        
-        lista_sugerencias.bind("<<ListboxSelect>>", lambda e: seleccionar_sugerencia(e, entrada_clave, entrada_desc, lista_sugerencias))
-        #entrada_desc.bind("<KeyRelease>", lambda e: mostrar_sugerencias(e, entrada_desc, entrada_clave, lista_sugerencias))
-        
+        entrada_importe.grid(row=0, column=2, padx=5, pady=2, sticky="ew")
         vcmd = fila_frame.register(solo_numeros_decimales)
         entrada_importe.configure(validate="key", validatecommand=(vcmd, "%P"))
+        
+        lista_sugerencias.bind("<<ListboxSelect>>", lambda e: seleccionar_sugerencia(e, entrada_clave, entrada_desc, lista_sugerencias))
         entrada_importe.bind("<KeyRelease>", lambda event: actualizar_total(entradas, total, cargo_entry, validacion_totales, total, total_ctk))
-        entrada_importe.grid(row=0, column=2, padx=5, pady=2, sticky="ew")
         entrada_clave.bind("<FocusOut>", lambda event: llenar_por_clave(event, entrada_clave, entrada_desc))
         entrada_clave.bind("<Return>", lambda event: entrada_importe.focus_set())
         entrada_importe.bind("<Return>", lambda event: agregar_fila(enfocar_nueva_clave=True))
@@ -564,7 +480,8 @@ def mostrar_formulario_egresos(frame_padre):
             entrada_clave.focus_set()
 
     # Agregar primera fila por defecto
-    agregar_fila()
+    if not poliza_editar:
+        agregar_fila()
 
     # Botón para agregar más filas
     ctk.CTkButton(
@@ -588,7 +505,7 @@ def mostrar_formulario_egresos(frame_padre):
 
     denominacion_entry = ctk.CTkEntry(
         denominacion_frame,
-        placeholder_text="Escriba aquí cualquier observación adicional...",
+        placeholder_text="Ingrese la denominacion...",
         #height=40,
         **ESTILO_ENTRADA
     )
@@ -636,7 +553,6 @@ def mostrar_formulario_egresos(frame_padre):
     acciones_frame.grid_columnconfigure(5, weight=0)  # Descargar
     acciones_frame.grid_columnconfigure(6, weight=0)  # Buscar
 
-
     # Total y validación
     total_ctk = ctk.CTkLabel(
         acciones_frame,
@@ -644,7 +560,6 @@ def mostrar_formulario_egresos(frame_padre):
         font=FUENTE_LABEL        
     )
     total_ctk.grid(row=0, column=0, sticky="w", padx=(0, 5))
-
 
     total = ctk.CTkEntry(
         acciones_frame,
@@ -664,15 +579,35 @@ def mostrar_formulario_egresos(frame_padre):
     validacion_totales.grid(row=0, column=2, sticky="w", padx=(0, 5))
     
     def guardar_poliza():
-        poliza = capturar_poliza(form, entradas)
-        if poliza is None:
-            return None  # No guardar si la validación falla
-        return inrtar_poliza_egreso(poliza)
+        try:
+            poliza = capturar_poliza(form, entradas)
+            if poliza is None:
+                messagebox.showerror("Error", "No se pudo capturar la información.")
+                return False
+
+            if poliza_editar:
+                exito = actualizar_poliza(poliza)
+            else:
+                exito = inrtar_poliza_egreso(poliza)
+
+            if exito:
+                from ui.detalle_egresos import mostrar_detalles_egresos
+                messagebox.showinfo("Éxito", "Póliza guardada correctamente.")
+                mostrar_detalles_egresos(contenedor_principal)
+                return True
+            else:
+                messagebox.showerror("Error", "No se pudo guardar la información.")
+                return False
+        except Exception as e:
+            print("Error en guardar_poliza:", e)
+            messagebox.showerror("Error", f"Ocurrió un error al guardar:\n{e}")
+            return False
+
 
     # Botones de acción
     btn_guardar = ctk.CTkButton(
         acciones_frame,
-        text="💾 Guardar",
+        text="💾 Actualizar" if poliza_editar else "💾 Guardar",
         width=50,
         **ESTILO_BOTON,
         fg_color="#10b981",
@@ -711,11 +646,12 @@ def mostrar_formulario_egresos(frame_padre):
 
     # Diccionario con los campos del formulario
     form = {
-        "poliza_id": no_poliza,
+        "poliza_id": entrada_id,  # Campo oculto
+        "no_poliza": no_poliza,
         "fecha": fecha_policia,
         "nombre": nombre,
         "cargo": cargo_entry,
-        "cargo_letras": cargo_letras_entry,
+        "monto_letra": cargo_letras_entry,
         "tipo_pago": tipo_pago,
         "clave_rastreo": clave_rastreo,
         "observaciones": observaciones_entry,
@@ -726,7 +662,6 @@ def mostrar_formulario_egresos(frame_padre):
     def mostrar_menu_descarga(form, entradas):
         menu = tk.Menu(None, tearoff=0)
         poliza = capturar_poliza(form, entradas)
-        
         menu.add_command(
             label="Exportar como PDF",
             command=lambda: ejecutar_con_loading(
@@ -749,7 +684,6 @@ def mostrar_formulario_egresos(frame_padre):
                 poliza
             )
         )
-    # Posicionar el menú cerca del botón
         try:
             x = btn_descargar.winfo_rootx()
             y = btn_descargar.winfo_rooty() + btn_descargar.winfo_height()
@@ -763,7 +697,6 @@ def mostrar_formulario_egresos(frame_padre):
             label = "Generar libro del mes",
             command = lambda: confirmar_y_generar()
         )
-        
         try:
             x= btn_guardar.winfo_rootx()
             y = btn_guardar.winfo_rooty() + btn_guardar.winfo_height()
@@ -781,57 +714,26 @@ def mostrar_formulario_egresos(frame_padre):
     )        
     btn_iopciones.grid(row=0, column=3, padx=5, sticky="e")
     
-    # campos obligatorios
-    campos_obligatorios = [
-        nombre,
-        cargo_entry,
-        observaciones_entry
-    ]
-# Los conceptos están en la lista 'entradas'
-
-    def bind_actualizacion(campos, conceptos, modo, btn_guardar, btn_descargar, btn_buscar):
-        def on_change(event=None):
-            actualizar_estado_botones(modo, campos, conceptos, btn_guardar, btn_descargar, btn_buscar)
-        for campo in campos:
-            campo.bind("<KeyRelease>", on_change)
-        for entrada_clave, entrada_desc, entrada_importe in conceptos:
-            entrada_clave.bind("<KeyRelease>", on_change)
-            entrada_desc.bind("<KeyRelease>", on_change)
-            entrada_importe.bind("<KeyRelease>", on_change)
     
-    actualizar_total(entradas, total, cargo_entry, validacion_totales, total, total_ctk)
-
-    # -------------------------------------------------------------------------------------------------------------------
-    # Registro de widgets relevantes en un diccionario
-    widgets = {
-        "entradas": [
-            fecha_policia,
-            no_poliza,
-            nombre,
-            cargo_entry,
-            clave_rastreo,
-            tipo_pago,
-            denominacion_entry,
-            observaciones_entry,
-            no_cheque_entry
+    if poliza_editar:
+        no_poliza.insert(0, poliza_editar.no_poliza)
+        fecha_policia.set_date(poliza_editar.fecha)
+        nombre.insert(0, poliza_editar.nombre)
+        cargo_entry.insert(0, poliza_editar.monto)
+        tipo_pago.set(poliza_editar.tipo_pago)
+        actualizar_cargo_letras()
+        clave_rastreo.insert(0, poliza_editar.clave_ref or "")
+        mostrar_campos_pago() 
+        observaciones_entry.insert(0, poliza_editar.observaciones)
+        denominacion_entry.insert(0, poliza_editar.denominacion or "")
+        no_cheque_entry.insert(0, poliza_editar.no_cheque or "")
+        for concepto in poliza_editar.conceptos:
+            agregar_fila()
+            entrada_clave, entrada_desc, entrada_importe = entradas[-1]
+            entrada_clave.insert(0, concepto.clave_cucop)
+            entrada_desc.configure(state="normal")
+            entrada_desc.insert(0, concepto.descripcion)
+            entrada_desc.configure(state="readonly")
+            entrada_importe.insert(0, concepto.cargo)
             
-        ],
-        "botones": [
-            btn_guardar,
-            btn_descargar,
-            btn_buscar
-        ],
-        "conceptos": entradas,
-        "menu": btn_iopciones
-    }
-    # Por ejemplo:
-    campos_obligatorios = [
-        nombre,
-        cargo_entry,
-        #clave_rastreo,
-        observaciones_entry
-    ]
-    # Establecer modo inicial (ej. agregar)
-    actualizar_estado_formulario(modo, widgets),
-    actualizar_estado_botones(modo, campos_obligatorios, entradas, btn_guardar, btn_descargar, btn_buscar)
-    bind_actualizacion(campos_obligatorios, entradas, modo, btn_guardar, btn_descargar, btn_buscar)
+    actualizar_total(entradas, total, cargo_entry, validacion_totales, total, total_ctk)    

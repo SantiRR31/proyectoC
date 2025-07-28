@@ -1,54 +1,42 @@
+from dataclasses import dataclass, field
+from typing import List, Optional
+
+@dataclass
 class ConceptoEgreso:
-    def __init__(self, clave_cucop, descripcion, partida_especifica, cargo):
-        self.clave_cucop = clave_cucop
-        self.descripcion = descripcion
-        self.partida_especifica = partida_especifica
-        self.cargo = cargo
+    clave_cucop: str
+    descripcion: str
+    partida_especifica: str
+    cargo: float
 
-    def __repr__(self):
-        return f"<ConceptoEgreso clave={self.clave_cucop} cargo={self.cargo}>"
-
+@dataclass
 class PolizaEgreso:
-    def __init__(
-        self,
-        poliza_id,
-        fecha,
-        monto,
-        montoletr,
-        nombre,
-        tipo_pago,
-        clave_ref=None,      # opcional
-        denominacion=None,
-        observaciones=None,
-        no_cheque=None,       # opcional
-        estado=None
-    ):
-        self.poliza_id = poliza_id 
-        self.fecha = fecha
-        self.monto = monto
-        self.montoletr = montoletr
-        self.nombre = nombre
-        self.tipo_pago = tipo_pago
-        self.clave_ref = clave_ref
-        self.denominacion = denominacion
-        self.observaciones = observaciones
-        self.no_cheque = no_cheque
-        self.estado = estado
-        self.conceptos = []  # Lista de ConceptoEgreso
+    poliza_id: Optional[int]
+    no_poliza: str
+    fecha: str
+    monto: float
+    nombre: str
+    tipo_pago: str
+    monto_letra: Optional[str] = None 
+    clave_ref: Optional[str] = None
+    denominacion: Optional[str] = None
+    observaciones: Optional[str] = None
+    no_cheque: Optional[str] = None
+    estado: Optional[str] = "activo"
+    conceptos: List[ConceptoEgreso] = field(default_factory=list)
 
     def agregar_concepto(self, concepto: ConceptoEgreso):
         self.conceptos.append(concepto)
-        
-    def campos_faltantes(self):
-        faltantes = []
-        if not self.fecha: faltantes.append("Fecha")
-        if not self.poliza_id: faltantes.append("No. de Póliza")
-        return faltantes
-
 
     def esta_cancelada(self):
         return self.estado == "cancelado"
 
-    def __repr__(self):
-        estado = f", estado={self.estado}" if self.estado else ""
-        return f"<PolizaEgreso fecha={self.fecha} monto={self.monto} conceptos={len(self.conceptos)}{estado}>"
+    def campos_faltantes(self):
+        faltantes = []
+        if not self.fecha:
+            faltantes.append("Fecha")
+        if not self.no_poliza:  # ← Este sí debe validarse
+            faltantes.append("No. de Póliza")
+        if self.monto is None or self.monto == 0:
+            faltantes.append("Monto")
+        return faltantes
+

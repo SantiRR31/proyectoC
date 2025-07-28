@@ -178,3 +178,29 @@ ESTILO_LIST_SUG = {
     "relief":"solid",
     "borderwidth":1
 }
+
+
+# ...otros estilos...
+
+ESTILO_DATEENTRY = {
+    "date_pattern": "dd/mm/yyyy",
+    "font": FUENTE_TEXTO,
+    "locale": "es_MX",
+    "background": "#18181b",
+    "foreground": "#e0e7ef",
+    "borderwidth": 1,
+    "relief": "flat",
+    "selectbackground": "#2563eb",
+    "selectforeground": "#ffffff",
+    "disabledbackground": "#23232a",
+    "disabledforeground": "#6b7280",
+    "headersbackground": "#1e293b",
+    "headersforeground": "#60a5fa",
+    "weekendbackground": "#18181b",
+    "weekendforeground": "#2563eb",
+    "normalbackground": "#18181b",
+    "normalforeground": "#e0e7ef",
+    "arrowcolor": "#2563eb",
+    "bordercolor": "#23232a",
+    "showweeknumbers": False,
+}
