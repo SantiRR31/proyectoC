@@ -1,5 +1,6 @@
 import sqlite3
 import os
+from db.conexion import conectar
 import xlwings as xw
 import subprocess
 import customtkinter as ctk
@@ -55,7 +56,7 @@ def seleccionar_poliza():
         filtro = "%" + "/".join(partes) + "%"
 
         try:
-            conn = sqlite3.connect("db/prueba2.db")
+            conn = conectar()
             cursor = conn.cursor()
             cursor.execute("SELECT DISTINCT no_poliza FROM polizasEgresos WHERE no_poliza LIKE ?", (filtro,))
             resultados = [row[0] for row in cursor.fetchall()]

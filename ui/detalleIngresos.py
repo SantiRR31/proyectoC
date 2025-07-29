@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import customtkinter as ctk
+from db.conexion import conectar_db2
 from widgets.widgets import *
 from styles.styles import *
 from utils.config_utils import cargar_config
@@ -79,7 +80,7 @@ def mostrar_detalles_ingresos(frame_padre):
     tabla.configure(yscrollcommand=scrollbar.set)
 
     # Conectar a la base de datos
-    conexion = sqlite3.connect("prueba.db")
+    conexion = conectar_db2()
     cursor = conexion.cursor()
     cursor.execute("SELECT id, fecha, noPoliza, banco, importe, nota FROM polizasIngresos ORDER BY STRFTIME('%Y-%m-%d', SUBSTR(fecha, 7, 4) || '-' || SUBSTR(fecha, 4, 2) || '-' || SUBSTR(fecha, 1, 2)) DESC")
     registros = cursor.fetchall()
@@ -136,7 +137,7 @@ def mostrar_detalles_ingresos(frame_padre):
 def eliminar_registro(id_registro, frame_padre):
     confirm = messagebox.askyesno("Confirmar", "¿Está seguro de eliminar este registro?")
     if confirm:
-        conexion = sqlite3.connect("prueba.db")
+        conexion = conectar_db2()
         cursor = conexion.cursor()
         cursor.execute("SELECT fecha, noPoliza FROM polizasIngresos WHERE id = ?", (id_registro,))
         resultado = cursor.fetchone()
@@ -234,7 +235,7 @@ def editar_registro(id_registro, fecha_antigua, no_poliza_ant, banco_ant, import
         
     entradas_detalles = []
 
-    conn = sqlite3.connect("prueba.db")
+    conn = conectar_db2()
     cursor = conn.cursor()
     cursor.execute("""
         SELECT id, clave, abono
@@ -329,7 +330,7 @@ def editar_registro(id_registro, fecha_antigua, no_poliza_ant, banco_ant, import
             )
             return
         
-        conexion = sqlite3.connect("prueba.db")
+        conexion = conectar_db2()
         cursor = conexion.cursor()
         
         cursor.execute("SELECT fecha, noPoliza FROM polizasIngresos WHERE id = ?", (id_registro,))

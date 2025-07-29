@@ -1,5 +1,5 @@
 import sqlite3
-from db.conexion import conectar, conectar_db
+from db.conexion import conectar, conectar_db2
 import sqlite3
 
 
@@ -23,7 +23,7 @@ def obtener_partidas_120_por_mes(mes_anio):
     return resultados
   
 def obtener_partidas_i_120_por_mes(mes_anio):
-  conn = conectar_db()
+  conn = conectar_db2()
   cursor = conn.cursor()
   query = """
         SELECT  pi.importe as cargo , pi.fecha 
@@ -59,7 +59,7 @@ def obtener_partidas_e_330_mes(mes_anio):
     return resultados
   
 def obtener_partidas_i_330_mes(mes_anio):
-  conn = conectar_db()
+  conn = conectar_db2()
   cursor = conn.cursor()
   query = """
         SELECT  pi.importe as cargo , pi.fecha 
@@ -99,7 +99,7 @@ def obte_poliz_egre(mes_anio):
   return resultados
 
 def obte_poliz_ingre(mes_anio):
-  conn = conectar_db()
+  conn = conectar_db2()
   cursor = conn.cursor()
   
   anio, mes = mes_anio.split('-') 

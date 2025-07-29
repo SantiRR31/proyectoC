@@ -1,6 +1,7 @@
 from datetime import datetime
 import sqlite3
 import os
+from db.conexion import conectar_db2
 import xlwings as xw
 from utils.rutas import ruta_absoluta
 from tkinter import messagebox
@@ -19,7 +20,7 @@ def confirmar_y_generar():
 def generar_reporte_xlwings():
     try:
         # Conectar con la base de datos
-        conn = sqlite3.connect('prueba.db')
+        conn = conectar_db2("prueba.db")
         cursor = conn.cursor()
 
         # Fecha actual y mes actual en formato YYYY-MM
