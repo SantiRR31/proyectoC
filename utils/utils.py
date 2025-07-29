@@ -5,7 +5,7 @@ from datetime import datetime
 def obtener_fecha_actual():
     """Devuelve la fecha actual en formato 'DD/mmm/YYYY', por ejemplo: 01/ene/2025."""
     meses = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
-    ahora = datetime.datetime.now()
+    ahora = datetime.now()
     return ahora.strftime(f"%d-{meses[ahora.month-1]}%Y")
 
 def abrir_carpeta(ruta_base, subcarpeta=""):

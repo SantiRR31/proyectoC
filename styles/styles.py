@@ -158,6 +158,14 @@ ESTILO_ENTRADA = {
     "fg_color": ("#ffffff", "#212121"),
     "text_color": ("#111827", "#f3f4f6")
 }
+ESTILO_ENTRADA_TEXTBOX = {
+    "height": 100,
+    "font": FUENTE_TEXTO,
+    "border_width": 1,
+    "border_color": ("#d1d5db", "#545454"),
+    "fg_color": ("#ffffff", "#212121"),
+    "text_color": ("#111827", "#f3f4f6")
+}
     
 ESTILO_BOTON = {
     #"font": FUENTE_BOTON,
