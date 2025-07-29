@@ -15,6 +15,9 @@ def ruta_absoluta(ruta_relativa):
 dotenv_path = ruta_absoluta('.env')
 load_dotenv(dotenv_path)
 
+import os
+import shutil
+from pathlib import Path
 
 NOMBRE_APP = "GestorEgresosIngresos"
 NOMBRE_BD = "prueba2.db"
@@ -26,22 +29,30 @@ def obtener_ruta_appdata(nombre_archivo=""):
     os.makedirs(ruta_base, exist_ok=True)
     return os.path.join(ruta_base, nombre_archivo) if nombre_archivo else ruta_base
 
+
 def inicializar_base_datos():
-    ruta_destino = obtener_ruta_appdata(NOMBRE_BD)
-    if not os.path.exists(ruta_destino):
-        ruta_origen = Path("db") / NOMBRE_BD
-        if ruta_origen.exists():
-            shutil.copy(ruta_origen, ruta_destino)
-            print(f"Base de datos copiada a: {ruta_destino}")
-        else:
-            print("No se encontró la base de datos original para copiar.")
+    try:
+        ruta_destino = obtener_ruta_appdata(NOMBRE_BD)
+        if not os.path.exists(ruta_destino):
+            ruta_origen = Path("db") / NOMBRE_BD
+            if ruta_origen.exists():
+                shutil.copy(ruta_origen, ruta_destino)
+                print(f"[✓] Base de datos '{NOMBRE_BD}' copiada a: {ruta_destino}")
+            else:
+                print(f"[!] No se encontró la base de datos '{NOMBRE_BD}' en la carpeta 'db'.")
+    except Exception as e:
+        print(f"[✗] Error al copiar '{NOMBRE_BD}': {e}")
+
 
 def inicializar_base_datos2():
-    ruta_destino = obtener_ruta_appdata(NOMBRE_BD2)
-    if not os.path.exists(ruta_destino):
-        ruta_origen = Path("db") / NOMBRE_BD2
-        if ruta_origen.exists():
-            shutil.copy(ruta_origen, ruta_destino)
-            print(f"Base de datos copiada a: {ruta_destino}")
-        else:
-            print("No se encontró la base de datos original para copiar.")
+    try:
+        ruta_destino = obtener_ruta_appdata(NOMBRE_BD2)
+        if not os.path.exists(ruta_destino):
+            ruta_origen = Path("") / NOMBRE_BD2
+            if ruta_origen.exists():
+                shutil.copy(ruta_origen, ruta_destino)
+                print(f"[✓] Base de datos '{NOMBRE_BD2}' copiada a: {ruta_destino}")
+            else:
+                print(f"[!] No se encontró la base de datos '{NOMBRE_BD2}' en el directorio actual.")
+    except Exception as e:
+        print(f"[✗] Error al copiar '{NOMBRE_BD2}': {e}")
