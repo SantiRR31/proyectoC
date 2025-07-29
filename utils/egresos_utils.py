@@ -1,6 +1,7 @@
 from datetime import time
 from datetime import datetime
 from tkinter import messagebox
+from styles.styles import ESTILO_LIST_SUG
 from utils.utils import *
 import customtkinter as ctk
 import math
@@ -391,3 +392,82 @@ def campos_obligatorios_vacios(campos, conceptos):
             return True
     return False
 
+
+def seleccionar_sugerencia(event, entrada_clave, entrada_desc, lista_sugerencias, entradas):
+    seleccion = lista_sugerencias.curselection()
+    try:
+        if not seleccion:
+            return
+        idx = seleccion[0]
+        seleccionado = lista_sugerencias.coins[idx]
+        entrada_clave.delete(0, tk.END)
+        entrada_clave.insert(0, seleccionado["partida"])
+
+        entrada_desc.configure(state="normal")
+        entrada_desc.delete(0, tk.END)
+        entrada_desc.insert(0, seleccionado["desc_partida"])
+        entrada_desc.configure(state="readonly")
+
+        # Enfocar siguiente campo
+        for entrada in entradas:
+            if entrada[1] == entrada_desc:
+                entrada[2].focus_set()
+                break
+    except Exception as e:
+        print(f"Error al seleccionar sugerencia: {e}")
+
+
+def configurar_lista_sugerencias(
+    entrada_desc, entrada_clave, conceptos_frame, entradas,
+    mostrar_sugerencias, ESTILO_LIST_SUG
+):
+    lista_sugerencias = tk.Listbox(conceptos_frame, **ESTILO_LIST_SUG)
+    
+    lista_sugerencias.bind("<Double-Button-1>", 
+        lambda e: seleccionar_sugerencia(e, entrada_clave, entrada_desc, lista_sugerencias, entradas))
+    lista_sugerencias.bind("<Return>", 
+        lambda e: seleccionar_sugerencia(e, entrada_clave, entrada_desc, lista_sugerencias, entradas))
+
+    search_timer = None
+    def throttled_search(event):
+        nonlocal search_timer
+        if search_timer:
+            entrada_desc.after_cancel(search_timer)
+        search_timer = entrada_desc.after(300, lambda: mostrar_sugerencias(event, entrada_desc, entrada_clave, lista_sugerencias))
+    
+    entrada_desc.bind("<KeyRelease>", throttled_search)
+
+    def hide_on_focus_out(event):
+        def hide_delayed():
+            try:
+                if lista_sugerencias.winfo_exists():
+                    lista_sugerencias.place_forget()
+            except tk.TclError:
+                pass
+        entrada_desc.after(200, hide_delayed)
+    
+    entrada_desc.bind("<FocusOut>", hide_on_focus_out)
+
+    def mover_seleccion(event, direccion):
+        if not lista_sugerencias.winfo_ismapped():
+            return
+
+        size = lista_sugerencias.size()
+        if size == 0:
+            return
+
+        seleccion = lista_sugerencias.curselection()
+        idx = seleccion[0] if seleccion else -1
+
+        nuevo_idx = min(idx + 1, size - 1) if direccion == "abajo" else max(idx - 1, 0)
+        
+        lista_sugerencias.selection_clear(0, tk.END)
+        lista_sugerencias.selection_set(nuevo_idx)
+        lista_sugerencias.activate(nuevo_idx)
+        lista_sugerencias.see(nuevo_idx)
+        return "break"
+
+    entrada_desc.bind("<Down>", lambda e: mover_seleccion(e, "abajo"))
+    entrada_desc.bind("<Up>", lambda e: mover_seleccion(e, "arriba")) 
+    
+    return lista_sugerencias

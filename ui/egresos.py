@@ -318,93 +318,7 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
 
     entradas = []      
         
-    def seleccionar_sugerencia(event, entrada_clave, entrada_desc, lista_sugerencias):
-        seleccion = lista_sugerencias.curselection()
-        try:
-            if not seleccion:
-                return
-            idx = seleccion[0]
-            seleccionado = lista_sugerencias.coins[idx]
-            entrada_clave.delete(0, tk.END)
-            entrada_clave.insert(0, seleccionado["clave"])
-            entrada_desc.configure(state="normal")
-            entrada_desc.delete(0, tk.END)
-            entrada_desc.insert(0, seleccionado["descripcion"])
-            entrada_desc.configure(state="readonly")
-            lista_sugerencias.place_forget()
-
-        # Enfocar siguiente campo
-            for entrada in entradas:
-                if entrada[1] == entrada_desc:
-                    entrada[2].focus_set()
-                    break
-        except Exception as e:
-            print(f"Error al seleccionar sugerencia:{e}")
-
-    def configurar_lista_sugerencias(entrada_desc, entrada_clave, ):
-        lista_sugerencias = tk.Listbox(
-            conceptos_frame,  # Usar el frame principal como padre
-            **ESTILO_LIST_SUG,
-        )
-        
-        # Eventos mejorados
-        lista_sugerencias.bind("<Double-Button-1>", 
-            lambda e: seleccionar_sugerencia(e, entrada_clave, entrada_desc, lista_sugerencias))
-        lista_sugerencias.bind("<Return>", 
-            lambda e: seleccionar_sugerencia(e, entrada_clave, entrada_desc, lista_sugerencias))
-        
-        # Throttled search - evitar búsquedas excesivas
-        search_timer = None
-        def throttled_search(event):
-            nonlocal search_timer
-            if search_timer:
-                entrada_desc.after_cancel(search_timer)
-            search_timer = entrada_desc.after(300, lambda: mostrar_sugerencias(event, entrada_desc, entrada_clave, lista_sugerencias))
-        
-        entrada_desc.bind("<KeyRelease>", throttled_search)
-        
-        # Mejor manejo de focus
-        def hide_on_focus_out(event):
-            # Delay para permitir selección con mouse
-            def hide_delayed():
-                try:
-                    if lista_sugerencias.winfo_exists():
-                        lista_sugerencias.place_forget()
-                except tk.TclError:
-                    pass
-            entrada_desc.after(200, hide_delayed)
-        
-        entrada_desc.bind("<FocusOut>", hide_on_focus_out)
-                
-        def mover_seleccion(event,direccion):
-            if not lista_sugerencias.winfo_ismapped():
-                return
-        
-            size = lista_sugerencias.size()
-            if size ==0:
-                return
-        
-            seleccion = lista_sugerencias.curselection()
-            if seleccion:
-                idx = seleccion[0]
-            else:
-                idx = -1
-        
-            if direccion == "abajo":
-                nuevo_idx = min(idx +1, size -1 )
-            else:
-                nuevo_idx = max(idx -1, 0)
-            
-            lista_sugerencias.selection_clear(0, tk.END)
-            lista_sugerencias.selection_set(nuevo_idx)
-            lista_sugerencias.activate(nuevo_idx)
-            lista_sugerencias.see(nuevo_idx)  # Asegura que se vea si hay scroll
-            return "break"  # Evita que se escriba ↑ o ↓ en el campo
-
-        entrada_desc.bind("<Down>", lambda e: mover_seleccion(e, "abajo"))
-        entrada_desc.bind("<Up>", lambda e: mover_seleccion(e, "arriba")) 
-        
-        return lista_sugerencias
+    
     
     def agregar_fila(enfocar_nueva_clave=False):
         fila_idx = len(entradas)
@@ -448,7 +362,6 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
         )
         entrada_desc.grid(row=0, column=1, padx=5, pady=2, sticky="ew")
         
-        lista_sugerencias = configurar_lista_sugerencias(entrada_desc, entrada_clave)
 
         # Entrada importe
         entrada_importe = ctk.CTkEntry(
@@ -460,13 +373,20 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
         vcmd = fila_frame.register(solo_numeros_decimales)
         entrada_importe.configure(validate="key", validatecommand=(vcmd, "%P"))
         
-        lista_sugerencias.bind("<<ListboxSelect>>", lambda e: seleccionar_sugerencia(e, entrada_clave, entrada_desc, lista_sugerencias))
+        lista_sugerencias = configurar_lista_sugerencias(
+        entrada_desc,
+        entrada_clave,
+        conceptos_frame,
+        entradas,
+        mostrar_sugerencias,
+        ESTILO_LIST_SUG)
+        
         entrada_importe.bind("<KeyRelease>", lambda event: actualizar_total(entradas, total, cargo_entry, validacion_totales, total, total_ctk))
         entrada_clave.bind("<FocusOut>", lambda event: llenar_por_clave(event, entrada_clave, entrada_desc))
         entrada_clave.bind("<Return>", lambda event: entrada_importe.focus_set())
         entrada_importe.bind("<Return>", lambda event: agregar_fila(enfocar_nueva_clave=True))
-        entrada_desc.bind("<Return>", lambda e: seleccionar_sugerencia(e, entrada_clave, entrada_desc, lista_sugerencias))
-
+        entrada_desc.bind("<Return>", lambda e: seleccionar_sugerencia(e, entrada_clave, entrada_desc, lista_sugerencias, entradas))
+        
         # Botón eliminar
         btn_eliminar = ctk.CTkButton(
             fila_frame,

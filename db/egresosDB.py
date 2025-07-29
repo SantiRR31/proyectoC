@@ -37,22 +37,42 @@ def buscar_clave_por_descripcion(descripcion):
     cursor = conn.cursor()
     cursor.execute(
         '''
-        SELECT "CLAVE CUCoP", "DESCRIPCIÓN", "PARTIDA ESPECÍFICA"
-        FROM partidasEgresos
-        WHERE "DESCRIPCIÓN" LIKE ?
+        SELECT 
+            detalle."CLAVE CUCoP", 
+            detalle."DESCRIPCIÓN", 
+            detalle."PARTIDA ESPECÍFICA",
+            partida."DESCRIPCIÓN"
+        FROM partidasEgresos AS detalle
+        JOIN partidasEgresos AS partida
+            ON detalle."PARTIDA ESPECÍFICA" = partida."CLAVE CUCoP"
+        WHERE detalle."DESCRIPCIÓN" LIKE ?
         UNION ALL
-        SELECT "CLAVE CUCoP", "DESCRIPCIÓN", "PARTIDA ESPECÍFICA"
-        FROM partidasEgresos
-        WHERE "DESCRIPCIÓN" LIKE ? AND "DESCRIPCIÓN" NOT LIKE ?
+        SELECT 
+            detalle."CLAVE CUCoP", 
+            detalle."DESCRIPCIÓN", 
+            detalle."PARTIDA ESPECÍFICA",
+            partida."DESCRIPCIÓN"
+        FROM partidasEgresos AS detalle
+        JOIN partidasEgresos AS partida
+            ON detalle."PARTIDA ESPECÍFICA" = partida."CLAVE CUCoP"
+        WHERE detalle."DESCRIPCIÓN" LIKE ?
+          AND detalle."DESCRIPCIÓN" NOT LIKE ?
         ''',
         (f"{descripcion}%", f"%{descripcion}%", f"{descripcion}%")
     )
     resultados = cursor.fetchall()
     conn.close()
     return [
-        {"clave": fila[0], "descripcion": fila[1], "partida": fila[2]}
+        {
+            "clave": fila[0],              # CUCoP
+            "descripcion": fila[1],        # Desc del artículo
+            "partida": fila[2],            # Clave partida
+            "desc_partida": fila[3]        # Desc partida
+        }
         for fila in resultados
     ]
+
+
     
 def buscar_claves_por_texto(texto):
     conn = conectar()
