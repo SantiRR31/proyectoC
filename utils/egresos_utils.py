@@ -24,7 +24,7 @@ def capturar_poliza(form, entradas):
         monto_letra = form["monto_letra"].get() or None
         clave_ref = form["clave_rastreo"].get()
         denominacion = form["denominacion"].get()
-        observaciones = form["observaciones"].get()
+        observaciones = form["observaciones"].get("1.0", "end").strip()
         no_cheque = None
 
         if tipo_pago == "CHEQUE":

@@ -533,14 +533,20 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
         font=FUENTE_SUBTITULO
     ).pack(pady=(5, 10))
 
-    observaciones_entry = ctk.CTkEntry(
+    observaciones_textbox = ctk.CTkTextbox(
         observaciones_frame,
-        placeholder_text="Escriba aquí cualquier observación adicional...",
-        #height=40,
-        **ESTILO_ENTRADA
+        **ESTILO_ENTRADA_TEXTBOX
     )
-    observaciones_entry.pack(fill="x", padx=10, pady=(0, 10))
-    observaciones_entry.bind("<KeyRelease>", lambda event: convertir_a_mayusculas(observaciones_entry, event))
+    observaciones_textbox.pack(fill="both", padx=10, pady=(0, 10), expand=True)
+
+    # Convertir a mayúsculas al soltar tecla
+    def convertir_textbox_a_mayusculas(event):
+        contenido = observaciones_textbox.get("1.0", "end-1c")
+        observaciones_textbox.delete("1.0", "end")
+        observaciones_textbox.insert("1.0", contenido.upper())
+
+    observaciones_textbox.bind("<KeyRelease>", convertir_textbox_a_mayusculas)
+
 
 #----------------------------------- Barra de acciones inferiores---------------------------------------------------------
    
@@ -600,9 +606,17 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
                 exito = inrtar_poliza_egreso(poliza)
 
             if exito:
-                from ui.detalle_egresos import mostrar_detalles_egresos
                 messagebox.showinfo("Éxito", "Póliza guardada correctamente.")
-                mostrar_detalles_egresos(contenedor_principal)
+
+                # Limpiar visualmente el formulario
+                for widget in frame_padre.winfo_children():
+                    widget.destroy()
+
+                # Mostrar solo si fue una edición
+                if poliza_editar:
+                    from ui.detalle_egresos import mostrar_detalles_egresos
+                    mostrar_detalles_egresos(frame_padre)
+
                 return True
             else:
                 messagebox.showerror("Error", "No se pudo guardar la información.")
@@ -665,7 +679,7 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
         "monto_letra": cargo_letras_entry,
         "tipo_pago": tipo_pago,
         "clave_rastreo": clave_rastreo,
-        "observaciones": observaciones_entry,
+        "observaciones": observaciones_textbox,
         "denominacion": denominacion_entry,
         "no_cheque": no_cheque_entry,  
     }
@@ -736,7 +750,7 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
         actualizar_cargo_letras()
         clave_rastreo.insert(0, poliza_editar.clave_ref or "")
         mostrar_campos_pago() 
-        observaciones_entry.insert(0, poliza_editar.observaciones)
+        observaciones_textbox.insert("1.0", poliza_editar.observaciones)
         denominacion_entry.insert(0, poliza_editar.denominacion or "")
         no_cheque_entry.insert(0, poliza_editar.no_cheque or "")
         for concepto in poliza_editar.conceptos:
