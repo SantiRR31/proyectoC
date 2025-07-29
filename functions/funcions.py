@@ -3,6 +3,7 @@ import datetime
 import os
 import sqlite3
 import subprocess
+from db.conexion import conectar_db2
 import xlwings as xw
 import shutil
 import customtkinter as ctk
@@ -26,8 +27,8 @@ def abrir_carpeta():
     subprocess.Popen(f'explorer "{carpeta_descargas}"')
     
 def buscar_denominacion_db(clave):
-        conn = sqlite3.connect('prueba.db')
-        cursor = conn.cursor()
+        conn = conectar_db2()
+        cursor=conn.cursor()
         cursor.execute("SELECT denominacion FROM partidasIngresos WHERE partida = ?", (clave,))
         resultado = cursor.fetchone()
         conn.close()
@@ -80,7 +81,7 @@ def gen_inf_consolidado():
         hoja_origen = wb_origen.sheets[nom_hoja]
         
         fila_claves = hoja_origen.range("D8").expand("right").value
-        #print("Fila de claves:", fila_claves)
+        print("Fila de claves:", fila_claves)
         
         fila_totales = hoja_origen.range("D41").expand("right").value
         #print("Fila de totales:", fila_totales)
@@ -99,6 +100,7 @@ def gen_inf_consolidado():
         for clave, total in zip(fila_claves, fila_totales):
             if isinstance(clave, str) and clave.startswith("A") and idx_destino < len(celdas_claves):
                 hoja_destino.range(celdas_claves[idx_destino]).value = clave
+                print(f"Insertando clave: {clave}")
                 hoja_destino.range(celdas_totales[idx_destino]).value = total
                 idx_destino += 1
         # ----------------------------------------------
@@ -241,11 +243,11 @@ def confirmar_aux():
     
     
 # Funcion para generar el documento "auxiliar bancario"    
-def gen_aux_bancario(ruta_db, anio, mes):
+def gen_aux_bancario(anio, mes):
     ruta_plantilla = ruta_absoluta("assets/plantillaAuxBancario.xls")
     carpeta_destino = r"C:\Cecati122\Auxiliar Bancario"
     
-    conn = sqlite3.connect(ruta_db)
+    conn = conectar_db2()
     cursor = conn.cursor()
     
     os.makedirs(carpeta_destino, exist_ok=True)

@@ -3,6 +3,7 @@ import os
 import gc
 import customtkinter as ctk
 from datetime import datetime
+from db.conexion import conectar_db2
 import xlwings as xw
 from tkinter import messagebox
 from utils.config_utils import cargar_config
@@ -49,7 +50,7 @@ def confirmar_y_generar_inf_real_ingresos(contenedor_principal=None):
     ctk.CTkButton(ventana, text="Generar", command=ejecutar_generacion).pack(pady=10)
 
 def obtener_totales_ingresos(mes_anio):
-    conn = sqlite3.connect("prueba.db")  # Ajustar ruta según corresponda
+    conn = conectar_db2()  # Ajustar ruta según corresponda
     cursor = conn.cursor()
     cursor.execute("""
         SELECT clave, SUM(abono)
