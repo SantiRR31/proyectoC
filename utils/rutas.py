@@ -19,6 +19,7 @@ load_dotenv(dotenv_path)
 NOMBRE_APP = "GestorEgresosIngresos"
 NOMBRE_BD = "prueba2.db"
 
+
 def obtener_ruta_appdata(nombre_archivo=""):
     ruta_base = os.path.join(os.environ["LOCALAPPDATA"], NOMBRE_APP)
     os.makedirs(ruta_base, exist_ok=True)

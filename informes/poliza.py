@@ -16,7 +16,7 @@ def asignar_valores_en_hoja(hoja, poliza):
         "no_poliza": "AX5",
         "nombre": "A9",
         "monto": "AO9",
-        "montoletr": "A10",
+        "monto_letra": "A10",
         "tipo_pago": "T12",
         "clave_ref": "A13",
         "denominacion": "A44",
@@ -25,6 +25,14 @@ def asignar_valores_en_hoja(hoja, poliza):
 
     for campo, celda in campos_a_celdas.items():
         valor = getattr(poliza, campo, "")
+        if campo == "no_poliza":
+            try:
+                d, m, y = valor.split("/")
+                m = m.replace(".", "")  # Eliminar el punto de la abreviatura del mes
+                valor = f"{d}/{m}/{y}"
+            except Exception:
+                pass
+            valor = f"{valor}"  # El apóstrofe fuerza a texto en Excel
         if campo == "clave_ref":
             if poliza.tipo_pago == "CHEQUE":
                 valor = f"NO. DE CHEQUE {poliza.no_cheque or ''}"
