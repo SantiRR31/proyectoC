@@ -463,7 +463,7 @@ def mostrar_formulario_ingresos(frame_padre):
     imgGenerarReporte = Image.open(ruta_absoluta("assets/generate.png"))
     btn_generar_reporte = ctk.CTkButton(
         botones_frame,
-        text="Generar Reporte Mensual",
+        text="Inf. Mensual de Ingresos",
         width=120,
         fg_color="#004b8f", 
         hover_color="#0065a5", 

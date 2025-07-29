@@ -34,14 +34,14 @@ def inicializar_base_datos():
             shutil.copy(ruta_origen, ruta_destino)
             print(f"Base de datos copiada a: {ruta_destino}")
         else:
-            print("No se encontró la base de datos original para copiar.")
+            print("No se encontró la base de datos original Pruebadb2 para copiar.")
 
 def inicializar_base_datos2():
     ruta_destino = obtener_ruta_appdata(NOMBRE_BD2)
     if not os.path.exists(ruta_destino):
-        ruta_origen = Path("db") / NOMBRE_BD2
+        ruta_origen = Path("") / NOMBRE_BD2
         if ruta_origen.exists():
             shutil.copy(ruta_origen, ruta_destino)
             print(f"Base de datos copiada a: {ruta_destino}")
         else:
-            print("No se encontró la base de datos original para copiar.")
+            print("No se encontró la base de datos original Pruebadb para copiar.")

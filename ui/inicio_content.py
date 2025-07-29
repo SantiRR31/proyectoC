@@ -1,5 +1,6 @@
 import customtkinter as ctk
 import tkinter as tk
+from functions.genRegIngresos import confirmar_y_generar
 from informes.Auxi_acre_div import confirmar_y_generar_Auxiliar_acree
 from informes.aux_bancario import confirmar_y_generar_aux_bancario
 from informes.aux_deudores_div import confirmar_y_generar_aux_deudor
@@ -7,6 +8,7 @@ from informes.consolidado_egre import confirmar_y_generar_consolidado
 from informes.inf_real_egre import confirmar_y_generar_infReal
 from informes.lib_regis_egresos import confirmar_y_generar_egresos
 from informes.inf_real_ingresos import confirmar_y_generar_inf_real_ingresos
+#from ui.formIngresosDiarios import mostrar_formulario_ingresos
 from styles.styles import *
 from PIL import Image
 from customtkinter import CTkImage
@@ -415,7 +417,7 @@ def mostrar_inicio(contenedor):
     tarjetas_ingresos.pack(fill="x", pady=20)
 
     tarjetas_info = [
-        ("Ingresos", "assets/coin.png", ("#10b981", "#059669"), ["Registrar", "Consultar", "Exportar"], "Opciones", None),
+        ("Informe Mensual de Ingresos", "assets/coin.png", ("#10b981", "#059669"), ["Inf. Mensual Ingresos"], "Opciones", {"Inf. Mensual Ingresos":confirmar_y_generar}),
         ("Inf. Consolidado de Ingresos", "assets/excel2.png", ("#10b981", "#059669"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar2}),
         ("Auxiliar Bancario", "assets/coin.png", ("#10b981", "#059669"), ["Generar"], "Opciones", {"Generar": confirmar_aux}),
         ("Inf. Real de Ingresos", "assets/excel2.png", ("#10b981", "#059669"), ["Generar"], "Opciones", {"Generar": lambda: confirmar_y_generar_inf_real_ingresos(contenedor_principal = contenedor)})

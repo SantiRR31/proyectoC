@@ -226,13 +226,13 @@ def lanzar_ventana_principal():
     btn_ingresos_sidebar = create_sidebar_btn(
         sidebar, 
         "Ingresos", 
-        ruta_absoluta("assets/coin.png"),  
+        ruta_absoluta("assets/up.png"),  
         lambda: abrir_formulario(frame_contenido)
     )
     btn_Egresos_sidebar = create_sidebar_btn(
         sidebar, 
         "Egresos", 
-        ruta_absoluta("assets/wallet.png"),  
+        ruta_absoluta("assets/down.png"),  
         lambda: abrir_formulario_egresos(frame_contenido)
     )
     
