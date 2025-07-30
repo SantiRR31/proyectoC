@@ -22,6 +22,7 @@ def conectar_db2(nombre_db="prueba.db"):
     origen_db = obtener_ruta_appdata(nombre_db)
     try:
         conn = sqlite3.connect(origen_db)
+        #print(f"Conectado a la base de datos en: {origen_db}")
         return conn
     except sqlite3.Error as e:
         print(f"Error al conectar a la base de datos: {e}")

@@ -336,42 +336,52 @@ def editar_registro(id_registro, fecha_antigua, no_poliza_ant, banco_ant, import
         cursor.execute("SELECT fecha, noPoliza FROM polizasIngresos WHERE id = ?", (id_registro,))
         resultado = cursor.fetchone()
 
-        if resultado:
-            fecha_actual, noPoliza_Actual = resultado
+        try:
             
-            cursor.execute("""
-                UPDATE polizasIngresos
-                SET fecha = ?, noPoliza = ?, banco = ?, importe = ?, nota = ?
-                WHERE id = ?
-            """, (nueva_fecha, nuevo_poliza, nuevo_banco, nuevo_importe, nueva_nota, id_registro))
-        
-            cursor.execute("""
-                UPDATE detallePolizaIngreso
-                SET fecha = ?, noPoliza = ?
-                WHERE noPoliza = ? AND fecha = ?
-            """, (nueva_fecha, nuevo_poliza, noPoliza_Actual, fecha_actual))
-            
-            for detalle in entradas_detalles:
-                id = detalle["id"]
-                nueva_clave = detalle["clave"].get().strip()
-                abono_text = detalle["abono"].get().strip()
-                if not abono_text:
-                    continue
-                try:
-                    nuevo_abono = float(abono_text)
-                except ValueError:
-                    continue
+            if resultado:
+                fecha_actual, noPoliza_Actual = resultado
             
                 cursor.execute("""
-                    UPDATE detallePolizaIngreso
-                    SET clave = ?, abono = ?
+                    UPDATE polizasIngresos
+                    SET fecha = ?, noPoliza = ?, banco = ?, importe = ?, nota = ?
                     WHERE id = ?
-                """, (nueva_clave, nuevo_abono, id))
+                """, (nueva_fecha, nuevo_poliza, nuevo_banco, nuevo_importe, nueva_nota, id_registro))
         
-        conexion.commit()
-        conexion.close()
-        ventana_editar.destroy()
-        mostrar_detalles_ingresos(frame_padre)
+                cursor.execute("""
+                    UPDATE detallePolizaIngreso
+                    SET fecha = ?, noPoliza = ?
+                    WHERE noPoliza = ? AND fecha = ?
+                """, (nueva_fecha, nuevo_poliza, noPoliza_Actual, fecha_actual))
+            
+                for detalle in entradas_detalles:
+                    id = detalle["id"]
+                    nueva_clave = detalle["clave"].get().strip()
+                    abono_text = detalle["abono"].get().strip()
+                    if not abono_text:
+                        continue
+                    try:
+                        nuevo_abono = float(abono_text)
+                    except ValueError:
+                        continue
+            
+                    cursor.execute("""
+                        UPDATE detallePolizaIngreso
+                        SET clave = ?, abono = ?
+                        WHERE id = ?
+                    """, (nueva_clave, nuevo_abono, id))
+        
+            conexion.commit()
+            conexion.close()
+            ventana_editar.destroy()
+            messagebox.showinfo("Éxito", "Datos actualizados correctamente.")
+            mostrar_detalles_ingresos(frame_padre)
+        except sqlite3.Error as e:
+            if "UNIQUE constraint failed" in str(e):
+                messagebox.showerror("Error", "Ya existe otra póliza con el mismo número y fecha.\nNo se puede actualizar.")
+            else:
+                messagebox.showerror("Error", f"Error de integridad de la base de datos:\n{e}")
+        except Exception as e:
+            messagebox.showerror("Error inesperado", f"Ocurrió un error: {e}")
     
     # ✅ BOTONES ABAJO (puedes moverlos dentro del frame_scroll_general si quieres que también se desplacen)
     frame_botones = ctk.CTkFrame(frame_scroll_general, fg_color="transparent")

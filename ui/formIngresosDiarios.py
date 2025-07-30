@@ -3,6 +3,7 @@ import customtkinter as ctk
 import sqlite3
 from PIL import Image
 from customtkinter import CTkImage
+from db.conexion import conectar_db2
 from utils.utils import convertir_a_mayusculas
 from widgets.widgets import crear_boton_imagen
 import xlwings as xw
@@ -61,6 +62,7 @@ def mostrar_formulario_ingresos(frame_padre):
     lbl_fecha.grid(row=0, column=0, padx=(10,5), pady=5, sticky="w")
     fecha_policia = DateEntry(entrada_frame, placeholder_text="📅 Fecha de ingreso", font=("Helvetica", 14), locale="es")
     fecha_policia.grid(row=0, column=1, padx=(5,10), pady=5, sticky="ew")
+    fecha_policia.bind("<<DateEntrySelected>>", lambda event: actualizar_polizas_disponibles())
     #fecha_policia.insert(0, obtener_fecha_actual())
     #fecha_policia.configure(state="readonly")
     
@@ -70,6 +72,38 @@ def mostrar_formulario_ingresos(frame_padre):
     no_poliza = ctk.CTkOptionMenu(entrada_frame, values=num_polizas)
     no_poliza.set("No. Póliza")  # Texto inicial
     no_poliza.grid(row=0, column=3, padx=(5,10), pady=5, sticky="ew")
+    def actualizar_polizas_disponibles():
+        fecha = fecha_policia.get_date()
+        #dia = f"{fecha.day:02}"
+        mes = f"{fecha.month:02}"
+        anio = str(fecha.year)
+        #print(F"Mes consultado: {mes}, año: {anio}")
+        
+        conn = conectar_db2()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+                SELECT noPoliza, fecha FROM polizasIngresos
+                WHERE fecha LIKE ?
+                """, (f"%/{mes}/{anio}",))
+        
+        resultados = cursor.fetchall()
+        #print(f"Resultados de la consulta: {resultados}")
+        #for row in resultados:
+            #print(f" - Poliza: {row[0]}, fecha: {row[1]}")
+            
+        polizas_ocupadas = set(str(row[0]) for row in resultados)
+        conn.close()
+        
+        disponibles = [str(i) for i in range(1, 32) if str(i) not in polizas_ocupadas]
+        #print(f"Polizas disponibles: {disponibles}")
+        
+        no_poliza.configure(values=disponibles)
+        
+        if disponibles:
+            no_poliza.set(disponibles[0])
+        else:
+            no_poliza.set("Sin numeros de póliza disponibles")
 
     # Fila 2 - Banco y Cargo o Importe
     lbl_banco = ctk.CTkLabel(entrada_frame, text="Banco/Caja:", font=("Arial", 14))
@@ -84,6 +118,25 @@ def mostrar_formulario_ingresos(frame_padre):
     lbl_cuanto_pago.grid(row=1, column=2, padx=(10,5), pady=5, sticky="w")
     cuanto_pago = ctk.CTkEntry(entrada_frame, placeholder_text="Importe")
     cuanto_pago.grid(row=1, column=3, padx=(5,10), pady=5, sticky="ew")
+    def evaluar_importe(event=None):
+        entry = event.widget
+        texto = entry.get().strip()
+        
+        if texto.startswith("="):
+            expresion = texto[1:].strip()
+            try:
+                if not all (c in "0123456789.+-*/() " for c in expresion):
+                            raise ValueError("Expresión invalida")
+                
+                resultado = eval(expresion)
+                entry.delete(0, 'end')
+                entry.insert(0, str(round(resultado, 2)))
+            except Exception as e:
+                messagebox.showerror("Error", f"Expresion invalida: {e}")
+    cuanto_pago.bind("<Return>", evaluar_importe)
+    cuanto_pago.bind("<Tab>", evaluar_importe)
+    cuanto_pago.bind("<FocusOut>", evaluar_importe)
+    cuanto_pago.bind("<KeyRelease>", lambda event: actualizar_total())
 
     # Fila 3 - Notas adicionales de la póliza
     lbl_nota = ctk.CTkLabel(entrada_frame, text="Nota:", font=("Arial", 14))
@@ -119,7 +172,8 @@ def mostrar_formulario_ingresos(frame_padre):
                 return "Error al acceder DB"
         
         try:
-            conn = sqlite3.connect('prueba.db')
+            conn = conectar_db2()
+            #print(f"Conectado a la base de datos en: {origen_db}")
             cursor = conn.cursor()
             cursor.execute("SELECT denominacion FROM partidasIngresos WHERE partida = ?", (clave,))
             resultado = cursor.fetchone()
@@ -184,9 +238,13 @@ def mostrar_formulario_ingresos(frame_padre):
 
         entrada_abono = ctk.CTkEntry(fila_frame, placeholder_text="Abono")
         entrada_abono.grid(row=0, column=2, padx=10, sticky="ew")
+        entrada_abono.bind("<Return>", evaluar_importe)
+        entrada_abono.bind("<Tab>", evaluar_importe)
         entrada_abono.bind("<KeyRelease>", lambda event: actualizar_total())
+        entrada_abono.bind("<FocusOut>", lambda event: actualizar_total())
 
 
+        entrada_clave.bind("<KeyRelease>", lambda event: convertir_a_mayusculas(entrada_clave, event))
         entrada_clave.bind("<FocusOut>", lambda event: llenar_denominacion(event, entrada_clave, entrada_resultado))
         entrada_clave.bind("<Return>", lambda event: entrada_abono.focus_set())
         entrada_abono.bind("<Return>", lambda event: agregar_fila(enfocar_nueva_clave=True))
@@ -224,8 +282,8 @@ def mostrar_formulario_ingresos(frame_padre):
     
             # Manejo de fechas
             fecha_ingresada = fecha_policia.get_date()
-            fecha1 = fecha_ingresada.day
-            fecha2 = fecha_ingresada.month
+            fecha1 = f"{fecha_ingresada.day:02}"
+            fecha2 = f"{fecha_ingresada.month:02}"
             fecha3 = fecha_ingresada.year
     
             # Obtener mes/año actual
@@ -388,7 +446,7 @@ def mostrar_formulario_ingresos(frame_padre):
             
     def guardar_datos_en_db():
         try:
-            conn = sqlite3.connect('prueba.db')
+            conn = conectar_db2()
             cursor = conn.cursor()
 
             # --- Guardar datos en polizasIngresos ---
@@ -447,7 +505,10 @@ def mostrar_formulario_ingresos(frame_padre):
     btn_agregar_fila = ctk.CTkButton(seccion_filas, text="➕ Agregar", command=agregar_fila, corner_radius=32,
                                      fg_color="#008d62", hover_color="#2ca880")
     btn_agregar_fila.pack(pady=10)
-
+    
+    # Actualizar las polizas disponibles al iniciar la ventana
+    actualizar_polizas_disponibles()
+                
     # --- BOTONES FINALES FIJOS ABAJO ---
     botones_frame = ctk.CTkFrame(contenedor_principal, fg_color="transparent", corner_radius=15)
     botones_frame.pack(fill="x", pady=10, padx=20, anchor="e")
