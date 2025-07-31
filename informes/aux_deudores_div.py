@@ -5,90 +5,36 @@ from utils.config_utils import cargar_config
 from tkinter import ttk, messagebox
 import gc
 from utils.egresos_utils import mostrar_loading_y_ejecutar
+from widgets.widgets import ventana_seleccion_mes_anio_y_campos
 import xlwings as xw
 from db.auxDB import obtener_partidas_120_por_mes, obtener_partidas_i_120_por_mes
 
 config = cargar_config()
 
-meses = {
-    1:"enero", 2:"febrero", 3:"marzo", 4:"abril",
-    5:"mayo", 6:"junio", 7:"julio", 8:"agosto",
-    9:"septiembre", 10:"octubre", 11:"noviembre", 12:"diciembre"
-    }
+def confirmar_y_generar_aux_deudor(contenedor_principal=None):
 
-def confirmar_y_generar_aux_deudor(contenedor_principal = None):
-    ventana = ctk.CTkToplevel()
-    ventana.title("Generar Auxiliar deudores diversos.")
-    ventana.geometry("340x180")
-    ventana.resizable(False, False)
-    ventana.grab_set()
-    
-    meses_lista = [
-        "enero", "febrero", "marzo", "abril", "mayo", "junio",
-        "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
-    ]
-    
-    hoy = datetime.now()
-    mes_actual = hoy.month
-    anio_actual = hoy.year
-    
-    
-    ctk.CTkLabel(ventana, text = "Seleccione el mes y año del  reporte:", font=("Arial", 13)).pack(pady= (16,6))
-    frame = ctk.CTkFrame(ventana, fg_color="transparent")
-    frame.pack(pady = 4)    
-    
-    mes_var = ctk.StringVar(value=meses_lista[mes_actual-1])
-    anio_var = ctk.StringVar(value=str(anio_actual))
-    saldo_var = ctk.StringVar(value="")
-    
-    mes_cb = ttk.Combobox(frame, values=meses_lista, textvariable=mes_var, state="readonly", width=14)
-    mes_cb.grid(row=0, column=0, padx=8)
-    anio_cb = ttk.Combobox(frame, values=[str(a) for a in range(anio_actual-5, anio_actual+2)], textvariable=anio_var, width=8, state="readonly")
-    anio_cb.grid(row=0, column=1, padx=8)
-    
-    saldo_frame = ctk.CTkFrame(ventana, fg_color="transparent")
-    saldo_frame.pack(pady=4)
-    ctk.CTkLabel(saldo_frame, text="Saldo inicial:", font=("Arial", 12)).grid(row=0, column=0, padx=8)
-    saldo_entry = ctk.CTkEntry(saldo_frame, textvariable=saldo_var, width=120)
-    saldo_entry.grid(row=0, column=1, padx=8)
-    
-    def generar_reporte_seleccionado():
-        saldo_inicial = saldo_var.get().strip()
-        if not saldo_inicial:
-            messagebox.showerror("Error", "Debe ingresar el saldo inicial.")
-            return
-        mes_idx = meses_lista.index(mes_var.get()) + 1
-        anio = int(anio_var.get())
-        mes_str = f"{anio}-{mes_idx:02d}"
-        ventana.destroy()
+    def validar_campos(vars_adic):
+        saldo = vars_adic.get("Saldo inicial:")
+        if saldo is None or saldo.get().strip() == "":
+            return False, "Debe ingresar el saldo inicial."
+        return True, ""
+
+    def funcion_generar(mes_anio, vars_adic):
+        saldo_inicial = vars_adic["Saldo inicial:"].get().strip()
         mostrar_loading_y_ejecutar(
-            lambda: gen_Aux_deud_div(saldo_inicial, mes_str),
+            lambda: gen_Aux_deud_div(saldo_inicial, mes_anio),
             contenedor_principal=contenedor_principal,
         )
-    
-    def generar_reporte_actual():
-        ventana.destroy()
-        mostrar_loading_y_ejecutar(
-            gen_Aux_deud_div(saldo_inicial),
-            contenedor_principal=contenedor_principal,
-        )
-    
-    btn_frame = ctk.CTkFrame(ventana, fg_color="transparent")
-    btn_frame.pack(pady=18)
-    
-    ctk.CTkButton(
-        btn_frame, 
-        text="Generar mes seleccionado", 
-        command=generar_reporte_seleccionado,
-        width=140
-        ).pack(side="left", padx=10)
-    ctk.CTkButton(
-        btn_frame, 
-        text="Generar mes actual", 
-        command=generar_reporte_actual,
-        width = 120
-        ).pack(side = "left", padx=10)
-    
+
+    ventana_seleccion_mes_anio_y_campos(
+        titulo="Generar Auxiliar deudores diversos.",
+        funcion_generar=funcion_generar,
+        contenedor_principal=contenedor_principal,
+        campos_adicionales=[{"label": "Saldo inicial:"}],
+        validar_campos_adicionales=validar_campos,
+        ancho_ventana="340x220",
+    )
+
     
 def gen_Aux_deud_div(saldo_inicial, mes_anio = None):
     app= None

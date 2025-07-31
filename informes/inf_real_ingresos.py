@@ -48,33 +48,8 @@ def confirmar_y_generar_inf_real_ingresos(contenedor_principal=None):
         ventana.destroy()
         
     ctk.CTkButton(ventana, text="Generar", command=ejecutar_generacion).pack(pady=10)
-
-def obtener_totales_ingresos(mes_anio):
-    conn = conectar_db2()  # Ajustar ruta según corresponda
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT clave, SUM(abono)
-        FROM detallePolizaIngreso
-        WHERE substr(fecha, 4, 2) = ? AND substr(fecha, 7, 4) = ?
-        GROUP BY clave
-        ORDER BY clave;
-    """, (mes_anio.split('-')[1], mes_anio.split('-')[0]))
-    resultados = cursor.fetchall()
-    conn.close()
-    #print(resultados)
-    return resultados
-
-def agrupar_por_letra_clave(partidas_mes):
-    grupos = {}
-    for clave, total in partidas_mes:
-        if clave in ("120", "330"):
-            continue
-        grupo = f"{clave[0].upper()}000"
-        if grupo not in grupos:
-            grupos[grupo] = []
-        grupos[grupo].append((clave, total))
-    return grupos
-
+    
+    
 def generar_informe_ingresos(mes_anio=None):
     app = None
     wb = None
@@ -140,3 +115,30 @@ def generar_informe_ingresos(mes_anio=None):
         if app:
             app.quit()
         gc.collect()
+
+def obtener_totales_ingresos(mes_anio):
+    conn = conectar_db2()  # Ajustar ruta según corresponda
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT clave, SUM(abono)
+        FROM detallePolizaIngreso
+        WHERE substr(fecha, 4, 2) = ? AND substr(fecha, 7, 4) = ?
+        GROUP BY clave
+        ORDER BY clave;
+    """, (mes_anio.split('-')[1], mes_anio.split('-')[0]))
+    resultados = cursor.fetchall()
+    conn.close()
+    #print(resultados)
+    return resultados
+
+def agrupar_por_letra_clave(partidas_mes):
+    grupos = {}
+    for clave, total in partidas_mes:
+        if clave in ("120", "330"):
+            continue
+        grupo = f"{clave[0].upper()}000"
+        if grupo not in grupos:
+            grupos[grupo] = []
+        grupos[grupo].append((clave, total))
+    return grupos
+

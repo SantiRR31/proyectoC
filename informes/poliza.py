@@ -25,14 +25,6 @@ def asignar_valores_en_hoja(hoja, poliza):
 
     for campo, celda in campos_a_celdas.items():
         valor = getattr(poliza, campo, "")
-        if campo == "no_poliza":
-            try:
-                d, m, y = valor.split("/")
-                m = m.replace(".", "")  # Eliminar el punto de la abreviatura del mes
-                valor = f"{d}/{m}/{y}"
-            except Exception:
-                pass
-            valor = f"{valor}"  # El apóstrofe fuerza a texto en Excel
         if campo == "clave_ref":
             if poliza.tipo_pago == "CHEQUE":
                 valor = f"NO. DE CHEQUE {poliza.no_cheque or ''}"
@@ -50,22 +42,42 @@ def asignar_valores_en_hoja(hoja, poliza):
         hoja.range(celda).value = valor
         
 
-def insertar_entradas_en_hoja(hoja, conceptos, fila_inicial=18):
+def insertar_entradas_en_hoja(hoja, conceptos):
+    fila_inicial=18
+    fila_final = 38  
     try:
         partidas_sumadas = {}
         for concepto in conceptos:
-            if concepto.partida_especifica and concepto.cargo:
-                clave = concepto.partida_especifica
+            if concepto.clave_cucop and concepto.cargo:
+                clave = concepto.clave_cucop
                 if clave not in partidas_sumadas:
                     partidas_sumadas[clave] = {"total": 0}
                 partidas_sumadas[clave]["total"] += float(concepto.cargo)
             else:
                 messagebox.showerror("Error", "Faltan datos. Verifica que todos los campos estén completos.")
                 return False
-        for partida, datos in partidas_sumadas.items():
-            hoja.range(f"B{fila_inicial}").value = partida
-            hoja.range(f"AV{fila_inicial}").value = datos["total"]
-            fila_inicial += 1
+
+        total_filas_disponibles = fila_final - fila_inicial + 1
+        total_partidas = len(partidas_sumadas)
+
+        necesita_filas_con_espacios = (total_partidas - 1)
+        espacio_requerido = total_partidas + necesita_filas_con_espacios
+
+        if espacio_requerido <= total_filas_disponibles:
+            usar_espacios = True
+            filas_necesarias = espacio_requerido
+        else:
+            usar_espacios = False
+            filas_necesarias = total_partidas
+            
+        filas_vacias_arriba = (total_filas_disponibles - filas_necesarias) // 2
+        fila_actual = fila_inicial + filas_vacias_arriba
+
+        for idx, (partida, datos) in enumerate(partidas_sumadas.items()):
+            hoja.range(f"B{fila_actual}").value = partida
+            hoja.range(f"AV{fila_actual}").value = datos["total"]
+            fila_actual += 2 if usar_espacios else 1
+
         return True
     except Exception as e:
         print("Error al insertar entradas en la hoja:", e)
@@ -73,6 +85,7 @@ def insertar_entradas_en_hoja(hoja, conceptos, fila_inicial=18):
         return False
 
 def guardar_egresos(poliza):
+    #print("Guardando póliza de egresos...",poliza)
     app = None
     wb = None
     try:

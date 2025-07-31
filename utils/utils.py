@@ -125,23 +125,25 @@ except:
     except:
         pass  # Si no está disponible, usará el default
 
-def obtener_nombre_hoja(poliza_id):
-    # Mapa de meses abreviados con punto a nombres completos en minúsculas
-    meses = {
-        "ene.": "enero", "feb.": "febrero", "mar.": "marzo", "abr.": "abril",
-        "may.": "mayo", "jun.": "junio", "jul.": "julio", "ago.": "agosto",
-        "sep.": "septiembre", "oct.": "octubre", "nov.": "noviembre", "dic.": "diciembre"
-    }
-
+def obtener_nombre_hoja(no_poliza):
     try:
-        dia, mes_abrev, anio = poliza_id.strip().lower().split("/")
-        nombre_mes = meses.get(mes_abrev)
-        if not nombre_mes:
-            raise ValueError(f"Mes no reconocido: {mes_abrev}")
-        return f"{int(dia):02d} {nombre_mes} {anio}"
+        partes = no_poliza.strip().lower().split("/")
+        if len(partes) != 3:
+            raise ValueError("Formato inválido")
+        dia, mes, anio = partes
+        return f"{int(dia):02d} {mes} {anio}"
     except Exception as e:
-        print(f"Error procesando poliza_id '{poliza_id}': {e}")
-        return "fecha inválida"
+        print(f"Error procesando poliza_id '{no_poliza}': {e}")
+        return "no_poliza inválida"
+
+def obtener_nombre_hoja_desde_mes(mes_anio: str) -> str:
+    meses_nombre = {
+        "01": "ene", "02": "feb", "03": "mar", "04": "abr", "05": "may", "06": "jun",
+        "07": "jul", "08": "ago", "09": "sep", "10": "oct", "11": "nov", "12": "dic"
+    }
+    anio, mes = mes_anio.split("-")
+    return f"{meses_nombre[mes]} {anio}"
+
 
 def col2int(col):
     """Convierte una referencia de columna de Excel (ej: 'A', 'AG') a número entero (1-indexed)."""
@@ -150,3 +152,20 @@ def col2int(col):
     for c in col:
         num = num * 26 + (ord(c) - ord('A') + 1)
     return num
+
+def agrupar_partidas_por_grupo(partidas_mes):
+    grupos = {}
+    for codigo, total_cargo in partidas_mes:
+        codigo_str = str(codigo)
+        if len(codigo_str) == 5:
+            grupo = int(codigo_str[:2]) * 100
+        elif len(codigo_str) == 4:
+            grupo = int(codigo_str[:2]) * 100
+        elif len(codigo_str) == 3:
+            grupo = int(codigo_str[0]) * 100
+        else:
+            grupo = int(codigo)
+        if grupo not in grupos:
+            grupos[grupo] = []
+        grupos[grupo].append((codigo, total_cargo))
+    return grupos

@@ -12,12 +12,29 @@ from utils.config_utils import cargar_config
 
 config = cargar_config()
 
+
+def formatear_numero_poliza(num_str):
+        num_str = num_str.strip()
+        if not num_str.isdigit():
+            return num_str  # Devolver tal cual si no es número
+        num = int(num_str)
+        return f"{num:02d}"  # Siempre con dos dígitos, pero sin agregar 010 ni nada raro
+
+
 #----------------- Funciones de captura y validación de pólizas de egresos -----------------
 
 def capturar_poliza(form, entradas):
     try:
         poliza_id = form["poliza_id"].get() or None
-        no_poliza = form["no_poliza"].get()
+
+        # Obtener número y sufijo desde los widgets (por ejemplo, CTkEntry)
+        numero = form["numero"].get().strip()
+        
+        sufijo = form["sufijo"].get().strip()
+
+        # Armar no_poliza completo
+        no_poliza = f"{numero}{sufijo}" if numero and sufijo else numero
+
         fecha = form["fecha"].get()
         nombre = form["nombre"].get()
         monto = form["cargo"].get()
@@ -26,18 +43,31 @@ def capturar_poliza(form, entradas):
         clave_ref = form["clave_rastreo"].get()
         denominacion = form["denominacion"].get()
         observaciones = form["observaciones"].get("1.0", "end").strip()
-        no_cheque = None
+        no_cheque = form["no_cheque"].get() or None
 
-        if tipo_pago == "CHEQUE":
-            no_cheque = form["no_cheque"].get().strip() or None
-        elif tipo_pago == "TRANSFERENCIA":
-            clave_ref = form["clave_rastreo"].get().strip() or None
+        # Validaciones...
+        faltantes = []
+        if not no_poliza:
+            faltantes.append(f"no_poliza: '{no_poliza}'")
+        if not fecha:
+            faltantes.append(f"fecha: '{fecha}'")
+        if not nombre:
+            faltantes.append(f"nombre: '{nombre}'")
 
-        # Validación mínima
-        if not no_poliza or not fecha or not nombre:
-            messagebox.showerror("Campos incompletos", "Por favor completa todos los campos obligatorios.")
+        if faltantes:
+            mensaje = "Faltan los siguientes campos obligatorios:\n" + "\n".join(faltantes)
+            messagebox.showerror("Campos incompletos", mensaje)
             return None
 
+        # Validación por tipo de pago...
+        if tipo_pago == "CHEQUE" and not no_cheque:
+            messagebox.showerror("Falta número de cheque", "Debes ingresar el número de cheque.")
+            return None
+        elif tipo_pago == "TRANSFERENCIA" and not clave_ref:
+            messagebox.showerror("Falta clave de rastreo", "Debes ingresar la clave de rastreo.")
+            return None
+
+        # Crear objeto PolizaEgreso
         poliza = PolizaEgreso(
             poliza_id=poliza_id,
             no_poliza=no_poliza,
@@ -52,20 +82,24 @@ def capturar_poliza(form, entradas):
             no_cheque=no_cheque
         )
 
+        # Procesar conceptos
         total_conceptos = 0.0
         for entrada_clave, entrada_desc, entrada_importe in entradas:
-            clave = entrada_clave.get().strip()
-            descripcion = entrada_desc.get()
             try:
-                partida_especifica = obtener_partida_especifica_por_clave(int(clave))
+                clave = entrada_clave.get().strip()
+                descripcion = entrada_desc.get()
                 cargo = float(entrada_importe.get())
-            except ValueError:
-                continue
-            if clave and descripcion and cargo:
-                concepto = ConceptoEgreso(clave, descripcion, partida_especifica, cargo)
-                poliza.agregar_concepto(concepto)
-                total_conceptos += cargo
+                partida_especifica = obtener_partida_especifica_por_clave(int(clave))
 
+                if clave and descripcion and cargo:
+                    concepto = ConceptoEgreso(clave, descripcion, partida_especifica, cargo)
+                    poliza.agregar_concepto(concepto)
+                    total_conceptos += cargo
+            except Exception as e:
+                print(f"Error procesando concepto: {e}")
+                continue
+
+        # Validar que el monto general coincida con el total de conceptos
         try:
             monto_float = float(monto)
         except ValueError:
@@ -75,7 +109,7 @@ def capturar_poliza(form, entradas):
         if abs(monto_float - total_conceptos) > 0.01:
             messagebox.showerror(
                 "Totales no coinciden",
-                "El monto total de los conceptos no coincide con el monto general.\nPor favor verifica los datos."
+                f"El monto total de los conceptos ({total_conceptos:.2f}) no coincide con el monto general ({monto_float:.2f})."
             )
             return None
 
@@ -85,6 +119,8 @@ def capturar_poliza(form, entradas):
         print("Error al capturar la póliza:", e)
         messagebox.showerror("Error", f"Ocurrió un error al capturar la póliza:\n{e}")
         return None
+
+
 
 
 
@@ -161,27 +197,27 @@ class AnimacionDescarga(ctk.CTkToplevel):
 
         self.after(120, self.animar)
 
-def ejecutar_con_loading(funcion, btn_guardar, btn_descargar, contenedor_principal, limpiar_formulario, *args):
-    if btn_guardar is not None:
+def ejecutar_con_loading(funcion, btn_guardar, btn_descargar, contenedor_principal, limpiar_formulario, es_edicion=False,*args):
+    if btn_guardar is not None and btn_guardar.winfo_exists():
         btn_guardar.configure(state="disabled", text="Guardando...")
-    if btn_descargar is not None:
-        btn_descargar.configure(state="disabled", text="Descargando...")
 
+    if btn_descargar is not None and btn_descargar.winfo_exists():
+        btn_descargar.configure(state="disabled", text="Descargando...")
     # Mostrar animación visual
     anim = AnimacionDescarga(contenedor_principal)
     anim.grab_set()  # Hace modal la ventana de animación
-
     def ejecutar():
         try:
             resultado = funcion(*args)
             if resultado:
                 messagebox.showinfo("Éxito", "Poliza Guardada correctamente")
-            respuesta = messagebox.askyesno(
-                "Nuevo documento",
-                "¿Desea crear una nueva póliza?"
-            )
-            if respuesta:
-                limpiar_formulario()
+            if not es_edicion:
+                    respuesta = messagebox.askyesno(
+                        "Nuevo documento",
+                        "¿Desea crear una nueva póliza?"
+                    )
+                    if respuesta:
+                        limpiar_formulario()
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo guardar la información.\n{e}")
         finally:
@@ -218,15 +254,9 @@ def mostrar_loading_y_ejecutar(funcion, contenedor_principal, *args, **kwargs):
 #------------------ Funciones de limpieza y animación de confirmación -----------------
     
 def limpiar_formulario(contenedor_principal, mostrar_formulario_egresos, frame_padre):
-    respuesta = messagebox.askyesno(
-        "Limpiar formulario",
-        "¿Está seguro de limpiar el formulario?\nEsta acción no se puede deshacer.",
-        icon="warning"
-    )
-    if respuesta:
-        for widget in contenedor_principal.winfo_children():
-            widget.destroy()
-        mostrar_formulario_egresos(frame_padre)
+    for widget in contenedor_principal.winfo_children():
+        widget.destroy()
+    mostrar_formulario_egresos(frame_padre)
             
             
 def animar_confirmacion(widget):
@@ -243,16 +273,25 @@ def animar_confirmacion(widget):
 #------------------ Funciones de generación de números de póliza -----------------
 
 def generar_no_poliza_para_fecha(fecha):
+    # Mapea los meses abreviados sin punto
+    meses_abreviados = [
+        "ene", "feb", "mar", "abr", "may", "jun",
+        "jul", "ago", "sep", "oct", "nov", "dic"
+    ]
+
     # Detecta y convierte si la fecha viene en formato 'DD/MM/YYYY'
     if "/" in fecha:
         dt = datetime.strptime(fecha, "%d/%m/%Y")
     else:
         dt = datetime.strptime(fecha, "%Y-%m-%d")
+
     consecutivo = obtener_siguiente_no_poliza_mes(dt.strftime("%d/%m/%Y"))
-    mes = dt.strftime("%b").lower()
+    mes = meses_abreviados[dt.month - 1]
     anio = dt.strftime("%Y")
-    dia = dt.strftime("%d")
     return f"{consecutivo}/{mes}/{anio}"
+
+
+
 
 #------------------ Funciones de búsqueda y sugerencias -----------------
             
@@ -303,7 +342,7 @@ def llenar_por_clave(event, entrada_clave, entrada_desc):
         try:
             descripcion = buscar_descripcion_db(clave)
             if descripcion and descripcion.strip().lower() != "No encontrada":                    
-                entrada_desc.configure(state="normal", fg_color= "transparent")
+                entrada_desc.configure(state="normal")
                 entrada_desc.delete(0, tk.END)
                 entrada_desc.insert(0, descripcion)
                 #threading.Thread(target=lambda: animar_confirmacion(entrada_desc), daemon=True).start()

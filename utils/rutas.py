@@ -8,6 +8,9 @@ NOMBRE_APP = "GestorEgresosIngresos"
 NOMBRE_BD = "prueba2.db"
 NOMBRE_BD2 = "prueba.db"
 
+
+
+
 def ruta_absoluta(ruta_relativa):
     """Devuelve la ruta absoluta, compatible con PyInstaller."""
     if getattr(sys, 'frozen', False):  # Si está empaquetado con PyInstaller
@@ -15,6 +18,7 @@ def ruta_absoluta(ruta_relativa):
     else:
         base_path = os.path.abspath(".")
     return os.path.join(base_path, ruta_relativa)
+
 
 # Cargar variables de entorno (.env)
 dotenv_path = ruta_absoluta(".env")

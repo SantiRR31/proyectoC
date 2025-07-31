@@ -6,7 +6,7 @@ from tkinter import messagebox, ttk
 from ui.egresos import mostrar_formulario_egresos
 
 def crear_treeview_polizas(parent, modo_tema="light"):
-    columnas = ("no_poliza", "fecha", "monto", "nombre", "estado")
+    columnas = ("no_poliza", "fecha", "nombre", "monto", "tipo de pago", "estado")
 
     # Estilos
     style = ttk.Style()
@@ -68,10 +68,14 @@ def mostrar_detalles_egresos(frame_padre):
     frame_filtros = ctk.CTkFrame(frame_padre)
     frame_filtros.pack(pady=10)
 
-    meses = [f"{i:02d}" for i in range(1, 13)]
+    meses = [f"{i:02d} - {nombre}" for i, nombre in enumerate([
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ], start=1)]
+
     anios = [str(anio) for anio in range(2020, datetime.now().year + 1)]
 
-    combo_mes = ctk.CTkComboBox(frame_filtros, values=meses, width=80)
+    combo_mes = ctk.CTkComboBox(frame_filtros, values=meses, width=160)
     combo_mes.pack(side="left", padx=10)
 
     combo_anio = ctk.CTkComboBox(frame_filtros, values=anios, width=100)
@@ -79,6 +83,11 @@ def mostrar_detalles_egresos(frame_padre):
 
     boton_filtrar = ctk.CTkButton(frame_filtros, text="Filtrar", command=lambda: cargar_polizas())
     boton_filtrar.pack(side="left", padx=10)
+    
+        # Cada vez que se cambia el valor del mes o año, se recarga automáticamente
+    combo_mes.bind("<<ComboboxSelected>>", lambda event: cargar_polizas())
+    combo_anio.bind("<<ComboboxSelected>>", lambda event: cargar_polizas())
+
 
     contenedor_tabla = ctk.CTkFrame(frame_padre)
     contenedor_tabla.pack(fill="both", expand=True, padx=20, pady=10)
@@ -90,7 +99,7 @@ def mostrar_detalles_egresos(frame_padre):
 
     def cargar_polizas():
         tree.delete(*tree.get_children())
-        mes = combo_mes.get()
+        mes = combo_mes.get().split(" - ")[0] if combo_mes.get() else None
         anio = combo_anio.get()
         mes = mes if mes != "Mes" else None
         anio = anio if anio != "Año" else None
@@ -196,7 +205,8 @@ def mostrar_detalles_egresos(frame_padre):
     # Establecer por defecto el mes y año actuales antes de cargar
     mes_actual = datetime.now().strftime("%m")
     anio_actual = datetime.now().strftime("%Y")
-    combo_mes.set(mes_actual)
+    mes_actual_str = [m for m in meses if m.startswith(mes_actual)][0]
+    combo_mes.set(mes_actual_str)
     combo_anio.set(anio_actual)
 
     cargar_polizas()
