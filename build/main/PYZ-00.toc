@@ -2457,6 +2457,10 @@
    'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
    'copia\\utils\\egresos_utils.py',
    'PYMODULE'),
+  ('utils.informes_utils',
+   'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
+   'copia\\utils\\informes_utils.py',
+   'PYMODULE'),
   ('utils.rutas',
    'C:\\Users\\Santi\\OneDrive\\Escritorio\\python\\programaEscuela - '
    'copia\\utils\\rutas.py',

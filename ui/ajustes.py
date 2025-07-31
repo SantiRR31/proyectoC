@@ -185,8 +185,8 @@ def mostrar_ajustes(frame_contenido):
 
     ctk.CTkLabel(
         contenedor_principal,
-        text="Desarrollado por Ariel y Santiago - UTSJR © 2025",
-        font=("Arial", 10),
+        text="Desarrollado por Ariel y Santiago - UTSJR © 2025\n Para que los cambios surtan efecto, reinicia la aplicación.",
+        font=("Arial", 12),
         text_color="#888"
     ).pack(side="bottom", pady=10)
 
