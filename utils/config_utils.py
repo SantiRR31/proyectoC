@@ -15,7 +15,8 @@ DEFAULT_CONFIG = {
     "color_theme": "blue",
     "no_cecati": "000",
     "no_cuenta" : "1234567890",
-    "cuenta_cheques": "1056897860"
+    "cuenta_cheques": "1056897860",
+    "estado": "Queretaro"
 }
 
 def obtener_ruta_config():

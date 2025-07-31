@@ -352,5 +352,4 @@ def lanzar_ventana_principal():
     root.after(0, lambda: cargar_estado_ventana(root))
     root.protocol("WM_DELETE_WINDOW", lambda: (guardar_estado_ventana(root), root.destroy()))
     root.protocol("WM_DELETE_WINDOW", on_closing)
-
     root.mainloop()

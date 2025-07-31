@@ -28,8 +28,8 @@ from functions.genObservaciones import seleccionar_poliza
 config = cargar_config()
 
 def mostrar_inicio(contenedor):
-    # Configuración del contenedor principal con gradiente sutil
-    
+    app = ctk.CTk()  # o CTkFrame si estás usando frames
+    app.withdraw()   
     # Frame interno para mejor organización
     main_frame = ctk.CTkScrollableFrame(
         master=contenedor,
@@ -523,4 +523,3 @@ def mostrar_inicio(contenedor):
         
     )
     abrir_carpeta_archivos.pack(padx=20, fill="x", side="right")
-    
