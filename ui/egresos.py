@@ -13,7 +13,11 @@ from models.egresomodelos import *
 CONFIG_PATH = ruta_absoluta("config.json")
 config = cargar_config()
 
+numero_generado_anterior = None
+no_poliza_autogenerado = None 
+
 def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
+    es_edicion = poliza_editar is not None
     # Limpiar frame anterior
     for widget in frame_padre.winfo_children():
         widget.destroy()
@@ -42,7 +46,7 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
     seccion_poliza.pack(fill="x", pady=(0, 20), padx=5)
 
     # Haz todas las columnas responsivas
-    for i in range(4):
+    for i in range(5):
         seccion_poliza.grid_columnconfigure(i, weight=1, uniform="poliza")
 
     entrada_id = ctk.CTkEntry(contenedor_principal)
@@ -78,15 +82,64 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
         placeholder_text="🔢 No. Póliza",
         **ESTILO_ENTRADA
     )
-    no_poliza.grid(row=0, column=3, padx=(5, 15), pady=10, sticky="ew")
+    no_poliza.grid(row=0, column=3, padx=(5, 5), pady=10, sticky="ew")
+    
+    def on_focus_out_no_poliza(event):
+        valor_actual = no_poliza.get().strip()
+        if valor_actual:
+            valor_formateado = formatear_numero_poliza(valor_actual)
+            no_poliza.delete(0, "end")
+            no_poliza.insert(0, valor_formateado)
+
+    no_poliza.bind("<FocusOut>", on_focus_out_no_poliza)
+
+
+
+    sufijo_fecha = ctk.CTkEntry(
+        seccion_poliza,
+        placeholder_text="/mes/año",
+        state="readonly",  # solo lectura
+        **ESTILO_ENTRADA
+    )
+    sufijo_fecha.grid(row=0, column=4, padx=(0, 15), pady=10, sticky="ew")
+
+     # <--- Agrega esta línea aquí
 
     def actualizar_no_poliza(event=None):
+        global no_poliza_autogenerado
+
         fecha = fecha_policia.get()
-        no_poliza_valor = generar_no_poliza_para_fecha(fecha)
-        no_poliza.delete(0, "end")
-        no_poliza.insert(0, no_poliza_valor)
-        
-    if not poliza_editar:
+        valor_completo = generar_no_poliza_para_fecha(fecha)  # Ej: "03/jul/2025"
+
+        if "/" in valor_completo:
+            numero_generado, sufijo = valor_completo.split("/", 1)
+            sufijo = "/" + sufijo
+        else:
+            numero_generado = valor_completo
+            sufijo = ""
+
+        valor_actual = no_poliza.get().strip()
+
+        if valor_actual == no_poliza_autogenerado or not valor_actual:
+            # Solo autocompletar si está vacío o aún contiene el valor generado anterior
+            no_poliza.delete(0, "end")
+            no_poliza.insert(0, numero_generado)
+            no_poliza_autogenerado = numero_generado  # Se guarda como autogenerado
+        else:
+            # El usuario escribió manualmente algo diferente
+            valor_formateado = formatear_numero_poliza(valor_actual)
+            no_poliza.delete(0, "end")
+            no_poliza.insert(0, valor_formateado)
+            # Y *no* actualizamos `no_poliza_autogenerado` aquí
+
+        # Actualizar el sufijo
+        sufijo_fecha.configure(state="normal")
+        sufijo_fecha.delete(0, "end")
+        sufijo_fecha.insert(0, sufijo)
+        sufijo_fecha.configure(state="readonly")
+
+
+    if not es_edicion:
         actualizar_no_poliza()
         fecha_policia.bind("<<DateEntrySelected>>", actualizar_no_poliza)
 
@@ -115,25 +168,24 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
         anchor="w"
     ).grid(row=3, column=0, padx=(15, 5), pady=5, sticky="ew")
 
-    vcmdo = seccion_poliza.register(solo_letras)
+    def convertir_a_mayusculas(event):
+        widget = event.widget  # <--- aquí accedes al widget que perdió el foco
+        texto = widget.get()
+        widget.delete(0, "end")
+        widget.insert(0, texto.upper())
+
     nombre = ctk.CTkEntry(
         seccion_poliza,
         placeholder_text="👤 Nombre completo",
         **ESTILO_ENTRADA
     )
-    nombre.configure(validate="key", validatecommand=(vcmdo, "%P"))
-    nombre.bind("<KeyRelease>", lambda event: convertir_a_mayusculas(nombre, event))
+    nombre.configure(validate="key")
+    # Convertir a mayúsculas mientras se escribe
+    nombre.configure(validate="key")
+    # Convertir a mayúsculas solo al perder el foco
+    nombre.bind("<FocusOut>", convertir_a_mayusculas)
     nombre.grid(row=3, column=1, columnspan=3, padx=(5, 15), pady=5, sticky="ew")
-    
-    def validar_y_mayusculas_nombre(event=None):
-        texto = nombre.get()
-        # Si no es válido, limpia lo que no sea permitido
-        texto_filtrado = ''.join([c for c in texto if solo_letras(c)])
-        nombre.delete(0, "end")
-        nombre.insert(0, texto_filtrado.upper())
 
-    nombre.bind("<<Paste>>", lambda e: nombre.after(1, validar_y_mayusculas_nombre))
-    nombre.bind("<Control-v>", lambda e: nombre.after(1, validar_y_mayusculas_nombre))
     
 # Etiqueta "Monto"
     ctk.CTkLabel(
@@ -409,7 +461,7 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
             entrada_clave.focus_set()
 
     # Agregar primera fila por defecto
-    if not poliza_editar:
+    if not es_edicion:
         agregar_fila()
 
     # Botón para agregar más filas
@@ -439,7 +491,7 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
         **ESTILO_ENTRADA
     )
     denominacion_entry.pack(fill="x", padx=10, pady=(0, 10))
-    denominacion_entry.bind("<KeyRelease>", lambda event: convertir_a_mayusculas(denominacion_entry, event))
+
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 
 
@@ -458,14 +510,6 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
         **ESTILO_ENTRADA_TEXTBOX
     )
     observaciones_textbox.pack(fill="both", padx=10, pady=(0, 10), expand=True)
-
-    # Convertir a mayúsculas al soltar tecla
-    def convertir_textbox_a_mayusculas(event):
-        contenido = observaciones_textbox.get("1.0", "end-1c")
-        observaciones_textbox.delete("1.0", "end")
-        observaciones_textbox.insert("1.0", contenido.upper())
-
-    observaciones_textbox.bind("<KeyRelease>", convertir_textbox_a_mayusculas)
 
 
 #----------------------------------- Barra de acciones inferiores---------------------------------------------------------
@@ -520,26 +564,19 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
                 messagebox.showerror("Error", "No se pudo capturar la información.")
                 return False
 
-            if poliza_editar:
+            if es_edicion:
                 exito = actualizar_poliza(poliza)
+                mensaje = "Póliza actualizada correctamente" if exito else "No se pudo actualizar la póliza."
             else:
-                exito = inrtar_poliza_egreso(poliza)
+                exito, mensaje = inrtar_poliza_egreso(poliza)
 
             if exito:
-                messagebox.showinfo("Éxito", "Póliza guardada correctamente.")
-
-                # Limpiar visualmente el formulario
-                for widget in frame_padre.winfo_children():
-                    widget.destroy()
-
-                # Mostrar solo si fue una edición
-                if poliza_editar:
+                if es_edicion:
                     from ui.detalle_egresos import mostrar_detalles_egresos
                     mostrar_detalles_egresos(frame_padre)
-
                 return True
             else:
-                messagebox.showerror("Error", "No se pudo guardar la información.")
+                messagebox.showerror("Error", mensaje)
                 return False
         except Exception as e:
             print("Error en guardar_poliza:", e)
@@ -550,20 +587,22 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
     # Botones de acción
     btn_guardar = ctk.CTkButton(
         acciones_frame,
-        text="💾 Actualizar" if poliza_editar else "💾 Guardar",
+        text="💾 Actualizar" if es_edicion else "💾 Guardar",
         width=50,
         **ESTILO_BOTON,
         fg_color="#10b981",
-        hover_color="#059669",
-        command=lambda: ejecutar_con_loading(
-            guardar_poliza,           # función a ejecutar
-            btn_guardar,
-            btn_descargar,
-            contenedor_principal,
-            lambda: limpiar_formulario(contenedor_principal, mostrar_formulario_egresos, frame_padre)
-        )
+        hover_color="#059669"
     )
-    btn_guardar.grid(row=0, column=4, padx=5,sticky="e")
+    btn_guardar.grid(row=0, column=4, padx=5, sticky="e")
+    
+    btn_guardar.configure(command=lambda: ejecutar_con_loading(
+        guardar_poliza,
+        btn_guardar,
+        btn_descargar,
+        contenedor_principal,
+        lambda: limpiar_formulario(contenedor_principal, mostrar_formulario_egresos, frame_padre),
+        es_edicion
+    ))
 
     btn_descargar = ctk.CTkButton(
         acciones_frame,
@@ -587,27 +626,19 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
     )
     abrir_carp.grid(row=0, column=6, padx=5, sticky="e")
 
-    if poliza_editar:
+    if es_edicion:
         entrada_id.insert(0, poliza_editar.poliza_id)
-
-    form = {
-        "poliza_id": entrada_id,
-        "no_poliza": no_poliza,
-        "fecha": fecha_policia,
-        "nombre": nombre,
-        "cargo": cargo_entry,
-        "monto_letra": cargo_letras_entry,
-        "tipo_pago": tipo_pago,
-        "clave_rastreo": clave_rastreo,
-        "observaciones": observaciones_textbox,
-        "denominacion": denominacion_entry,
-        "no_cheque": no_cheque_entry,  
-    }
-          
-         
+        
+    # Obtener número y sufijo por separado
     def mostrar_menu_descarga(form, entradas):
         menu = tk.Menu(None, tearoff=0)
         poliza = capturar_poliza(form, entradas)
+        #print("Poliza capturada:", poliza)
+        if not poliza:
+            messagebox.showerror("Error", "No se pudo capturar la información de la póliza.")
+            return
+        # usar `poliza` directamente después
+
         menu.add_command(
             label="Exportar como PDF",
             command=lambda: ejecutar_con_loading(
@@ -616,7 +647,10 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
                 btn_descargar,
                 contenedor_principal,
                 lambda: limpiar_formulario(contenedor_principal, mostrar_formulario_egresos, frame_padre),
-                poliza
+                es_edicion,
+                poliza,
+                
+                
             )
         )
         menu.add_command(
@@ -627,7 +661,8 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
                 btn_descargar,
                 contenedor_principal,
                 lambda: limpiar_formulario(contenedor_principal, mostrar_formulario_egresos, frame_padre),
-                poliza
+                es_edicion,
+                poliza,
             )
         )
         try:
@@ -660,9 +695,34 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
     )        
     btn_iopciones.grid(row=0, column=3, padx=5, sticky="e")
     
+
+    form = {
+        "poliza_id": entrada_id,
+        "numero": no_poliza,
+        "sufijo": sufijo_fecha,
+        "fecha": fecha_policia,
+        "nombre": nombre,
+        "cargo": cargo_entry,
+        "monto_letra": cargo_letras_entry,
+        "tipo_pago": tipo_pago,
+        "clave_rastreo": clave_rastreo,
+        "observaciones": observaciones_textbox,
+        "denominacion": denominacion_entry,
+        "no_cheque": no_cheque_entry,  
+    }
     
-    if poliza_editar:
-        no_poliza.insert(0, poliza_editar.no_poliza)
+    if es_edicion:
+        if "/" in poliza_editar.no_poliza:
+            numero, sufijo = poliza_editar.no_poliza.split("/", 1)
+            sufijo = "/" + sufijo
+        else:
+            numero = poliza_editar.no_poliza
+            sufijo = ""
+
+        no_poliza.insert(0, numero)
+        sufijo_fecha.configure(state="normal")
+        sufijo_fecha.insert(0, sufijo)
+        sufijo_fecha.configure(state="readonly")
         fecha_policia.set_date(poliza_editar.fecha)
         nombre.insert(0, poliza_editar.nombre)
         cargo_entry.insert(0, poliza_editar.monto)

@@ -1,12 +1,13 @@
 from datetime import datetime
 from tkinter import messagebox, ttk
 import customtkinter as ctk
-from db.egresosDB import agrupar_partidas_por_grupo, obtener_partidas_mesagrupasa, obtener_total_acreedores, obtener_total_deudores
+from db.egresosDB import obtener_partidas_mesagrupasa, obtener_total_acreedores, obtener_total_deudores
 from utils.config_utils import cargar_config
 from utils.egresos_utils import mostrar_loading_y_ejecutar
 import os
 import gc
 from utils.rutas import ruta_absoluta
+from utils.utils import agrupar_partidas_por_grupo
 import xlwings as xw
 import re
 

@@ -103,9 +103,9 @@ def obtener_partida_especifica_por_clave(clave_cucop):
 def inrtar_poliza_egreso(poliza):
     conn = conectar()
     if conn is None or not poliza:
-        return "Error de conexion o poliza vacia"
+        return False, "Error de conexión o póliza vacía"
+
     cursor = conn.cursor()
-    # Insertar la póliza principal
     try:
         cursor.execute(
             '''
@@ -128,17 +128,16 @@ def inrtar_poliza_egreso(poliza):
                 poliza.monto,
                 poliza.nombre, 
                 poliza.tipo_pago, 
-                getattr (poliza, "clave_ref", None),
+                getattr(poliza, "clave_ref", None),
                 poliza.denominacion, 
                 poliza.observaciones,
                 getattr(poliza, "no_cheque", None),
                 poliza.estado or "activo"
             )
         )
-        # Obtener el id de la póliza recién insertada (si es autoincremental)
+
         id_poliza = cursor.lastrowid
 
-        # Insertar los detalles (conceptos)
         for concepto in poliza.conceptos:
             cursor.execute(
                 '''
@@ -149,28 +148,27 @@ def inrtar_poliza_egreso(poliza):
                     "PARTIDA ESPECÍFICA"
                 ) VALUES (?, ?, ?, ?)
                 ''',
-                (id_poliza, 
-                concepto.clave_cucop, 
-                concepto.cargo,
-                concepto.partida_especifica
+                (
+                    id_poliza, 
+                    concepto.clave_cucop, 
+                    concepto.cargo,
+                    concepto.partida_especifica
                 )
             )
 
         conn.commit()
-        conn.close()
-        return "Póliza y detalles insertados correctamente"
+        return True, "Póliza y detalles insertados correctamente"
     except sqlite3.IntegrityError as e:
         conn.rollback()
         if "UNIQUE constraint failed: polizasEgresos.no_poliza" in str(e):
-            return f"Ya existe una póliza con el número '{poliza.poliza_id}'."
-        else:
-            return f"Error de integridad: {str(e)}"    
+            return False, f"Ya existe una póliza con el número '{poliza.no_poliza}'."
+        return False, f"Error de integridad: {e}"
     except sqlite3.OperationalError as e:
         conn.rollback()
-        return f"Error operativo: {str(e)}"
+        return False, f"Error operativo: {e}"
     except Exception as e:
         conn.rollback()
-        return f"Error inesperado: {str(e)}"
+        return False, f"Error inesperado: {e}"
     finally:
         conn.close()
 
@@ -276,6 +274,7 @@ def obtener_polizas_egresos_mes(mes_actual):
         WHERE strftime('%Y-%m', 
             substr(fecha, 7) || '-' || substr(fecha, 4, 2) || '-' || substr(fecha, 1, 2)
         ) = ?
+        ORDER BY CAST(SUBSTR(no_poliza, 1, INSTR(no_poliza, '/') - 1) AS INTEGER)
     """, (mes_actual,))
     resultados = cursor.fetchall()
     conn.close()
@@ -285,13 +284,13 @@ def obtener_partidas_mes(mes_actual):
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT DISTINCT d."PARTIDA ESPECÍFICA"
+        SELECT DISTINCT d."CLAVE CUCoP"
         FROM detallePolizaEgreso d
         JOIN polizasEgresos p ON d.id_poliza = p.id_poliza
         WHERE strftime('%Y-%m', 
             substr(p.fecha, 7) || '-' || substr(p.fecha, 4, 2) || '-' || substr(p.fecha, 1, 2)
         ) = ?
-        ORDER BY d."PARTIDA ESPECÍFICA"
+        ORDER BY d."CLAVE CUCoP"
     """, (mes_actual,))
     resultados = cursor.fetchall()
     conn.close()
@@ -301,10 +300,10 @@ def obtener_conceptos_por_partida_especifica (id_poliza):
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT "PARTIDA ESPECÍFICA", SUM(cargo)
+        SELECT "CLAVE CUCoP", SUM(cargo)
         FROM detallePolizaEgreso
         WHERE id_poliza = ?
-        GROUP BY "PARTIDA ESPECÍFICA"
+        GROUP BY "CLAVE CUCoP"
     """, (id_poliza,))
     resultados = cursor.fetchall()
     conn.close()
@@ -344,36 +343,23 @@ def obtener_total_acreedores(mes_anio):
     return result[0] if result and result[0] is not None else 0
 
 
-def agrupar_partidas_por_grupo(partidas_mes):
-    grupos = {}
-    for codigo, total_cargo in partidas_mes:
-        codigo_str = str(codigo)
-        if len(codigo_str) == 5:
-            grupo = int(codigo_str[:2]) * 100
-        elif len(codigo_str) == 4:
-            grupo = int(codigo_str[:2]) * 100
-        elif len(codigo_str) == 3:
-            grupo = int(codigo_str[0]) * 100
-        else:
-            grupo = int(codigo)
-        if grupo not in grupos:
-            grupos[grupo] = []
-        grupos[grupo].append((codigo, total_cargo))
-    return grupos
 
 
-def obtener_partidas_mesagrupasa (mes_actual): 
+
+def obtener_partidas_mesagrupasa(mes_actual): 
     conn = conectar()
     query = """
-    SELECT d."PARTIDA ESPECÍFICA", SUM(d.cargo)
+    SELECT d."CLAVE CUCoP", SUM(d.cargo)
     FROM detallePolizaEgreso d
     JOIN polizasEgresos po ON d.id_poliza = po.id_poliza
     WHERE strftime('%Y-%m', substr(po.fecha, 7) || '-' || substr(po.fecha, 4, 2) || '-' || substr(po.fecha, 1, 2)) = ?
-    GROUP BY d."PARTIDA ESPECÍFICA"
+      AND (po.estado IS NULL OR po.estado != 'cancelado')
+    GROUP BY d."CLAVE CUCoP"
     """
     cur = conn.cursor()
     cur.execute(query, (mes_actual,))
     return cur.fetchall()
+
 
 
 def obtener_polizas_egresos():
@@ -405,14 +391,14 @@ def obtener_polizas_egresos_filtrado(mes=None, anio=None):
 
     if mes and anio:
         cursor.execute('''
-            SELECT id_poliza, no_poliza, fecha, monto, nombre, estado
+            SELECT id_poliza, no_poliza, fecha, nombre, monto, tipo_pago, estado
             FROM polizasEgresos
             WHERE SUBSTR(fecha, 4, 2) = ? AND SUBSTR(fecha, 7, 4) = ?
             ORDER BY CAST(SUBSTR(no_poliza, 1, 2) AS INTEGER) ASC
         ''', (f"{int(mes):02d}", str(anio)))
     else:
         cursor.execute('''
-            SELECT id_poliza, no_poliza, fecha, monto, nombre, estado
+            SELECT id_poliza, no_poliza, fecha, nombre, monto, tipo_pago, estado
             FROM polizasEgresos
             ORDER BY CAST(SUBSTR(no_poliza, 1, 2) AS INTEGER) ASC
         ''')
