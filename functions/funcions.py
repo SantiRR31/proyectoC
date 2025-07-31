@@ -159,7 +159,7 @@ def gen_inf_consolidado():
         
         wb_origen.close()
                 
-        messagebox.showinfo("Éxito", "Transferencia de claves y totales completada")
+        messagebox.showinfo("Éxito", f"Informe Consolidado de Ingresos generado exitosamente: \n{ruta_nueva}")
         
 def confirmar_aux():
     import tkinter as tk

@@ -91,7 +91,7 @@ def generar_notitas(no_poliza):
     app = None
     try:
         # Conectar con la base de datos
-        conn = sqlite3.connect('db/prueba2.db')
+        conn = conectar()
         cursor = conn.cursor()
         
         cursor.execute("SELECT observaciones FROM polizasEgresos WHERE no_poliza = ?", (no_poliza,))

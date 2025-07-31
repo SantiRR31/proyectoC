@@ -419,7 +419,6 @@ def mostrar_inicio(contenedor):
     tarjetas_info = [
         ("Informe Mensual de Ingresos", "assets/coin.png", ("#10b981", "#059669"), ["Inf. Mensual Ingresos"], "Opciones", {"Inf. Mensual Ingresos":confirmar_y_generar}),
         ("Inf. Consolidado de Ingresos", "assets/excel2.png", ("#10b981", "#059669"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar2}),
-        ("Auxiliar Bancario", "assets/coin.png", ("#10b981", "#059669"), ["Generar"], "Opciones", {"Generar": confirmar_aux}),
         ("Inf. Real de Ingresos", "assets/excel2.png", ("#10b981", "#059669"), ["Generar"], "Opciones", {"Generar": lambda: confirmar_y_generar_inf_real_ingresos(contenedor_principal = contenedor)})
     ]
     

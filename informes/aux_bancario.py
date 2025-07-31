@@ -158,7 +158,11 @@ def gen_Aux_acre_div(mes_anio= None):
         os.makedirs(carpeta_salida, exist_ok=True)    
         archivo_salida = os.path.join(carpeta_salida, f"Auxiliar_Bancario{mes_abrev}_{anio_corto}.xlsx")
         wb.save(archivo_salida)
-        messagebox.showinfo("Reporte generado", f"El Auxiliar bancario se ha generado:\n{archivo_salida}")
+        #carpeta = os.path.dirname(archivo_salida)
+        messagebox.showinfo(
+            "Reporte generado",
+            f"El Auxiliar bancario se ha generado:\n{archivo_salida}\n\nCarpeta:\n{carpeta_salida}"
+        )
         return archivo_salida
         
     except Exception as e:
