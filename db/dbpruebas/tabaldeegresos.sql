@@ -245,8 +245,21 @@ SET "CLAVE CUCoP" = 33300005, "PARTIDA ESPECÍFICA" = 33303
 WHERE id_poliza = 11;
 
 
-select * from detallePolizaEgreso
-WHERE id_poliza = 11;
+select * from polizasEgresos
+
+UPDATE polizasEgresos SET no_poliza = REPLACE(no_poliza, 'ene.', 'ene');
+UPDATE polizasEgresos SET no_poliza = REPLACE(no_poliza, 'feb.', 'feb');
+UPDATE polizasEgresos SET no_poliza = REPLACE(no_poliza, 'mar.', 'mar');
+UPDATE polizasEgresos SET no_poliza = REPLACE(no_poliza, 'abr.', 'abr');
+UPDATE polizasEgresos SET no_poliza = REPLACE(no_poliza, 'may.', 'may');
+UPDATE polizasEgresos SET no_poliza = REPLACE(no_poliza, 'jun.', 'jun');
+UPDATE polizasEgresos SET no_poliza = REPLACE(no_poliza, 'jul.', 'jul');
+UPDATE polizasEgresos SET no_poliza = REPLACE(no_poliza, 'ago.', 'ago');
+UPDATE polizasEgresos SET no_poliza = REPLACE(no_poliza, 'sep.', 'sep');
+UPDATE polizasEgresos SET no_poliza = REPLACE(no_poliza, 'oct.', 'oct');
+UPDATE polizasEgresos SET no_poliza = REPLACE(no_poliza, 'nov.', 'nov');
+UPDATE polizasEgresos SET no_poliza = REPLACE(no_poliza, 'dic.', 'dic');
+
 
 
 INSERT INTO partidasEgresos (

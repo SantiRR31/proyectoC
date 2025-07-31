@@ -121,7 +121,7 @@ def mostrar_detalles_egresos(frame_padre):
         if not seleccionado:
             return
         id_poliza = int(seleccionado)
-        estado_actual = tree.item(seleccionado, "values")[4] 
+        estado_actual = tree.item(seleccionado, "values")[5] 
         nuevo_estado = "cancelado" if estado_actual.lower() == "activo" else "activo"
         from tkinter import messagebox
         if not messagebox.askyesno("Confirmar", f"¿Deseas marcar esta póliza como '{nuevo_estado}'?"):
@@ -184,8 +184,8 @@ def mostrar_detalles_egresos(frame_padre):
         boton_frame,
         text="Editar",
         command=editar_poliza,
-        fg_color="#00bfff",
-        hover_color="#009acd",
+        fg_color="#005f99",  # Azul profundo
+        hover_color="#004d80",
         width=140
     )
     boton_editar.pack(side="left", padx=10)
