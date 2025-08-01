@@ -97,10 +97,10 @@ def generar_informe_ingresos(mes_anio=None):
         
         #print("pasamos los datos de abajo")
 
-        if not os.path.exists(config["carpeta_destino"]):
+        if not os.path.exists(config["carpeta_destino"], "Informe Real Ingresos"):
             os.makedirs(config["carpeta_destino"])
 
-        salida = os.path.join(config["carpeta_destino"], f"InformeRealIngresos_{mes_actual}.xlsx")
+        salida = os.path.join(config["carpeta_destino"], f"{mes_nombre} {anio}.xlsx")
         wb.save(salida)
         messagebox.showinfo("Reporte generado", f"El informe real de ingresos se ha generado:\n{salida}")
         return salida

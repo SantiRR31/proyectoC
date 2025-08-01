@@ -347,7 +347,7 @@ def abrir_ventana_soporte():
 def abrir_ventana_edicion(frame_contenido, titulo, label_actual, variable_actual, label_nuevo, actualizar_callback, maxlen=20):
     ventana = ctk.CTkToplevel(frame_contenido)
     ventana.title(titulo)
-    ventana.geometry("400x250")
+    ventana.geometry("400x300")
     ventana.resizable(False, False)
     ventana.grab_set()
     ventana.focus_force()
@@ -375,9 +375,17 @@ def abrir_ventana_edicion(frame_contenido, titulo, label_actual, variable_actual
         if nuevo_valor:
             actualizar_callback(nuevo_valor)
             ventana.destroy()
+            
+    ctk.CTkLabel(
+        ventana,
+        text="* Por favor, reinicie la aplicación para que los cambios \ntengan efecto.",
+        font=FUENTE_LABEL,
+        text_color="#FFA500"  # Puedes cambiar el color según tu estilo
+    ).grid(row=4, column=0, padx=20, pady=(10, 0), sticky="w")
+
 
     frame_botones = ctk.CTkFrame(ventana, fg_color="transparent")
-    frame_botones.grid(row=4, column=0, pady=20)
+    frame_botones.grid(row=5, column=0, pady=20)
 
     ctk.CTkButton(frame_botones, text="Guardar", command=guardar, fg_color="#d10d2f", hover_color="#d93954").pack(side="left", padx=10)
     ctk.CTkButton(frame_botones, text="Cancelar", command=ventana.destroy, fg_color="#d10d2f", hover_color="#d93954").pack(side="left", padx=10)

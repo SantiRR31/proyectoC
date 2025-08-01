@@ -11,6 +11,12 @@ from db.auxDB import obtener_partidas_120_por_mes, obtener_partidas_i_120_por_me
 
 config = cargar_config()
 
+meses = {
+    1: "enero", 2: "febrero", 3: "marzo", 4: "abril",
+    5: "mayo", 6: "junio", 7: "julio", 8: "agosto",
+    9: "septiembre", 10: "octubre", 11: "noviembre", 12: "diciembre"
+}
+
 def confirmar_y_generar_aux_deudor(contenedor_principal=None):
 
     def validar_campos(vars_adic):
@@ -45,7 +51,7 @@ def gen_Aux_deud_div(saldo_inicial, mes_anio = None):
         anio, mes = mes_actual.split("-")
         mes_nombre = meses[int(mes)]
         
-        carpeta_salida = os.path.join(config["carpeta_destino"], "Auxiliares","Deudores Diversos")
+        carpeta_salida = os.path.join(config["carpeta_destino"], "Auxiliar Deudores Diversos")
         os.makedirs(carpeta_salida, exist_ok=True)
         
         dia = hoy.strftime("%d")
@@ -118,7 +124,7 @@ def gen_Aux_deud_div(saldo_inicial, mes_anio = None):
                 sht.range(f"AJ{fila}").value = cargo
                 sht.range(f"j{fila}").value = "REINTEGRO POLIZA"
         
-        archivo_salida = os.path.join(carpeta_salida, f"Deudores div{mes_actual}_{anio}.xlsx")
+        archivo_salida = os.path.join(carpeta_salida, f"{mes_nombre} {anio}.xlsx")
         wb.save(archivo_salida)
         messagebox.showinfo("Reporte generado", f"El Auxiliar de deudores diversos se ha generado:\n{archivo_salida}")
         return archivo_salida

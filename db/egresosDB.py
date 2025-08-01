@@ -1,6 +1,7 @@
 import sqlite3
 from db.conexion import conectar
 from models.egresomodelos import PolizaEgreso, ConceptoEgreso
+from utils.utils import numero_a_letras_mxn
 
 # Funcion para buscar la descripcion de una clave en la tabla PARTIDAS_EGRESOS
 def buscar_descripcion_db(clave):
@@ -96,9 +97,6 @@ def obtener_partida_especifica_por_clave(clave_cucop):
     resultado = cursor.fetchone()
     conn.close()
     return resultado[0] if resultado else ""
-
-
-
 
 def inrtar_poliza_egreso(poliza):
     conn = conectar()
@@ -207,7 +205,7 @@ def consultar_poliza_por_no(no_poliza):
     # 1. Consultar la póliza principal
     cursor.execute(
         '''
-        SELECT id_poliza, no_poliza, fecha, monto, nombre, tipo_pago, clave_ref, denominacion, observaciones, no_cheque
+        SELECT id_poliza, no_poliza, fecha, monto, nombre, tipo_pago, clave_ref, denominacion, observaciones, no_cheque, estado
         FROM polizasEgresos
         WHERE no_poliza = ?
         ''',
@@ -218,51 +216,63 @@ def consultar_poliza_por_no(no_poliza):
         conn.close()
         return None
 
+    # Si la póliza está cancelada, se pone nombre = "Cancelado" y no se cargan conceptos
+    estado = poliza_row[10]
+    nombre = poliza_row[4]
+    monto_letra = numero_a_letras_mxn(poliza_row[3]),
+    
+    if estado.lower() == "cancelado":
+        nombre = "CANCELADO"
+        monto_letra = "CANCELADO"
+    
     # Crear el objeto PolizaEgreso
     poliza = PolizaEgreso(
-        no_poliza=poliza_row[1],   # no_poliza
+        poliza_id=poliza_row[0],
+        no_poliza=poliza_row[1],
         fecha=poliza_row[2],
         monto=poliza_row[3],
-        montoletr="",  # Puedes calcularlo si lo necesitas
-        nombre=poliza_row[4],
+        monto_letra= monto_letra,
+        nombre=nombre,
         tipo_pago=poliza_row[5],
         clave_ref=poliza_row[6],
         denominacion=poliza_row[7],
         observaciones=poliza_row[8],
         no_cheque=poliza_row[9],
-        estado = poliza_row[10]
+        estado=estado
     )
     id_poliza = poliza_row[0]
 
-    # 2. Consultar los conceptos (detalles)
-    cursor.execute(
-        '''
-        SELECT "CLAVE CUCoP", cargo
-        FROM detallePolizaEgreso
-        WHERE id_poliza = ?
-        ''',
-        (id_poliza,)
-    )
-    detalles = cursor.fetchall()
-    for detalle in detalles:
-        clave_cucop = detalle[0]
-        cargo = detalle[1]
-        # Consultar descripción y partida_especifica si lo deseas
+    # Sólo cargar conceptos si no está cancelada
+    if estado.lower() != "cancelado":
         cursor.execute(
             '''
-            SELECT "DESCRIPCIÓN", "PARTIDA ESPECÍFICA"
-            FROM partidasEgresos
-            WHERE "CLAVE CUCoP" = ?
+            SELECT "CLAVE CUCoP", cargo
+            FROM detallePolizaEgreso
+            WHERE id_poliza = ?
             ''',
-            (clave_cucop,)
+            (id_poliza,)
         )
-        partida_row = cursor.fetchone()
-        descripcion = partida_row[0] if partida_row else ""
-        partida_especifica = partida_row[1] if partida_row else ""
-        concepto = ConceptoEgreso(clave_cucop, descripcion, partida_especifica, cargo)
-        poliza.agregar_concepto(concepto)
+        detalles = cursor.fetchall()
+        for detalle in detalles:
+            clave_cucop = detalle[0]
+            cargo = detalle[1]
+            cursor.execute(
+                '''
+                SELECT "DESCRIPCIÓN", "PARTIDA ESPECÍFICA"
+                FROM partidasEgresos
+                WHERE "CLAVE CUCoP" = ?
+                ''',
+                (clave_cucop,)
+            )
+            partida_row = cursor.fetchone()
+            descripcion = partida_row[0] if partida_row else ""
+            partida_especifica = partida_row[1] if partida_row else ""
+            concepto = ConceptoEgreso(clave_cucop, descripcion, partida_especifica, cargo)
+            poliza.agregar_concepto(concepto)
+
     conn.close()
     return poliza
+
 
 
 def obtener_polizas_egresos_mes(mes_actual):
@@ -343,9 +353,6 @@ def obtener_total_acreedores(mes_anio):
     return result[0] if result and result[0] is not None else 0
 
 
-
-
-
 def obtener_partidas_mesagrupasa(mes_actual): 
     conn = conectar()
     query = """
@@ -359,7 +366,6 @@ def obtener_partidas_mesagrupasa(mes_actual):
     cur = conn.cursor()
     cur.execute(query, (mes_actual,))
     return cur.fetchall()
-
 
 
 def obtener_polizas_egresos():
@@ -462,8 +468,10 @@ def obtener_poliza_completa(id_poliza):
     return poliza
 
 
-def actualizar_poliza(poliza: PolizaEgreso):
-    print("Actualizando póliza:", poliza.no_poliza)
+import sqlite3  # Asegúrate de tener este import
+
+def actualizar_poliza(poliza: PolizaEgreso) -> tuple[bool, str]:
+    print(f"Actualizando póliza: {poliza.no_poliza} (ID: {poliza.poliza_id})")
 
     conn = conectar()
     cursor = conn.cursor()
@@ -472,26 +480,38 @@ def actualizar_poliza(poliza: PolizaEgreso):
             cursor.execute("""
                 UPDATE polizasEgresos SET
                     no_poliza=?, fecha=?, monto=?, nombre=?, tipo_pago=?,
-                    clave_ref=?, denominacion=?, observaciones=?, no_cheque=?, estado=?
+                    clave_ref=?, denominacion=?, observaciones=?, no_cheque=?
                 WHERE id_poliza = ?
             """, (
                 poliza.no_poliza, poliza.fecha, poliza.monto, poliza.nombre, poliza.tipo_pago,
                 poliza.clave_ref, poliza.denominacion, poliza.observaciones,
-                poliza.no_cheque, poliza.estado, poliza.poliza_id
+                poliza.no_cheque, poliza.poliza_id
             ))
+
             cursor.execute("DELETE FROM detallePolizaEgreso WHERE id_poliza = ?", (poliza.poliza_id,))
             for concepto in poliza.conceptos:
                 cursor.execute("""
                     INSERT INTO detallePolizaEgreso (id_poliza, "CLAVE CUCoP", "PARTIDA ESPECÍFICA", cargo)
                     VALUES (?, ?, ?, ?)
                 """, (poliza.poliza_id, concepto.clave_cucop, concepto.partida_especifica, concepto.cargo))
+        else:
+            return False, "ID de póliza no proporcionado."
+
         conn.commit()
-        return True
+        return True, "Póliza actualizada correctamente."
+    except sqlite3.IntegrityError as e:
+        print("Error de integridad:", e)
+        if "UNIQUE constraint failed: polizasEgresos.no_poliza" in str(e):
+            return False, f"Ya existe una póliza con el número {poliza.no_poliza}. El número debe ser único."
+        else:
+            return False, f"Error de integridad: {e}"
     except Exception as e:
-        print("Error al actualizar:", e)
-        return False
+        import traceback
+        traceback.print_exc()
+        return False, f"Error inesperado al actualizar: {e}"
     finally:
         conn.close()
+
         
         
 def eliminar_poliza(id_poliza: int):
@@ -505,3 +525,25 @@ def eliminar_poliza(id_poliza: int):
         print("Error al eliminar póliza:", e)
     finally:
         conn.close()
+
+def obtener_numeros_polizas_por_mes(mes: int, anio: int):
+    conn = conectar()
+    if conn is None:
+        return []
+    
+    cursor = conn.cursor()
+    patron = f"%/{mes:02}/{anio}"
+    
+    cursor.execute(
+        '''
+        SELECT no_poliza
+        FROM polizasEgresos
+        WHERE fecha LIKE ?
+        ORDER BY no_poliza
+        ''',
+        (patron,)
+    )
+    
+    resultados = [fila[0] for fila in cursor.fetchall()]
+    conn.close()
+    return resultados

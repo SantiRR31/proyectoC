@@ -561,12 +561,11 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
         try:
             poliza = capturar_poliza(form, entradas)
             if poliza is None:
-                messagebox.showerror("Error", "No se pudo capturar la información.")
+                messagebox.showerror("Error", "No se pudo capturar la información del formulario.")
                 return False
 
             if es_edicion:
-                exito = actualizar_poliza(poliza)
-                mensaje = "Póliza actualizada correctamente" if exito else "No se pudo actualizar la póliza."
+                exito, mensaje = actualizar_poliza(poliza)
             else:
                 exito, mensaje = inrtar_poliza_egreso(poliza)
 
@@ -574,13 +573,15 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
                 if es_edicion:
                     from ui.detalle_egresos import mostrar_detalles_egresos
                     mostrar_detalles_egresos(frame_padre)
+                messagebox.showinfo("Éxito", mensaje)
                 return True
             else:
                 messagebox.showerror("Error", mensaje)
                 return False
         except Exception as e:
-            print("Error en guardar_poliza:", e)
-            messagebox.showerror("Error", f"Ocurrió un error al guardar:\n{e}")
+            import traceback
+            traceback.print_exc()
+            messagebox.showerror("Error", f"Ocurrió un error inesperado al guardar:\n{e}")
             return False
 
 
@@ -622,7 +623,7 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
         **ESTILO_BOTON,
         fg_color="#6b7280",
         hover_color="#4b5563",
-        command=lambda: abrir_carpeta(config["carpeta_destino"],"PolizasDeEgresos")
+        command=lambda: abrir_carpeta(config["carpeta_destino"],"Polizas De Egresos")
     )
     abrir_carp.grid(row=0, column=6, padx=5, sticky="e")
 

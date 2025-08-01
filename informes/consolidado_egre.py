@@ -178,7 +178,7 @@ def generar_informe_consolidado_egresos(mes_anio=None):
                     raise
                 
         # Guardar archivo
-        archivo_salida = os.path.join(carpeta_salida, f"consolidado_egresos_{mes_actual}_{anio}.xlsx")
+        archivo_salida = os.path.join(carpeta_salida, f"{mes_nombre} {anio}.xlsx")
         wb.save(archivo_salida)
         messagebox.showinfo("Reporte generado", f"El informe consolidado se ha generado:\n{archivo_salida}")
         return archivo_salida

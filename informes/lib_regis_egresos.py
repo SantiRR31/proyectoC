@@ -60,7 +60,7 @@ def generar_reporte_egresos_xlwings(mes_anio=None):
         ajustar_columnas(sht, partidas_mes)
         insertar_encabezados_partidas(sht, partidas_mes)
         insertar_filas_polizas(sht, polizas_mes, partidas_mes)
-        archivo_salida = guardar_archivo(wb, mes_actual)
+        archivo_salida = guardar_archivo(wb, mes_nombre, anio)
 
         mostrar_confirmacion()
 
@@ -143,10 +143,10 @@ def insertar_filas_polizas(sht, polizas_mes, partidas_mes):
 
 
 
-def guardar_archivo(wb, mes_actual):
-    carpeta_salida = os.path.join(config["carpeta_destino"], "InformesDeEgresos")
+def guardar_archivo(wb, mes_nombre, anio):
+    carpeta_salida = os.path.join(config["carpeta_destino"], "Libro De Egresos")
     os.makedirs(carpeta_salida, exist_ok=True)
-    archivo_salida = os.path.join(carpeta_salida, f"egresos_{mes_actual}.xlsx")
+    archivo_salida = os.path.join(carpeta_salida, f"{mes_nombre} {anio}.xlsx")
 
     wb.app.calculation = 'automatic'
     wb.app.calculate()
