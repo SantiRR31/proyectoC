@@ -54,3 +54,16 @@ def inicializar_base_datos2():
                 print(f"[!] No se encontró la base de datos '{NOMBRE_BD2}' en el directorio actual.")
     except Exception as e:
         print(f"[✗] Error al copiar '{NOMBRE_BD2}': {e}")
+from pathlib import Path
+
+def obtener_carpeta_destino_segura(config):
+    try:
+        ruta = Path(config.get("carpeta_destino", "")).expanduser()
+        ruta.mkdir(parents=True, exist_ok=True)
+        return str(ruta)
+    except Exception as e:
+        print("⚠️ No se pudo acceder a la carpeta destino:", e)
+        # Ruta local alternativa segura
+        ruta_respaldo = Path(os.getcwd()) / "Cecati122" / "Polizas"
+        ruta_respaldo.mkdir(parents=True, exist_ok=True)
+        return str(ruta_respaldo)

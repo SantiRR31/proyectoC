@@ -172,9 +172,9 @@ def gen_Aux_acre_div(saldo_inicial, mes_anio=None):
             else:  # Ingreso
                 sht.range(f"AJ{fila}").value = cargo
         
-        carpeta_salida = os.path.join(config["carpeta_destino"], "Auxiliares", "Acreedores")
+        carpeta_salida = os.path.join(config["carpeta_destino"], "Auxiliar Acreedores diversos")
         os.makedirs(carpeta_salida, exist_ok=True)        
-        archivo_salida = os.path.join(carpeta_salida, f"Auxiliar_Acreedores_Diversos_{mes_abrev}_{anio_corto}.xlsx")
+        archivo_salida = os.path.join(carpeta_salida, f"{mes_nombre} {anio}.xlsx")
         wb.save(archivo_salida)
         messagebox.showinfo("Reporte generado", f"El Auxiliar de acreedores diversos se ha generado:\n{archivo_salida}")
         return archivo_salida

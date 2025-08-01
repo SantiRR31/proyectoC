@@ -154,9 +154,9 @@ def gen_Aux_acre_div(mes_anio= None):
             fila_excel += 1
             
         
-        carpeta_salida = os.path.join(config["carpeta_destino"], "Auxiliares", "Bancario")
+        carpeta_salida = os.path.join(config["carpeta_destino"], "Auxiliar Bancario")
         os.makedirs(carpeta_salida, exist_ok=True)    
-        archivo_salida = os.path.join(carpeta_salida, f"Auxiliar_Bancario{mes_abrev}_{anio_corto}.xlsx")
+        archivo_salida = os.path.join(carpeta_salida, f"{mes_nombre} {anio}.xlsx")
         wb.save(archivo_salida)
         #carpeta = os.path.dirname(archivo_salida)
         messagebox.showinfo(

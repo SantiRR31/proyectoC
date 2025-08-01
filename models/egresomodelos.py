@@ -23,6 +23,7 @@ class PolizaEgreso:
     no_cheque: Optional[str] = None
     estado: Optional[str] = "activo"
     conceptos: List[ConceptoEgreso] = field(default_factory=list)
+    estado: Optional[str] = None
 
     def agregar_concepto(self, concepto: ConceptoEgreso):
         self.conceptos.append(concepto)

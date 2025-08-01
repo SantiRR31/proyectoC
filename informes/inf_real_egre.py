@@ -104,8 +104,11 @@ def generar_inf_real_egresos(mes_anio=None):
             sht.range("AQ49").value = total_120
         if total_330 is not None:
             sht.range("AQ50").value = total_330
-
-        archivo_salida = os.path.join(config["carpeta_destino"], f"InformeReal_{mes_actual}.xlsx")
+            
+        carpeta_salida = os.path.join(config["carpeta_destino"], "Informe Real Egresos")
+        os.makedirs(carpeta_salida, exist_ok=True)
+        
+        archivo_salida = os.path.join(carpeta_salida, f"{mes_nombre} {anio}.xlsx")
     
         if os.path.exists(archivo_salida):
             try:
