@@ -1,4 +1,5 @@
 import os
+import sys
 import tkinter as tk
 from tkinter import messagebox
 import customtkinter as ctk
@@ -45,9 +46,20 @@ ctk.set_default_color_theme(config.get("color_theme", "blue"))
         
 def lanzar_ventana_principal():
     root = ctk.CTk()
+    
+    after_ids = [] 
+    
     def on_closing():
+        guardar_estado_ventana(root)
         if messagebox.askokcancel("Salir", "¿Seguro que deseas cerrar el programa?"):
+            for _id in after_ids:
+                try:
+                    root.after_cancel(_id)
+                except Exception as e:
+                    print(f"Error al cancelar la tarea after:", e)
+            
             root.destroy()
+            sys.exit()
 
     
     root.iconbitmap(ruta_absoluta("assets/cecati-122.ico"))
@@ -342,14 +354,15 @@ def lanzar_ventana_principal():
         sidebar, 
         "Salir", 
         ruta_absoluta("assets/output.png"),
-        lambda: (guardar_estado_ventana(root), root.destroy())
+        on_closing
     )
     
     # Cargar pantalla inicial
     abrir_inicio(frame_contenido)
     cambiar_boton_activo(btn_inicio_sidebar)
     
-    root.after(0, lambda: cargar_estado_ventana(root))
-    root.protocol("WM_DELETE_WINDOW", lambda: (guardar_estado_ventana(root), root.destroy()))
+    _id = root.after(0, lambda: cargar_estado_ventana(root))
+    after_ids.append(_id)
+    #root.protocol("WM_DELETE_WINDOW", lambda: (guardar_estado_ventana(root), root.destroy()))
     root.protocol("WM_DELETE_WINDOW", on_closing)
     root.mainloop()
