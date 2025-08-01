@@ -499,6 +499,7 @@ def mostrar_formulario_ingresos(frame_padre):
         try:
             guardar_datos_en_db()
             guardar_Ingresos()
+            actualizar_polizas_disponibles()
         except Exception as e:
             messagebox.showerror("Error", f"Ocurrio un error: {e}")
 

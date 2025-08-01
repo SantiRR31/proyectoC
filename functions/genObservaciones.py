@@ -11,25 +11,58 @@ from datetime import datetime
 def seleccionar_poliza():
     ventana = ctk.CTkToplevel()
     ventana.title("Seleccionar Poliza")
-    ventana.geometry("300x300")
+    ventana.geometry("300x500")
     ventana.resizable(False, False)
     ventana.grab_set()
     
     ctk.CTkLabel(ventana, text="Selecciona el numero de poliza:").pack(pady=(20,10))
     
+    ctk.CTkLabel(ventana, text="Dia:").pack(anchor="w", padx=20)
     combo_dia = ctk.CTkComboBox(ventana, values=[f"{i:02}" for i in range(1, 32)], state="readonly")
-    combo_dia.pack(pady=2)
+    combo_dia.pack(pady=2, padx=20, fill="x")
     
     meses = ["ene.", "feb.", "mar.", "abr.", "may.", "jun.", "jul.", "ago.", "sep.", "oct.", "nov.", "dic."]
+    ctk.CTkLabel(ventana, text="Mes:").pack(anchor="w", padx=20)
     combo_mes = ctk.CTkComboBox(ventana, values=meses, state="readonly")
-    combo_mes.pack(pady=2)
+    combo_mes.pack(pady=2, padx=20, fill="x")
     
+    ctk.CTkLabel(ventana, text="Año:").pack(anchor="w", padx=20)
     combo_anio = ctk.CTkComboBox(ventana, values=[str(y) for y in range(2024, datetime.now().year + 1)], state="readonly")
-    combo_anio.pack(pady=2)
+    combo_anio.pack(pady=2, padx=20, fill="x")
     
-    ctk.CTkLabel(ventana, text="Selecciona la póliza:").pack(pady=(15, 5))
+    ctk.CTkLabel(ventana, text="Polizas Encontradas:").pack(pady=(15, 5))
     combo_poliza = ctk.CTkComboBox(ventana, values=[], state="readonly")
     combo_poliza.pack(pady=5)
+    
+    ctk.CTkLabel(ventana, text="Nombre de la persona:").pack(pady=(20,5))
+    combo_nombre = ctk.CTkComboBox(ventana, values=[], state="readonly")
+    combo_nombre.pack(pady=5, padx=20, fill="x")
+    
+    def buscaar_nombres():
+        try:
+            
+            conn = conectar()
+            cursor = conn.cursor()
+        
+            cursor.execute("SELECT nombreCompleto FROM personal")
+            nombres = [row[0] for row in cursor.fetchall()]
+        
+            if nombres:
+                combo_nombre.configure(values=nombres)
+                combo_nombre.set(nombres[0])
+            if not nombres:
+                combo_nombre.configure(values=["No se encontraron nombres"])
+                combo_nombre.set("No se pudieron obtener los nombres")
+                
+        except Exception as e:
+            combo_nombre.configure(values=["Error al buscar nombres"])
+            combo_nombre.set(f"Error: {str(e)}")
+            
+        finally:
+            if conn:
+                conn.close()
+                
+    buscaar_nombres()
     
     def actualizar_resultados(*_):
         
@@ -80,14 +113,40 @@ def seleccionar_poliza():
     
     def confirmar():
         seleccion = combo_poliza.get()
-        if seleccion and "No hay" not in seleccion:
-            generar_notitas(seleccion)
-            ventana.destroy()
+        nombre = combo_nombre.get()
+        if seleccion and "No hay" not in seleccion and nombre:
+            try:
+                conn = conectar()
+                cursor = conn.cursor()
+                cursor.execute("SELECT rfc, clave, puesto FROM personal WHERE nombreCompleto = ?", (nombre,))
+                resultado = cursor.fetchone()
+                conn.close()
+                
+                if resultado:
+                    rfc, clave, puesto = resultado
+                    generar_notitas(seleccion, nombre, rfc, clave, puesto)
+                    ventana.destroy()
+                else:
+                    messagebox.showerror("Error", f"No se encontraron datos para el nombre: {nombre}")
+            except Exception as e:
+                messagebox.showerror("Error", f"Error al buscar {str(e)}")
+            
     
-    ctk.CTkButton(ventana, text="Confirmar", command=confirmar).pack(pady=10)
+    ctk.CTkButton(ventana, text="Confirmar", command=confirmar).pack(pady=10, padx=20, fill="x")
         
+def obtener_nombre_unico(libro, nombre_base):
+    nombre = nombre_base[:25]
+    contador = 1
+    nombres_existentes = [hoja.name for hoja in libro.sheets]
+    
+    while nombre in nombres_existentes:
+        contador += 1
+        sufijo = f"_{contador}"
+        nombre = f"{nombre_base[:31 - len(sufijo)]}{sufijo}"
+        
+    return nombre
 
-def generar_notitas(no_poliza):
+def generar_notitas(no_poliza, nombre_persona, rfc, clave, puesto):
     app = None
     try:
         # Conectar con la base de datos
@@ -103,20 +162,8 @@ def generar_notitas(no_poliza):
             return
         
         nota = resultado[0]
-        
-        #try: 
-        #    fecha_dt = datetime.strptime(fecha_str, "%d/%m/%Y")
-        #except ValueError:
-        #    fecha_dt = datetime.today()
-        
         fecha_dt = datetime.today()
-            
-        nombre_hoja1 = f"COMPERCO {fecha_dt.strftime('%d %B %Y')}"
-        nombre_hoja1 = nombre_hoja1[:31]
-        
-        nombre_hoja2 = f"OCOMI {fecha_dt.strftime('%d %B %Y')}"
-        nombre_hoja2 = nombre_hoja2[:31]
-            
+                        
         ruta_plantilla1 = ruta_absoluta("assets/plantillas/plantillaCOMPERCO.xls")
         ruta_plantilla2 = ruta_absoluta("assets/plantillas/plantillaOCOMI.xls")
         
@@ -132,10 +179,17 @@ def generar_notitas(no_poliza):
         else:
             wb1 = app.books.open(ruta_plantilla1)
             
+        nombre_base1 = f"COMPERCO {fecha_dt.strftime('%d %B %Y')}"
+        nombre_hoja1 = obtener_nombre_unico(wb1, nombre_base1)
+            
         #wb1 = app.books.open(ruta_plantilla1)
         hojaBase1 = wb1.sheets[0]
         hojaNueva1 = hojaBase1.copy(after=wb1.sheets[len(wb1.sheets)-1])
         hojaNueva1.name = nombre_hoja1
+        hojaNueva1.range("E15").value = nombre_persona
+        hojaNueva1.range("AD15").value = rfc
+        hojaNueva1.range("AD17").value = clave
+        hojaNueva1.range("J17").value = puesto
         hojaNueva1.range("A23").value = nota
         wb1.save(ruta_salida1)
         wb1.close()
@@ -144,6 +198,9 @@ def generar_notitas(no_poliza):
             wb2 = app.books.open(ruta_salida2)
         else:
             wb2 = app.books.open(ruta_plantilla2)
+            
+        nombre_base2 = f"OCOMI {fecha_dt.strftime('%d %B %Y')}"
+        nombre_hoja2 = obtener_nombre_unico(wb2, nombre_base2)
         
         #wb2 = app.books.open(ruta_plantilla2)
         hojaBase2 = wb2.sheets[0]
