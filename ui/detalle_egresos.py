@@ -1,6 +1,5 @@
 from datetime import datetime
 import traceback
-from typing import Self
 import customtkinter as ctk
 from db.egresosDB import cambiar_estado_poliza_id, consultar_poliza_por_no, eliminar_poliza, obtener_poliza_completa, obtener_polizas_egresos_filtrado
 from informes.poliza import guardar_pdf, guardar_polizas_mes
