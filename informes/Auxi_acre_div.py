@@ -145,14 +145,14 @@ def gen_Aux_acre_div(saldo_inicial, mes_anio=None):
             return fecha
 
         partidas_combinadas = [
-            ("Egreso", cargo, fecha) for cargo, fecha in partidas_330_egresos
+            ("Egreso", cargo, fecha, observaciones) for cargo, fecha, observaciones in partidas_330_egresos
         ] + [
-            ("Ingreso", cargo, fecha) for cargo, fecha in partidas_330_ingresos
+            ("Ingreso", cargo, fecha, nota) for cargo, fecha, nota in partidas_330_ingresos
         ]
 
         partidas_ordenadas = sorted(partidas_combinadas, key=lambda x: fecha_a_yyyymmdd(x[2]))
         
-        for idx, (tipo, cargo, fecha) in enumerate(partidas_ordenadas):
+        for idx, (tipo, cargo, fecha, observaciones) in enumerate(partidas_ordenadas):
             fila = fila_inicio + idx
             try:
                 # Si fecha es 'DD/MM/YYYY'
@@ -168,9 +168,11 @@ def gen_Aux_acre_div(saldo_inicial, mes_anio=None):
                 fecha_formateada = fecha
             sht.range(f"B{fila}").value = fecha_formateada
             if tipo == "Egreso":
-                sht.range(f"AC{fila}").value = cargo
+                sht.range(f"AC{fila}").value = cargo,
+                sht.range(f"J{fila}").value = observaciones
             else:  # Ingreso
-                sht.range(f"AJ{fila}").value = cargo
+                sht.range(f"AJ{fila}").value = cargo,
+                sht.range(f"j{fila}").value = f"Acreedor {observaciones}"
         
         carpeta_salida = os.path.join(config["carpeta_destino"], "Auxiliar Acreedores diversos")
         os.makedirs(carpeta_salida, exist_ok=True)        

@@ -46,7 +46,7 @@ def obtener_partidas_e_330_mes(mes_anio):
     conn = conectar()
     cursor = conn.cursor()
     query = """
-        SELECT d.cargo, p.fecha
+        SELECT d.cargo, p.fecha, observaciones
         FROM detallePolizaEgreso d
         JOIN polizasEgresos p ON d.id_poliza = p.id_poliza
         WHERE d."PARTIDA ESPECÍFICA" = 330
@@ -59,23 +59,38 @@ def obtener_partidas_e_330_mes(mes_anio):
     return resultados
   
 def obtener_partidas_i_330_mes(mes_anio):
-  conn = conectar_db2()
-  cursor = conn.cursor()
-  query = """
-        SELECT  pi.importe as cargo , pi.fecha 
-        from polizasIngresos pi
-        where exists (
-        SELECT 1
-        FROM detallePolizaIngreso dpi
-        WHERE dpi.noPoliza = pi.noPoliza
-          AND dpi.clave = 330
+    conn = conectar_db2()
+    cursor = conn.cursor()
+
+    query = """
+    SELECT 
+        pi.importe AS cargo,
+        pi.fecha,
+        CASE
+            WHEN EXISTS (
+                SELECT 1 FROM detallePolizaIngreso dpi2
+                WHERE dpi2.noPoliza = pi.noPoliza AND dpi2.clave = 'A001'
+            ) THEN 'CIDFORT'
+            WHEN EXISTS (
+                SELECT 1 FROM detallePolizaIngreso dpi2
+                WHERE dpi2.noPoliza = pi.noPoliza AND dpi2.clave = 'A002'
+            ) THEN 'Seguro escolar'
+            
+            ELSE 'Otro'
+        END AS nota
+    FROM polizasIngresos pi
+    WHERE EXISTS (
+        SELECT 1 FROM detallePolizaIngreso dpi
+        WHERE dpi.noPoliza = pi.noPoliza AND dpi.clave = 330
     )
-      AND strftime('%Y-%m', substr(pi.fecha, 7) || '-' || substr(pi.fecha, 4, 2) || '-' || substr(pi.fecha, 1, 2)) = ?;
-      """
-  cursor.execute(query, (mes_anio,))
-  resultados = cursor.fetchall()
-  conn.close()
-  return resultados
+    AND strftime('%Y-%m', substr(pi.fecha, 7) || '-' || substr(pi.fecha, 4, 2) || '-' || substr(pi.fecha, 1, 2)) = ?;
+    """
+
+    cursor.execute(query, (mes_anio,))
+    resultados = cursor.fetchall()
+    conn.close()
+    return resultados
+
 
 
 def obte_poliz_egre(mes_anio):

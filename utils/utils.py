@@ -10,16 +10,19 @@ def obtener_fecha_actual():
 
 def abrir_carpeta(ruta_base, subcarpeta=""):
     import os
-    # Expandir ~ al directorio del usuario
-    ruta_expandida = os.path.expanduser(ruta_base)
-    ruta_final = os.path.join(ruta_expandida, subcarpeta) if subcarpeta else ruta_expandida
+    from tkinter import messagebox
+    try:
+        ruta_expandida = os.path.expanduser(ruta_base)
+        ruta_final = os.path.join(ruta_expandida, subcarpeta) if subcarpeta else ruta_expandida
+        print("Intentando abrir:", ruta_final) 
 
-    # Crear la carpeta si no existe
-    if not os.path.exists(ruta_final):
-        os.makedirs(ruta_final, exist_ok=True)
+        if not os.path.exists(ruta_final):
+            os.makedirs(ruta_final, exist_ok=True)
 
-    # Abrir la carpeta
-    os.startfile(ruta_final)
+        os.startfile(ruta_final)
+    except Exception as e:
+        messagebox.showerror("Error al abrir carpeta", f"No se pudo abrir la carpeta:\n{e}")
+
 
 def convertir_a_mayusculas(entry_widget, event=None):
     texto = entry_widget.get()

@@ -371,7 +371,7 @@ def lanzar_ventana_principal():
     cambiar_boton_activo(btn_inicio_sidebar)
     
     _id = root.after(0, lambda: cargar_estado_ventana(root))
-    after_ids.append(_id)
-    #root.protocol("WM_DELETE_WINDOW", lambda: (guardar_estado_ventana(root), root.destroy()))
+    #after_ids.append(_id)
+    root.protocol("WM_DELETE_WINDOW", lambda: (guardar_estado_ventana(root), root.destroy()))
     root.protocol("WM_DELETE_WINDOW", on_closing)
     root.mainloop()
