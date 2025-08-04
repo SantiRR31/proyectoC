@@ -26,7 +26,7 @@ def obtener_partidas_i_120_por_mes(mes_anio):
   conn = conectar_db2()
   cursor = conn.cursor()
   query = """
-        SELECT  pi.importe as cargo , pi.fecha 
+        SELECT  pi.importe as cargo , pi.fecha, nota 
         from polizasIngresos pi
         where exists (
         SELECT 1
