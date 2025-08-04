@@ -14,10 +14,6 @@ from PIL import Image
 from customtkinter import CTkImage
 import datetime
 from functions.funcions import confirmar_aux, confirmar_y_generar2
-import requests
-from io import BytesIO
-import threading
-from dotenv import load_dotenv
 import os
 from utils.rutas import ruta_absoluta
 from utils.rutas import ruta_absoluta
@@ -210,6 +206,15 @@ def mostrar_inicio(contenedor):
         tarjeta.bind("<Enter>", on_enter)
         tarjeta.bind("<Leave>", on_leave)
         return tarjeta
+    
+    def crear_menu_command(comandos, nombre_local):
+        def menu_command(opcion):
+            if comandos and opcion in comandos and callable(comandos[opcion]):
+                comandos[opcion]()
+            else:
+                print(f"{nombre_local}: {opcion}")
+        return menu_command
+
 
     
     egresos_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
@@ -217,7 +222,7 @@ def mostrar_inicio(contenedor):
     
     titulo_egresos_ingresos = ctk.CTkLabel(
         egresos_frame,
-        text="Egresos",
+        text="Libro de Egresos",
         font=("Arial", 18, "bold"),
         text_color=("#2a2d32", "#ffffff"),
         anchor="w",
@@ -228,10 +233,49 @@ def mostrar_inicio(contenedor):
     tarjetas_egresos.pack(fill="x", padx=10)
 
     tarjetas_ei_info = [
-        ("Egresos", "assets/wallet.png", ("#ef4444", "#dc2626"), ["LIBRO DE REGISTRO DE EGRESOS"], "Opciones", {"LIBRO DE REGISTRO DE EGRESOS": lambda:confirmar_y_generar_egresos(contenedor_principal=contenedor)}),
-        ("Inf. Consolidado de egresos", "assets/excel2.png", ("#ef4444", "#dc2626"), ["Generar"],"Opciones", {"Generar": lambda: confirmar_y_generar_consolidado(contenedor_principal=contenedor)}),
-        ("Inf. Real de egresos", "assets/excel2.png", ("#ef4444", "#dc2626"), ["Generar"], "Opciones", {"Generar": lambda: confirmar_y_generar_infReal(contenedor_principal = contenedor)}),
-        ("Notas en COMPERCO y OCOMI", "assets/excel2.png", ("#ef4444", "#dc2626"), ["Insertar"], "Opciones", {"Insertar": seleccionar_poliza})
+        (
+            "Libro de Egresos", 
+         "assets/wallet.png", 
+         (
+             "#ef4444", 
+             "#dc2626"), 
+         [
+             "Generar",
+             "Abrir Carpeta"], 
+         "Opciones", 
+         {
+             "Generar": lambda:confirmar_y_generar_egresos(contenedor_principal=contenedor),
+             "Abrir Carpeta": lambda: abrir_carpeta(config["carpeta_destino"], "Libro de Egresos")}),
+        
+        (
+            "Inf. Consolidado de egresos", "assets/excel2.png", 
+            ("#ef4444", 
+             "#dc2626"), 
+            [
+                "Generar",
+                "Abrir Carpeta"],
+            "Opciones", 
+            {
+                "Generar": lambda: confirmar_y_generar_consolidado(contenedor_principal=contenedor),
+                "Abrir Carpeta": lambda: abrir_carpeta(config["carpeta_destino"], "Consolidado de egresos")}),
+        
+        ("Inf. Real de egresos", 
+         "assets/excel2.png", 
+         ("#ef4444", "#dc2626"), 
+         [
+             "Generar",
+             "Abrir Carpeta"], 
+         "Opciones", 
+         {
+             "Generar": lambda: confirmar_y_generar_infReal(contenedor_principal = contenedor),
+             "Abrir Carpeta": lambda: abrir_carpeta(config["carpeta_destino"], "Informe Real Egresos")}),
+        
+        ("Notas en COMPERCO y OCOMI", 
+         "assets/excel2.png", 
+         (
+             "#ef4444", 
+             "#dc2626"), 
+         ["Insertar"], "Opciones", {"Insertar": seleccionar_poliza})
     ]
 
     columnas = 4
@@ -243,11 +287,7 @@ def mostrar_inicio(contenedor):
         fila = idx // columnas
         columna = idx % columnas
 
-        def menu_command(opcion, cmd=comandos, nombre_local=nombre):
-            if cmd and opcion in cmd and callable(cmd[opcion]):
-                cmd[opcion]()
-            else:
-                print(f"{nombre_local}: {opcion}")
+        menu_command = crear_menu_command(comandos, nombre)
 
         tarjeta = crear_tarjeta_moderna_con_menu(
             parent=tarjetas_egresos,
@@ -329,7 +369,13 @@ def mostrar_inicio(contenedor):
     tarjetas_auxil.pack(fill="x", pady=20)
 
     tarjetas_info = [
-        ("Aux. Bancario", "assets/coin.png", ("#f59e0b", "#d97706"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar_aux_bancario}),
+        ("Aux. Bancario", 
+         "assets/coin.png", 
+         ("#f59e0b", "#d97706"), 
+         ["Generar"
+          ], 
+         "Opciones", 
+         {"Generar": confirmar_y_generar_aux_bancario}),
         ("Aux. Acreedores diversos", "assets/excel2.png", ("#f59e0b", "#d97706"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar_Auxiliar_acree}),
         ("Aux. deudores diversos", "assets/coin.png", ("#f59e0b", "#d97706"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar_aux_deudor}),
     ]
