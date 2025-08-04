@@ -85,6 +85,17 @@ def generar_informe_consolidado_egresos(mes_anio=None):
         mes_nombre = meses[int(mes)]
         partidas_mes = obtener_partidas_mesagrupasa(mes_actual)  # Debe devolver (codigo, descripcion, total_cargo)
         
+        partidas_mes = obtener_partidas_mesagrupasa(mes_actual)
+
+        # Validar si hay datos
+        if not partidas_mes:
+            messagebox.showwarning(
+                "Sin datos",
+                f"No se encontraron egresos registrados para el mes de {meses[int(mes)]} {anio}."
+            )
+            return
+
+        
         # Abrir plantilla
         app = xw.App(visible=False)
         wb = app.books.open(ruta_absoluta("assets/plantillas/ConsolidadoEgresos.xls"))
