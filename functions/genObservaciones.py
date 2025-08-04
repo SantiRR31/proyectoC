@@ -17,7 +17,7 @@ def seleccionar_poliza():
     
     ctk.CTkLabel(ventana, text="Selecciona el numero de poliza:").pack(pady=(20,10))
     
-    ctk.CTkLabel(ventana, text="Dia:").pack(anchor="w", padx=20)
+    ctk.CTkLabel(ventana, text="Número:").pack(anchor="w", padx=20)
     combo_dia = ctk.CTkComboBox(ventana, values=[f"{i:02}" for i in range(1, 32)], state="readonly")
     combo_dia.pack(pady=2, padx=20, fill="x")
     

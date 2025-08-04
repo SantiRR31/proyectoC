@@ -50,16 +50,25 @@ def lanzar_ventana_principal():
     after_ids = [] 
     
     def on_closing():
-        guardar_estado_ventana(root)
-        if messagebox.askokcancel("Salir", "¿Seguro que deseas cerrar el programa?"):
-            for _id in after_ids:
-                try:
-                    root.after_cancel(_id)
-                except Exception as e:
-                    print(f"Error al cancelar la tarea after:", e)
+        try:
+            guardar_estado_ventana(root)
+            if messagebox.askokcancel("Salir", "¿Seguro que deseas cerrar el programa?"):
+                for _id in after_ids:
+                    try:
+                        root.after_cancel(_id)
+                    except Exception as e:
+                        print(f"Error al cancelar la tarea after:{_id}: {e}")
             
+                root.quit()
+                root.destroy()
+                sys.exit(0)
+        except Exception as e:
+            with open("log.txt", "a") as f:
+                f.write("Intentando cerrar la app\n")
+                
+            print(f"Erorr al cerrar la aplicacion: {e}")
             root.destroy()
-            sys.exit()
+            sys.exit(1)
 
     
     root.iconbitmap(ruta_absoluta("assets/cecati-122.ico"))
