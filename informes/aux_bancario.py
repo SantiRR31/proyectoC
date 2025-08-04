@@ -6,6 +6,7 @@ from db.auxDB import obte_poliz_egre, obte_poliz_ingre
 from utils.egresos_utils import mostrar_loading_y_ejecutar
 from utils.egresos_utils import cargar_config
 import gc 
+from utils.rutas import ruta_absoluta
 import xlwings as xw
 import re
 import os  
@@ -103,7 +104,7 @@ def gen_Aux_acre_div(mes_anio= None):
             return
         
         app = xw.App(visible=False)
-        wb= app.books.open("assets/plantillas/Auxiliar Bancario.xls")
+        wb= app.books.open(ruta_absoluta("assets/plantillas/Auxiliar Bancario.xls"))
         sht = wb.sheets[0]
         
         #Datos generales

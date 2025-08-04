@@ -117,7 +117,7 @@ def generar_reporte_xlwings():
 
         # Guardar en carpeta personalizada
         carpeta_base = r"C:\Cecati122"
-        carpeta_salida = os.path.join(carpeta_base, "InformesDeIngresos")
+        carpeta_salida = os.path.join(carpeta_base, "Libro de Ingresos")
         os.makedirs(carpeta_salida, exist_ok=True)
         archivo_salida = os.path.join(carpeta_salida, f"ingresos_{mes_actual}.xlsx")
         

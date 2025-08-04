@@ -62,7 +62,7 @@ def gen_inf_consolidado():
     nom_archivo = f"ingresos_{anio}-{mes_num}.xlsx"
     nom_hoja = f"{mes_texto} {anio}"
     
-    carpeta_informes = r"C:\Cecati122\InformesDeIngresos"
+    carpeta_informes = r"C:\Cecati122\Libro de Ingresos"
     ruta_archivo_origen = os.path.join(carpeta_informes,nom_archivo)
     ruta_archivo_destino = ruta_absoluta(os.path.join("assets", "plantillaConsolidadoIngresos.xls"))
     
@@ -84,12 +84,14 @@ def gen_inf_consolidado():
         print("Fila de claves:", fila_claves)
         
         fila_totales = hoja_origen.range("D41").expand("right").value
-        #print("Fila de totales:", fila_totales)
+        print("Fila de totales:", fila_totales)
         
         # ----------------------------------------------
         # BLOQUE PARA CLAVES CON A
         celdas_claves = ["C17", "C19", "C21", "C23"]
         celdas_totales = ["H17", "H19", "H21", "H23"]
+        
+        claves_a_fijas = ["A001", "A002", "A003"]
         
         wb_destino = xw.Book(ruta_nueva, update_links=False, visible=False)
         hoja_destino = wb_destino.sheets.active
@@ -97,10 +99,19 @@ def gen_inf_consolidado():
         # Contador para ubicar las claves A
         idx_destino = 0
         
+        # Primero escribe las fijas en los primeros 3 lugares
+        for clave_fija in claves_a_fijas:
+            hoja_destino.range(celdas_claves[idx_destino]).value = clave_fija
+            # Buscar si existe esa clave en el archivo de origen
+            if clave_fija in fila_claves:
+                i = fila_claves.index(clave_fija)
+                hoja_destino.range(celdas_totales[idx_destino]).value = fila_totales[i]
+            idx_destino += 1
+        
         for clave, total in zip(fila_claves, fila_totales):
-            if isinstance(clave, str) and clave.startswith("A") and idx_destino < len(celdas_claves):
+            if isinstance(clave, str) and clave.startswith("A") and clave not in claves_a_fijas and idx_destino < len(celdas_claves):
                 hoja_destino.range(celdas_claves[idx_destino]).value = clave
-                print(f"Insertando clave: {clave}")
+                #print(f"Insertando clave: {clave}")
                 hoja_destino.range(celdas_totales[idx_destino]).value = total
                 idx_destino += 1
         # ----------------------------------------------
@@ -108,10 +119,25 @@ def gen_inf_consolidado():
         celdas_claves_b = ["C33", "C35", "C37", "C39", "C41"]
         celdas_totales_b = ["H33", "H35", "H37", "H39", "H41"]
         
+        claves_b_fijas = ["B001", "B004"]
+        claves_b_insertadas = set()
+        
         idx_destino_b = 0
         
+        # Agrega primero las fijas
+        for clave_fija in claves_b_fijas:
+            if idx_destino_b < len(celdas_claves_b):
+                hoja_destino.range(celdas_claves_b[idx_destino_b]).value = clave_fija
+                claves_b_insertadas.add(clave_fija)
+                
+                if clave_fija in fila_claves:
+                    i = fila_claves.index(clave_fija)
+                    hoja_destino.range(celdas_totales_b[idx_destino_b]).value = fila_totales[i]
+                
+                idx_destino_b += 1
+        
         for clave, total in zip(fila_claves, fila_totales):
-            if isinstance(clave, str) and clave.startswith("B") and idx_destino_b < len(celdas_claves_b):
+            if isinstance(clave, str) and clave.startswith("B") and clave not in claves_b_fijas and idx_destino_b < len(celdas_claves_b):
                 hoja_destino.range(celdas_claves_b[idx_destino_b]).value = clave
                 hoja_destino.range( celdas_totales_b[idx_destino_b]).value = total
                 idx_destino_b += 1
@@ -120,10 +146,23 @@ def gen_inf_consolidado():
         celdas_claves_c = ["R26", "R29", "R31", "R34"]
         celdas_totales_c = ["W26", "W29", "W31", "W34"]
         
+        clave_c_fija = "C003"
+        clave_c_insertada = set()
+        
         idx_destino_c = 0
         
+        # Agrega C003 primero
+        hoja_destino.range(celdas_claves_c[idx_destino_c]).value = clave_c_fija
+        clave_c_insertada.add(clave_c_fija)
+        
+        if clave_c_fija in fila_claves:
+            i = fila_claves.index(clave_c_fija)
+            hoja_destino.range(celdas_totales_c[idx_destino_c]).value = fila_totales[i]
+    
+        idx_destino_c += 1
+        
         for clave, total in zip(fila_claves, fila_totales):
-            if isinstance(clave, str) and clave.startswith("C") and idx_destino_c < len(celdas_claves_c):
+            if isinstance(clave, str) and clave.startswith("C") and clave != clave_c_fija and idx_destino_c < len(celdas_claves_c):
                 hoja_destino.range(celdas_claves_c[idx_destino_c]).value = clave
                 hoja_destino.range(celdas_totales_c[idx_destino_c]).value = total
                 idx_destino_c += 1
