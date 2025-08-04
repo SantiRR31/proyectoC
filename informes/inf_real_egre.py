@@ -82,6 +82,16 @@ def generar_inf_real_egresos(mes_anio=None):
         mes_nombre = meses[int(mes)]
         partidas_mes = obtener_partidas_mesagrupasa(mes_actual)
         print(f"Partidas obtenidas para {mes_actual}: {partidas_mes}")
+        partidas_mes = obtener_partidas_mesagrupasa(mes_actual)
+
+        # Validar si hay datos
+        if not partidas_mes:
+            messagebox.showwarning(
+                "Sin datos",
+                f"No se encontraron egresos registrados para el mes de {meses[int(mes)]} {anio}."
+            )
+            return
+
 
         app = xw.App(visible=False)
         wb = app.books.open(ruta_absoluta("assets/plantillas/InformeReal.xls"))
