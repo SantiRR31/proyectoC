@@ -99,7 +99,7 @@ def gen_Aux_deud_div(saldo_inicial, mes_anio = None):
         partidas_combinadas = [
             ("Egreso", cargo, fecha,nombre, no_poliza) for cargo, fecha, nombre, no_poliza in partidas_120_egresos
         ] + [
-            ("Ingreso", cargo, fecha," ", " ") for cargo, fecha in partidas_120_ingresos
+            ("Ingreso", cargo, fecha, nota, " ") for cargo, fecha, nota in partidas_120_ingresos
         ]
 
         partidas_ordenadas = sorted(partidas_combinadas, key=lambda x: fecha_a_yyyymmdd(x[2]))
@@ -122,7 +122,7 @@ def gen_Aux_deud_div(saldo_inicial, mes_anio = None):
                 sht.range(f"J{fila}").value = f"{nombre} {no_poliza}"
             else:  # Ingreso
                 sht.range(f"AJ{fila}").value = cargo
-                sht.range(f"j{fila}").value = "REINTEGRO POLIZA"
+                sht.range(f"j{fila}").value = nombre 
         
         archivo_salida = os.path.join(carpeta_salida, f"{mes_nombre} {anio}.xlsx")
         wb.save(archivo_salida)
