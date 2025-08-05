@@ -135,6 +135,10 @@ def gen_Aux_acre_div(saldo_inicial, mes_anio=None):
         sht.range("AO4").value = config['clave_cecati']
         sht.range("AP9").value = saldo_inicial
         
+        firmas = config.get("firmas", {})
+        sht.range("AA68").value = firmas.get("director", "")
+        sht.range("C68").value = firmas.get("elaboro", "")
+        
         def fecha_a_yyyymmdd(fecha):
             if "/" in fecha:
                 d, m, y = fecha.split("/")

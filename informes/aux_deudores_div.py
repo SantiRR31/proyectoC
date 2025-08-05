@@ -87,6 +87,12 @@ def gen_Aux_deud_div(saldo_inicial, mes_anio = None):
         anio_corto = anio[-2:]      # '2025' -> '25'
         sht.range("V3").value = f"{mes_abrev}-{anio_corto}"
         sht.range("AP9").value = saldo_inicial
+        
+        # Agregar firmas
+        firmas = config.get("firmas", {})
+        sht.range("AA68").value = firmas.get("director", "")
+        sht.range("C68").value = firmas.get("elaboro", "")
+        
         def fecha_a_yyyymmdd(fecha):
             if "/" in fecha:
                 d, m, y = fecha.split("/")

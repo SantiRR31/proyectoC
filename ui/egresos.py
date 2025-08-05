@@ -313,7 +313,44 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
     )
     tipo_pago.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
     tipo_pago.set("CHEQUE")  
-    mostrar_campos_pago()     
+    mostrar_campos_pago()
+    
+    #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 
+    
+     # Sección de observaciones
+    """denominacion_frame = ctk.CTkFrame(contenedor_principal, **ESTILO_FRAME)
+    denominacion_frame.pack(fill="x", pady=(0, 20), padx=5)
+
+    ctk.CTkLabel(
+        denominacion_frame,
+        text="DENOMINACION",
+        font=FUENTE_SUBTITULO
+    ).pack(pady=(5, 10))
+
+    denominacion_entry = ctk.CTkEntry(
+        denominacion_frame,
+        placeholder_text="Ingrese la denominacion...",
+        #height=40,
+        **ESTILO_ENTRADA
+    )
+    denominacion_entry.pack(fill="x", padx=10, pady=(0, 10)) """
+
+    # Sección de observaciones
+    observaciones_frame = ctk.CTkFrame(contenedor_principal, **ESTILO_FRAME)
+    observaciones_frame.pack(fill="x", pady=(0, 20), padx=5)
+
+    ctk.CTkLabel(
+        observaciones_frame,
+        text="OBSERVACIONES",
+        font=FUENTE_SUBTITULO
+    ).pack(pady=(5, 10))
+
+    observaciones_textbox = ctk.CTkTextbox(
+        observaciones_frame,
+        **ESTILO_ENTRADA_TEXTBOX
+    )
+    observaciones_textbox.pack(fill="both", padx=10, pady=(0, 10), expand=True)
+
 
 
     #-----------------------------------------------------------# Sección de conceptos -------------------------------------------------------------------------------------------
@@ -338,15 +375,12 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
         ).grid(row=1, column=col, padx=10, pady=(0, 5), sticky="ew")
 
     # Reemplaza la creación de filas_frame con esto:
-    filas_frame = ctk.CTkScrollableFrame(
+    filas_frame = ctk.CTkFrame(
         conceptos_frame,
-        height=200,  # Aumentado para mejor visibilidad
         fg_color="transparent",
-        scrollbar_fg_color=("#e5e7eb", "#374151"),
-        scrollbar_button_color=("#9ca3af", "#4b5563"),
-        scrollbar_button_hover_color=("#6b7280", "#374151"),
-        corner_radius=8
     )
+    filas_frame.grid(row=2, column=0, columnspan=4, sticky="nsew", pady=(0, 10))
+
     filas_frame.grid(row=2, column=0, columnspan=4, sticky="nsew", pady=(0, 10))
     
     def configurar_scroll(widget):
@@ -383,6 +417,10 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
             corner_radius=6
             )
         fila_frame.pack(fill="x", pady=2, padx=2)     
+        
+        contenedor_principal._parent_canvas.update_idletasks()  # Asegura que el layout esté actualizado
+        contenedor_principal._parent_canvas.yview_moveto(1.0)   # Desplaza el scroll al fondo
+
         
          # Efecto hover
         def on_enter(e):
@@ -474,42 +512,9 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
         command=agregar_fila
     ).grid(row=3, column=0, columnspan=4, pady=10)
     
-     # Sección de observaciones
-    denominacion_frame = ctk.CTkFrame(contenedor_principal, **ESTILO_FRAME)
-    denominacion_frame.pack(fill="x", pady=(0, 20), padx=5)
-
-    ctk.CTkLabel(
-        denominacion_frame,
-        text="DENOMINACION",
-        font=FUENTE_SUBTITULO
-    ).pack(pady=(5, 10))
-
-    denominacion_entry = ctk.CTkEntry(
-        denominacion_frame,
-        placeholder_text="Ingrese la denominacion...",
-        #height=40,
-        **ESTILO_ENTRADA
-    )
-    denominacion_entry.pack(fill="x", padx=10, pady=(0, 10))
+    
 
 
-#----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 
-
-    # Sección de observaciones
-    observaciones_frame = ctk.CTkFrame(contenedor_principal, **ESTILO_FRAME)
-    observaciones_frame.pack(fill="x", pady=(0, 20), padx=5)
-
-    ctk.CTkLabel(
-        observaciones_frame,
-        text="OBSERVACIONES",
-        font=FUENTE_SUBTITULO
-    ).pack(pady=(5, 10))
-
-    observaciones_textbox = ctk.CTkTextbox(
-        observaciones_frame,
-        **ESTILO_ENTRADA_TEXTBOX
-    )
-    observaciones_textbox.pack(fill="both", padx=10, pady=(0, 10), expand=True)
 
 
 #----------------------------------- Barra de acciones inferiores---------------------------------------------------------
@@ -708,7 +713,7 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
         "tipo_pago": tipo_pago,
         "clave_rastreo": clave_rastreo,
         "observaciones": observaciones_textbox,
-        "denominacion": denominacion_entry,
+        #"denominacion": denominacion_entry,
         "no_cheque": no_cheque_entry,  
     }
     
@@ -732,7 +737,7 @@ def mostrar_formulario_egresos(frame_padre, poliza_editar=None):
         clave_rastreo.insert(0, poliza_editar.clave_ref or "")
         mostrar_campos_pago() 
         observaciones_textbox.insert("1.0", poliza_editar.observaciones)
-        denominacion_entry.insert(0, poliza_editar.denominacion or "")
+        #denominacion_entry.insert(0, poliza_editar.denominacion or "")
         no_cheque_entry.insert(0, poliza_editar.no_cheque or "")
         for concepto in poliza_editar.conceptos:
             agregar_fila()
