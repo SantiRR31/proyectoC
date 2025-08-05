@@ -212,7 +212,7 @@ def mostrar_detalles_egresos(frame_padre):
         boton_frame,
         text="Cambiar Estado",
         command=cambiar_estado_poliza,
-        fg_color="#0b91b4",
+        fg_color="#90c064",
         width=140
     )
     boton_estado.pack(side="left", padx=10)
