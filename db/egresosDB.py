@@ -326,7 +326,7 @@ def obtener_total_deudores(mes_anio):
     SELECT SUM(d.cargo)
     FROM detallePolizaEgreso d
     JOIN polizasEgresos p ON d.id_poliza = p.id_poliza
-    WHERE d."PARTIDA ESPECÍFICA" = 120
+    WHERE d."CLAVE CUCoP" = 120
       AND strftime('%Y-%m', 
           substr(p.fecha, 7) || '-' || substr(p.fecha, 4, 2) || '-' || substr(p.fecha, 1, 2)
       ) = ?
@@ -342,7 +342,7 @@ def obtener_total_acreedores(mes_anio):
     SELECT SUM(d.cargo)
     FROM detallePolizaEgreso d
     JOIN polizasEgresos p ON d.id_poliza = p.id_poliza
-    WHERE d."PARTIDA ESPECÍFICA" = 330
+    WHERE d."CLAVE CUCoP" = 330
       AND strftime('%Y-%m', 
           substr(p.fecha, 7) || '-' || substr(p.fecha, 4, 2) || '-' || substr(p.fecha, 1, 2)
       ) = ?

@@ -127,10 +127,13 @@ def gen_Aux_acre_div(mes_anio= None):
             fecha_normalizada = formatear_fecha_string(fila[0])
             lista_combinada.append({
                 "fecha": datetime.strptime(fecha_normalizada, "%d/%m/%Y"),
-                "descripcion": f"{fila[1]} {fila[2]}".strip(),
+                "descripcion": f"{fila[1]} ".strip(),
+                "tipo_pago": fila[2],
+                "no_cheque": fila[3],
                 "ingreso": None,
                 "egreso": fila[4]
             })
+
 
         for fila in poliza_ingresos:
             fecha_normalizada = formatear_fecha_string(fila[0])
@@ -152,7 +155,22 @@ def gen_Aux_acre_div(mes_anio= None):
                 sht.range(f"AF{fila_excel}").value = item["ingreso"]
             if item["egreso"] is not None:
                 sht.range(f"AL{fila_excel}").value = item["egreso"]
+                
+                tipo_pago = item.get("tipo_pago", "").lower()
+                if tipo_pago in ["egreso", "transf. electrónica"]:
+                    sht.range(f"Z{fila_excel}").value = "TRANSF"
+                elif tipo_pago == "cheque":
+                    no_cheque = item.get("no_cheque", "")
+                    if no_cheque == "00":
+                        sht.range(f"Z{fila_excel}").value = ""
+                    else:
+                        sht.range(f"Z{fila_excel}").value = no_cheque
+                    
+                else:
+                    sht.range(f"Z{fila_excel}").value = ""  # Por si acaso
+
             fila_excel += 1
+
             
         
         carpeta_salida = os.path.join(config["carpeta_destino"], "Auxiliar Bancario")

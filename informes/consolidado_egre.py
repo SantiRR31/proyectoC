@@ -161,7 +161,14 @@ def generar_informe_consolidado_egresos(mes_anio=None):
             5600: "AL",
             5900: "AL",
         }
-        
+          
+
+        total_deudores = obtener_total_deudores(mes_anio)
+        print(f"Total deudores en {mes_anio}: {total_deudores:.2f}")
+
+        total_acreedores = obtener_total_acreedores(mes_anio)
+        print(f"Total acreedores en {mes_anio}: {total_acreedores:.2f}")
+
         # Otros
         sht.range("Al59").value = obtener_total_deudores(mes_actual)
         sht.range("Al60").value = obtener_total_acreedores(mes_actual)
