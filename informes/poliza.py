@@ -30,7 +30,6 @@ def asignar_valores_en_hoja(hoja, poliza):
         "monto_letra": "A10",
         "tipo_pago": "T12",
         "clave_ref": "A13",
-        "denominacion": "A44",
         "observaciones": "A47",
     }
 
@@ -50,6 +49,13 @@ def asignar_valores_en_hoja(hoja, poliza):
             except Exception:
                 pass
         hoja.range(celda).value = valor
+        
+         # Agregar firmas
+        firmas = config.get("firmas", {})
+
+        hoja.range("A55").value = firmas.get("elaboro", "")
+        hoja.range("R55").value = firmas.get("reviso", "")
+        hoja.range("AM55").value = firmas.get("autorizo", "")
 
 def insertar_entradas_en_hoja(hoja, conceptos, mensaje=True):
     fila_inicial = 18

@@ -41,7 +41,7 @@ def capturar_poliza(form, entradas):
         tipo_pago = form["tipo_pago"].get()
         monto_letra = form["monto_letra"].get() or None
         clave_ref = form["clave_rastreo"].get()
-        denominacion = form["denominacion"].get()
+        #denominacion = form["denominacion"].get() or None
         observaciones = form["observaciones"].get("1.0", "end").strip()
         no_cheque = form["no_cheque"].get() or None
 
@@ -77,7 +77,7 @@ def capturar_poliza(form, entradas):
             nombre=nombre,
             tipo_pago=tipo_pago,
             clave_ref=clave_ref,
-            denominacion=denominacion,
+            #denominacion=denominacion,
             observaciones=observaciones,
             no_cheque=no_cheque
         )
@@ -142,7 +142,7 @@ def obtener_valores_campos(form):
         "cargo_letras": form["cargo_letras"].get(),
         "tipo_pago": form["tipo_pago"].get(),
         "clave_rastreo": form["clave_rastreo"].get(),
-        "denominacion": form["denominacion"].get(),
+        #"denominacion": form["denominacion"].get(),
         "observaciones": form["observaciones"].get(),
     }
         

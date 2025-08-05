@@ -25,6 +25,12 @@ def mostrar_ajustes(frame_contenido):
     no_cuenta = tk.StringVar(value=config.get("no_cuenta"))
     cuenta_cheques = tk.StringVar(value=config.get("cuenta_cheques"))
     estado = tk.StringVar(value=config.get("estado"))
+    firmas = config.get("firmas", {})
+    elaboro = tk.StringVar(value=firmas.get("elaboro", ""))
+    reviso = tk.StringVar(value=firmas.get("reviso", ""))
+    autorizo = tk.StringVar(value=firmas.get("autorizo", ""))
+    director = tk.StringVar(value=firmas.get("director", ""))
+
     
 
     def selecionar_carpeta():
@@ -56,6 +62,24 @@ def mostrar_ajustes(frame_contenido):
     def actualizar_estado(nuevo_estado):
         estado.set(nuevo_estado)
         actualizar_config("estado", nuevo_estado)
+        
+    def actualizar_elaboro(nuevo_valor):
+        elaboro.set(nuevo_valor)
+        actualizar_config("firmas.elaboro", nuevo_valor)
+
+    def actualizar_reviso(nuevo_valor):
+        reviso.set(nuevo_valor)
+        actualizar_config("firmas.reviso", nuevo_valor)
+
+    def actualizar_autorizo(nuevo_valor):
+        autorizo.set(nuevo_valor)
+        actualizar_config("firmas.autorizo", nuevo_valor)
+
+    def actualizar_director(nuevo_valor):
+        director.set(nuevo_valor)
+        actualizar_config("firmas.director", nuevo_valor)
+
+
 
     # Título principal
     ctk.CTkLabel(
@@ -139,11 +163,41 @@ def mostrar_ajustes(frame_contenido):
     )
     seccion_datos.grid_columnconfigure(1, weight=1)
     
-    
-
     # Separador visual
     ctk.CTkFrame(contenedor_principal, height=2, fg_color=("#191919","#faf7f6")).pack(fill="x", padx=30, pady=10)
+    
+    
+    seccion_firmas = ctk.CTkFrame(contenedor_principal, fg_color= ("#faf7f6", "#191919") , corner_radius=12)
+    seccion_firmas.pack(fill="x", padx=30, pady=(0, 15))
+    
+    ctk.CTkLabel(
+        seccion_firmas,
+        text= "Firmas responsables (Elaboró, Revisó, Autorizó)",
+        font=FUENTE_SUBMENU,
+        text_color="#d31329", 
+    ).grid(row=0, column=0, columnspan=3, sticky="w", pady=(10, 5))
+    
+    crear_fila_ajuste(
+    seccion_firmas, 1, "Elaboró:", elaboro,
+    lambda: abrir_ventana_edicion(frame_contenido, "Editar nombre", "Nombre actual:", elaboro, "Nuevo nombre:", actualizar_elaboro)
+)
 
+    crear_fila_ajuste(
+        seccion_firmas, 2, "Revisó:", reviso,
+        lambda: abrir_ventana_edicion(frame_contenido, "Editar nombre", "Nombre actual:", reviso, "Nuevo nombre:", actualizar_reviso)
+    )
+
+    crear_fila_ajuste(
+        seccion_firmas, 3, "Autorizó:", autorizo,
+        lambda: abrir_ventana_edicion(frame_contenido, "Editar nombre", "Nombre actual:", autorizo, "Nuevo nombre:", actualizar_autorizo)
+    )
+    crear_fila_ajuste(
+        seccion_firmas, 4, "Director:", director,
+        lambda: abrir_ventana_edicion(frame_contenido, "Editar nombre", "Nombre actual:", director, "Nuevo nombre:", actualizar_director)
+    )
+
+    seccion_firmas.grid_columnconfigure(1, weight=1)
+    
 
     # Sección de carpeta de destino
     seccion_carpeta = ctk.CTkFrame(contenedor_principal, fg_color= ("#faf7f6", "#191919") , corner_radius=12)
@@ -344,7 +398,7 @@ def abrir_ventana_soporte():
     btn_cerrar = ctk.CTkButton(ventana, text="Cerrar", command=ventana.destroy)
     btn_cerrar.pack(pady=(0, 10))
     
-def abrir_ventana_edicion(frame_contenido, titulo, label_actual, variable_actual, label_nuevo, actualizar_callback, maxlen=20):
+def abrir_ventana_edicion(frame_contenido, titulo, label_actual, variable_actual, label_nuevo, actualizar_callback, maxlen=100):
     ventana = ctk.CTkToplevel(frame_contenido)
     ventana.title(titulo)
     ventana.geometry("400x300")
