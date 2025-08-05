@@ -5,6 +5,7 @@ from utils.config_utils import cargar_config
 from tkinter import ttk, messagebox
 import gc
 from utils.egresos_utils import mostrar_loading_y_ejecutar
+from utils.rutas import ruta_absoluta
 from widgets.widgets import ventana_seleccion_mes_anio_y_campos
 import xlwings as xw
 from db.auxDB import obtener_partidas_120_por_mes, obtener_partidas_i_120_por_mes
@@ -72,7 +73,7 @@ def gen_Aux_deud_div(saldo_inicial, mes_anio = None):
             return
         
         app = xw.App(visible=False, add_book=False)
-        wb = app.books.open("assets/plantillas/Auxiliar de deudores diversos.xls")
+        wb = app.books.open(ruta_absoluta("assets/plantillas/Auxiliar de deudores diversos.xls"))
         sht = wb.sheets[0]
         
         #datos generales

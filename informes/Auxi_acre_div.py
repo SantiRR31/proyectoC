@@ -5,6 +5,7 @@ from db.auxDB import obtener_partidas_i_330_mes, obtener_partidas_e_330_mes
 from utils.egresos_utils import mostrar_loading_y_ejecutar
 from utils.egresos_utils import cargar_config
 import gc 
+from utils.rutas import ruta_absoluta
 import xlwings as xw
 import re
 import os  
@@ -119,7 +120,7 @@ def gen_Aux_acre_div(saldo_inicial, mes_anio=None):
             return
         
         app = xw.App(visible=False)
-        wb= app.books.open("assets/plantillas/Auxiliar de acredores diversos.xls")
+        wb= app.books.open(ruta_absoluta("assets/plantillas/Auxiliar de acredores diversos.xls"))
         sht = wb.sheets[0]
         
         #Datos generales
