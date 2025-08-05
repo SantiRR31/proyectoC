@@ -1,6 +1,8 @@
 from datetime import datetime
 import sqlite3
 import os
+import tkinter as tk
+from tkinter import ttk
 from db.conexion import conectar_db2
 import xlwings as xw
 from utils.rutas import ruta_absoluta
@@ -12,12 +14,49 @@ meses = {
     9: "septiembre", 10: "octubre", 11: "noviembre", 12: "diciembre"
 }
 
-def confirmar_y_generar():
-    respuesta = messagebox.askyesno("Generar reporte", "¿Está seguro de generar el reporte?")
-    if respuesta:
-        generar_reporte_xlwings()
 
-def generar_reporte_xlwings():
+def confirmar_y_generar():
+    ventana = tk.Toplevel()
+    ventana.title("Seleccionar mes y año")
+    ventana.geometry("300x200")
+    ventana.resizable(False, False)
+    ventana.grab_set()
+
+    # --- Mes ---
+    ttk.Label(ventana, text="Mes:").pack(pady=(20, 5))
+    combo_mes = ttk.Combobox(ventana, state="readonly", values=[
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ])
+    combo_mes.current(datetime.now().month - 1)
+    combo_mes.pack()
+
+    # --- Año ---
+    ttk.Label(ventana, text="Año:").pack(pady=(15, 5))
+    año_actual = datetime.now().year
+    combo_anio = ttk.Combobox(ventana, state="readonly", values=[str(a) for a in range(año_actual - 5, año_actual + 6)])
+    combo_anio.set(str(año_actual))
+    combo_anio.pack()
+
+    # --- Botón generar ---
+    def generar():
+        mes_index = combo_mes.current() + 1
+        try:
+            anio = int(combo_anio.get())
+        except ValueError:
+            messagebox.showerror("Error", "Seleccione un año válido.")
+            return
+
+        if mes_index < 1 or mes_index > 12:
+            messagebox.showerror("Error", "Seleccione un mes válido.")
+            return
+
+        ventana.destroy()
+        generar_reporte_xlwings(mes_index, anio)
+
+    ttk.Button(ventana, text="Generar Reporte", command=generar).pack(pady=20)
+
+def generar_reporte_xlwings(mes: int, anio: int):
     try:
         # Conectar con la base de datos
         conn = conectar_db2("prueba.db")
@@ -26,16 +65,18 @@ def generar_reporte_xlwings():
         # Fecha actual y mes actual en formato YYYY-MM
         hoy = datetime.now()
         mes_actual = hoy.strftime('%Y-%m')
-        nombre_hoja = hoy.strftime('%b %Y').lower()  # Ejemplo: 'may 2025'
+        mes_str = f"{mes:02}"
+        mes_anio = f"{anio}-{mes_str}"  # Ej: '2025-05'
+        nombre_hoja = datetime(anio, mes, 1).strftime('%b %Y').lower()  # Ejemplo: 'may 2025'
         
-        # Obtener pólizas del mes actual
+        # Obtener pólizas del mes seleccionado
         cursor.execute("""
             SELECT fecha, noPoliza, importe
             FROM polizasIngresos
             WHERE strftime('%Y-%m', 
                 substr(fecha, 7) || '-' || substr(fecha, 4, 2) || '-' || substr(fecha, 1, 2)
             ) = ?
-        """, (mes_actual,))
+        """, (mes_anio,))
         polizas_mes = cursor.fetchall()
 
         if not polizas_mes:
@@ -50,9 +91,16 @@ def generar_reporte_xlwings():
                 substr(p.fecha, 7) || '-' || substr(p.fecha, 4, 2) || '-' || substr(p.fecha, 1, 2)
             ) = ?
             ORDER BY clave
-        """, (mes_actual,))
+        """, (mes_anio,))
         claves_mes = [row[0] for row in cursor.fetchall()]
-
+        
+        claves_especiales = ["120", "330"]
+        claves_ordenadas =  [clave for clave in claves_mes if clave not in claves_especiales]
+        for clave_esp in claves_especiales:
+            if clave_esp in claves_mes:
+                claves_ordenadas.append(clave_esp)
+        claves_mes = claves_ordenadas
+                
         # Abrir Excel
         app = xw.App(visible=False)
         wb = app.books.open(ruta_absoluta("assets/plantillaLibroIngresos.xls"))
@@ -96,6 +144,7 @@ def generar_reporte_xlwings():
 
         # Escribir pólizas
         fila_inicio = 10
+        col_rendimientos = 10
         for idx, (fecha, no_poliza, importe) in enumerate(polizas_mes):
             fila = fila_inicio + idx
             fecha_dt = datetime.strptime(fecha, "%d/%m/%Y")
@@ -111,9 +160,15 @@ def generar_reporte_xlwings():
             """, (no_poliza,))
             abonos = dict(cursor.fetchall())
 
-            # Escribir abonos
-            for col_idx, clave in enumerate(claves_mes):
-                sht.range((fila, col_inicio + col_idx)).value = abonos.get(clave, 0)
+            if abonos:
+                # Escribir abonos por clave
+                for col_idx, clave in enumerate(claves_mes):
+                    sht.range((fila, col_inicio + col_idx)).value = abonos.get(clave, 0)
+                if col_rendimientos:
+                    sht.range((fila, col_rendimientos)).value = 0
+            else:
+                if col_rendimientos:
+                    sht.range((fila, col_rendimientos)).value = importe # Columna para rendimiento si no hay abonos
 
         # Guardar en carpeta personalizada
         carpeta_base = r"C:\Cecati122"

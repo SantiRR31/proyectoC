@@ -319,7 +319,7 @@ def mostrar_inicio(contenedor):
     tarjetas_ingresos.pack(fill="x", pady=20)
 
     tarjetas_info = [
-        ("Informe Mensual de Ingresos", "assets/coin.png", ("#10b981", "#059669"), ["Libro de Ingresos"], "Opciones", {"Libro de Ingresos":confirmar_y_generar}),
+        ("Libro de Ingresos", "assets/coin.png", ("#10b981", "#059669"), ["Libro de Ingresos"], "Opciones", {"Libro de Ingresos":confirmar_y_generar}),
         ("Inf. Consolidado de Ingresos", "assets/excel2.png", ("#10b981", "#059669"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar2}),
         ("Inf. Real de Ingresos", "assets/excel2.png", ("#10b981", "#059669"), ["Generar"], "Opciones", {"Generar": lambda: confirmar_y_generar_inf_real_ingresos(contenedor_principal = contenedor)})
     ]
