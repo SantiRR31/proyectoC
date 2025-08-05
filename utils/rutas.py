@@ -40,7 +40,7 @@ def inicializar_base_datos():
                 print(f"[✓] Base de datos '{NOMBRE_BD}' copiada a: {ruta_destino}")
             else:
                 print(f"[!] No se encontró la base de datos '{NOMBRE_BD}' en 'db'.")
-            migrar_personal(ruta_destino)
+            migrar_personal()
     except Exception as e:
         print(f"[✗] Error al copiar '{NOMBRE_BD}': {e}")
 
@@ -70,9 +70,10 @@ def obtener_carpeta_destino_segura(config):
         ruta_respaldo.mkdir(parents=True, exist_ok=True)
         return str(ruta_respaldo)
     
-def migrar_personal(ruta_bd):
+def migrar_personal():
+    from db.conexion import conectar
     try:
-        conn = sqlite3.connect(ruta_bd)
+        conn = conectar()
         cursor = conn.cursor()
         cursor.execute("""
              SELECT name FROM sqlite_master WHERE type='table' AND name='personal';

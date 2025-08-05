@@ -41,7 +41,22 @@ def confirmar_y_generar2():
     if respuesta:
         gen_inf_consolidado()
         
-        
+def eliminar_ultimo_registro():
+    '''Si lanza un error de instancias abiertas de Excel, elimina el ultimo registro de la base de datos para evitar datos erroneos.'''
+    conn = conectar_db2()
+    cursor = conn.cursor()
+    cursor.execute("SELECT MAX(noPoliza) FROM polizasIngresos")
+    resultado = cursor.fetchone()
+    ultima_poliza = resultado[0]
+    if ultima_poliza:
+        #Elimina los ultimos detalles si es que existen
+        cursor.execute("DELETE FROM detallePolizaIngreso WHERE noPoliza = ?", (ultima_poliza,))
+        #Elimina la poliza principal
+        cursor.execute("DELETE FROM polizasIngresos WHERE noPoliza = ?", (ultima_poliza,))
+        messagebox.showinfo("Corrección", "Se ha eliminado el ultimo registro ingresado accidentalmente antes del error.")
+    conn.commit()
+    conn.close()
+    
     
 meses_esp = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
 

@@ -14,7 +14,7 @@ def abrir_carpeta(ruta_base, subcarpeta=""):
     try:
         ruta_expandida = os.path.expanduser(ruta_base)
         ruta_final = os.path.join(ruta_expandida, subcarpeta) if subcarpeta else ruta_expandida
-        print("Intentando abrir:", ruta_final) 
+        #print("Intentando abrir:", ruta_final) 
 
         if not os.path.exists(ruta_final):
             os.makedirs(ruta_final, exist_ok=True)

@@ -11,6 +11,7 @@ import os
 from tkcalendar import DateEntry
 from tkinter import messagebox
 from functions import genRegIngresos, funcions
+from functions.funcions import eliminar_ultimo_registro
 from datetime import datetime
 import psutil, time
 from utils.config_utils import cargar_config
@@ -308,6 +309,7 @@ def mostrar_formulario_ingresos(frame_padre):
                 try:
                     if os.path.exists(ruta_completa):
                         wb = app.books.open(ruta_completa)
+                        
                     else:
                         wb = app.books.open(ruta_absoluta("assets/plantillaIngresos.xlsx"))
 
@@ -383,6 +385,10 @@ def mostrar_formulario_ingresos(frame_padre):
                         suma_por_clave[clave] += abono_val
                     else:
                         suma_por_clave[clave] = abono_val
+                        
+                if not clave:
+                    hoja_activa.range("K17").value = "RENDIMIENTOS DEL MES"
+                    hoja_activa.range("AT17").value = float(cargo_importe)
                 
             fila_inicial = 15
             for clave, total_abono in suma_por_clave.items():
@@ -394,6 +400,7 @@ def mostrar_formulario_ingresos(frame_padre):
             wb.save(ruta_completa)
             wb.close()
             app.quit()
+            
         
             success_msg = (
                 "Póliza guardada exitosamente!\n"
@@ -403,6 +410,7 @@ def mostrar_formulario_ingresos(frame_padre):
                 f"N° Póliza: {noPoliza} | Importe: ${cargo_importe}"
             )
             messagebox.showinfo("Operación Exitosa", success_msg)
+            return True
 
         except Exception as e:
             error_type = type(e).__name__
@@ -417,6 +425,7 @@ def mostrar_formulario_ingresos(frame_padre):
                 "   > assets/plantillaIngresos.xlsx"
             )
             messagebox.showerror("Error Crítico", error_msg)
+        
         
         finally:
             try:
@@ -442,6 +451,7 @@ def mostrar_formulario_ingresos(frame_padre):
                             pass
                 except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                     pass
+        return False
 
             
     def guardar_datos_en_db():
@@ -497,11 +507,20 @@ def mostrar_formulario_ingresos(frame_padre):
     # si queremos fucionar los votones de guardar y de descargar
     def guardar_descargar():
         try:
+            # Primero abrir Excel y escribir (sin guardar en BD aún)
+            exito_excel = guardar_Ingresos()
+            if not exito_excel:
+                messagebox.showerror("Error", "No se pudo guardar en Excel. Verifica que no esté abierto.")
+                return  # No guardar en DB ni actualizar
+
+            # Si llegó aquí, Excel guardó bien, ahora sí guardamos en BD
             guardar_datos_en_db()
-            guardar_Ingresos()
+
             actualizar_polizas_disponibles()
+            messagebox.showinfo("Éxito", "Datos guardados correctamente.")
+
         except Exception as e:
-            messagebox.showerror("Error", f"Ocurrio un error: {e}")
+            messagebox.showerror("Error", f"Ocurrió un error: {e}")
 
     btn_agregar_fila = ctk.CTkButton(seccion_filas, text="➕ Agregar", command=agregar_fila, corner_radius=32,
                                      fg_color="#008d62", hover_color="#2ca880")
