@@ -7,17 +7,24 @@ import sys
 DEFAULT_CONFIG = {
     "carpeta_destino": "~/Documentos/Cecati122/Polizas",
     "clave_cecati": "22DBT0005P",
-    "cuenta_cheques":"1056897860",
+    "cuenta_cheques": "1056897860",
     "banco_caja": "BANORTE",
     "geometry": "1280x720+100+100",
     "state": "normal",
     "appearance_mode": "dark",
     "color_theme": "blue",
     "no_cecati": "000",
-    "no_cuenta" : "1234567890",
-    "cuenta_cheques": "1056897860",
-    "estado": "Queretaro"
+    "no_cuenta": "1234567890",
+    "estado": "Queretaro",
+    
+    "firmas": {
+        "elaboro": "Nombre del elaborador",
+        "reviso": "Nombre del revisor",
+        "autorizo": "Nombre del autorizador",
+        "director" : "Nombre del director"
+    }
 }
+
 
 def obtener_ruta_config():
     if getattr(sys, 'frozen', False):
@@ -36,16 +43,33 @@ def cargar_config():
                 config = json.load(f)
             except Exception:
                 config = {}
-    for key, value in DEFAULT_CONFIG.items():
-        if key not in config:
-            config[key] = value
+    config_a(DEFAULT_CONFIG, config)
     return config
+
+def config_a(default, current):
+    for key, value in default.items():
+        if key not in current:
+            current[key] = value
+        elif isinstance(value, dict) and isinstance(current[key], dict):
+            config_a(value, current[key])
 
 def guardar_config(config):
     with open(CONFIG_PATH, "w") as f:
-        json.dump(config, f)
+        json.dump(config, f) 
 
 def actualizar_config(clave, valor):
     config = cargar_config()
-    config[clave] = valor
+    
+    # Soporte para claves anidadas tipo "firmas.elaboro"
+    if "." in clave:
+        claves = clave.split(".")
+        actual = config
+        for k in claves[:-1]:
+            if k not in actual or not isinstance(actual[k], dict):
+                actual[k] = {}
+            actual = actual[k]
+        actual[claves[-1]] = valor
+    else:
+        config[clave] = valor
+
     guardar_config(config)

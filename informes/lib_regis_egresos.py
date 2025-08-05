@@ -81,6 +81,12 @@ def ordenar_partidas(partidas_mes):
 
 
 def llenar_datos_generales(sht, mes_nombre, anio):
+    # Agregar firmas
+    firmas = config.get("firmas", {})
+    sht.range("C54").value = firmas.get("elaboro", "")
+    #sht.range("R55").value = firmas.get("reviso", "")
+    sht.range("J54").value = firmas.get("director", "")
+    
     sht.range("T5").value = f"{mes_nombre} {anio}"
     sht.range("J5").value = config["no_cecati"]
     sht.range("AI5").value = config["clave_cecati"]

@@ -141,11 +141,15 @@ def generar_inf_real_egresos(mes_anio=None):
         
 
 def llenar_datos_generales(sht, hoy, mes_nombre, anio):
+    
     sht.range("AI5").value = config["clave_cecati"]
     sht.range("AQ5").value = hoy.strftime("%d %m %Y")
     sht.range("AX5").value = f"{mes_nombre} {anio}"
     sht.range("BB1").value = config["no_cecati"]
-
+    
+    # Agregar firmas
+    firmas = config.get("firmas", {})
+    sht.range("AE68").value = firmas.get("director", "")
 
 def insertar_partidas_en_hoja(sht, partidas_por_grupo):
     fila = 12

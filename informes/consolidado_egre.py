@@ -105,6 +105,11 @@ def generar_informe_consolidado_egresos(mes_anio=None):
         sht.range("M5").value = f"CECATI No. {config['no_cecati']}"
         sht.range("R8").value = f"{mes_nombre} {anio}"
         sht.range("AH8").value = hoy.strftime("%d %m %Y")
+        # Agregar firmas
+        firmas = config.get("firmas", {})
+        #sht.range("C54").value = firmas.get("elaboro", "")
+        #sht.range("R55").value = firmas.get("reviso", "")
+        sht.range("B80").value = firmas.get("director", "")
 
         # Diccionario de rangos por grupo
         rangos = {

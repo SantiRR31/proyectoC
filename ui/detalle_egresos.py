@@ -1,12 +1,17 @@
 from datetime import datetime
+from logging import config
 import traceback
 import customtkinter as ctk
 from db.egresosDB import cambiar_estado_poliza_id, consultar_poliza_por_no, eliminar_poliza, obtener_poliza_completa, obtener_polizas_egresos_filtrado
 from informes.poliza import guardar_pdf, guardar_polizas_mes
-from styles.styles import FUENTE_FORMULARIO_T
+from styles.styles import ESTILO_BOTON, FUENTE_FORMULARIO_T
 from tkinter import messagebox, ttk
 from ui.egresos import mostrar_formulario_egresos
+from utils.config_utils import cargar_config
 from utils.egresos_utils import mostrar_loading_y_ejecutar
+from utils.utils import abrir_carpeta
+
+config = cargar_config()
 
 def crear_treeview_polizas(parent, modo_tema="light"):
     columnas = ("no_poliza", "fecha", "nombre", "monto", "tipo de pago", "estado")
@@ -83,13 +88,15 @@ def mostrar_detalles_egresos(frame_padre):
 
     combo_anio = ctk.CTkComboBox(frame_filtros, values=anios, width=100)
     combo_anio.pack(side="left", padx=10)
+    
+    combo_mes.configure(command=lambda value: (print("Mes seleccionado:", value), cargar_polizas()))
+    combo_anio.configure(command=lambda value: (print("Año seleccionado:", value), cargar_polizas()))
 
+    
     boton_filtrar = ctk.CTkButton(frame_filtros, text="Filtrar", command=lambda: cargar_polizas())
     boton_filtrar.pack(side="left", padx=10)
     
-        # Cada vez que se cambia el valor del mes o año, se recarga automáticamente
-    combo_mes.bind("<<ComboboxSelected>>", lambda event: cargar_polizas())
-    combo_anio.bind("<<ComboboxSelected>>", lambda event: cargar_polizas())
+     
 
 
     contenedor_tabla = ctk.CTkFrame(frame_padre)
@@ -205,8 +212,7 @@ def mostrar_detalles_egresos(frame_padre):
         boton_frame,
         text="Cambiar Estado",
         command=cambiar_estado_poliza,
-        fg_color="#ffaa00",
-        hover_color="#cc8800",
+        fg_color="#0b91b4",
         width=140
     )
     boton_estado.pack(side="left", padx=10)
@@ -215,8 +221,7 @@ def mostrar_detalles_egresos(frame_padre):
         boton_frame,
         text="Editar",
         command=editar_poliza,
-        fg_color="#005f99",  # Azul profundo
-        hover_color="#004d80",
+        fg_color="#f79b86",  # Azul profundo
         width=140
     )
     boton_editar.pack(side="left", padx=10)
@@ -225,8 +230,7 @@ def mostrar_detalles_egresos(frame_padre):
         boton_frame,
         text="Borrar",
         command=borrar_poliza,
-        fg_color="#ff4500",
-        hover_color="#cc3700",
+        fg_color="#e0123c",
         width=140
     )
     boton_borrar.pack(side="left", padx=10)
@@ -235,8 +239,7 @@ def mostrar_detalles_egresos(frame_padre):
         boton_frame,
         text="Guardar polizas del mes",
         command=lambda: guardar_mes(combo_mes.get(), combo_anio.get()),
-        fg_color="#007acc",
-        hover_color="#005f99",
+        fg_color="#36485f",
         width=180
     )
     boton_guardar_mes.pack(side="left", padx=10)
@@ -245,12 +248,21 @@ def mostrar_detalles_egresos(frame_padre):
         boton_frame,
         text="Guardar poliza seleccionada",
         command=guardar_seleccionada,
-        fg_color="#007acc",
-        hover_color="#005f99",
+        fg_color="#fe933b",
         width=180
     )
     boton_guardar_seleccion.pack(side ="left", padx =10)
-
+    
+    abrir_carp = ctk.CTkButton(
+        boton_frame,
+        text=" Abrir Carpeta",
+        width=50,
+        **ESTILO_BOTON,
+        fg_color="#6b7280",
+        hover_color="#4b5563",
+        command=lambda: abrir_carpeta(config["carpeta_destino"],"Polizas De Egresos")
+    )
+    abrir_carp.pack(side ="left", padx =10)
 
     # Establecer por defecto el mes y año actuales antes de cargar
     mes_actual = datetime.now().strftime("%m")
@@ -258,7 +270,7 @@ def mostrar_detalles_egresos(frame_padre):
     mes_actual_str = [m for m in meses if m.startswith(mes_actual)][0]
     combo_mes.set(mes_actual_str)
     combo_anio.set(anio_actual)
-
+    
     cargar_polizas()
     
     
