@@ -222,7 +222,7 @@ def mostrar_inicio(contenedor):
     
     titulo_egresos_ingresos = ctk.CTkLabel(
         egresos_frame,
-        text="Libro de Egresos",
+        text="Egresos",
         font=("Arial", 18, "bold"),
         text_color=("#2a2d32", "#ffffff"),
         anchor="w",
@@ -369,15 +369,41 @@ def mostrar_inicio(contenedor):
     tarjetas_auxil.pack(fill="x", pady=20)
 
     tarjetas_info = [
-        ("Aux. Bancario", 
-         "assets/coin.png", 
-         ("#f59e0b", "#d97706"), 
-         ["Generar"
-          ], 
-         "Opciones", 
-         {"Generar": confirmar_y_generar_aux_bancario}),
-        ("Aux. Acreedores diversos", "assets/excel2.png", ("#f59e0b", "#d97706"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar_Auxiliar_acree}),
-        ("Aux. deudores diversos", "assets/coin.png", ("#f59e0b", "#d97706"), ["Generar"], "Opciones", {"Generar": confirmar_y_generar_aux_deudor}),
+        (
+            "Aux. Bancario", 
+            "assets/coin.png", 
+            ("#f59e0b", "#d97706"), 
+            [
+                "Generar",
+                "Abrir Carpeta"], 
+            "Opciones", 
+            {"Generar": confirmar_y_generar_aux_bancario,
+             "Abrir Carpeta": lambda: abrir_carpeta(config["carpeta_destino"], "Auxiliar Bancario")}),
+        
+        
+        (
+            "Aux. Acreedores diversos", 
+            "assets/excel2.png", 
+            ("#f59e0b", "#d97706"), 
+            [
+                "Generar",
+                "Abrir Carpeta"], 
+            "Opciones", 
+            {
+                "Generar": confirmar_y_generar_Auxiliar_acree,
+                "Abrir Carpeta": lambda: abrir_carpeta(config["carpeta_destino"], "Auxiliar Acreedores diversos")}),
+        
+        (
+            "Aux. deudores diversos", 
+            "assets/coin.png", 
+            ("#f59e0b", "#d97706"), 
+            [
+                "Generar",
+                "Abrir Carpeta"], 
+            "Opciones", 
+            {
+                "Generar": confirmar_y_generar_aux_deudor,
+                "Abrir Carpeta": lambda: abrir_carpeta(config["carpeta_destino"], "Auxiliar Deudores Diversos")}),
     ]
     
     columnas = 4

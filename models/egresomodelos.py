@@ -35,7 +35,7 @@ class PolizaEgreso:
         faltantes = []
         if not self.fecha:
             faltantes.append("Fecha")
-        if not self.no_poliza:  # ← Este sí debe validarse
+        if not self.no_poliza:  # debe validarse
             faltantes.append("No. de Póliza")
         if self.monto is None or self.monto == 0:
             faltantes.append("Monto")
