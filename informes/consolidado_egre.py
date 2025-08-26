@@ -176,14 +176,14 @@ def generar_informe_consolidado_egresos(mes_anio=None):
         # Agrupa partidas por grupo (2100, 2200, etc.)
         partidas_por_grupo = agrupar_partidas_por_grupo(partidas_mes)
         
-        #print("Partidas por grupo:", partidas_por_grupo)
+        print("Partidas por grupo:", partidas_por_grupo)
         
         carpeta_salida = os.path.join(config["carpeta_destino"], "Consolidado de egresos")
         os.makedirs(carpeta_salida, exist_ok=True)
 
         # Para cada grupo, coloca los códigos y cargos en las celdas correspondientes
 
-        for grupo, (inicio, fin) in rangos.items():
+        """ for grupo, (inicio, fin) in rangos.items():
             codigos = partidas_por_grupo.get(grupo, [])
             col = re.match(r'[A-Z]+', inicio).group()
             fila_inicio = int(re.search(r'\d+', inicio).group())
@@ -198,7 +198,27 @@ def generar_informe_consolidado_egresos(mes_anio=None):
                     sht.range(celda_cargo).value = total_cargo
                 except Exception as e:
                     print(f"Error al escribir en {celda_codigo} o {celda_cargo}: {e}")
-                    raise
+                    raise """
+        
+        for grupo, (inicio, fin) in rangos.items():
+            codigos = partidas_por_grupo.get(grupo, [])
+            col = re.match(r'[A-Z]+', inicio).group()
+            fila_inicio = int(re.search(r'\d+', inicio).group())
+            fila_fin = int(re.search(r'\d+', fin).group())
+            col_cargo = columnas_cargo[grupo]
+
+            for i in range(fila_inicio, fila_fin + 1):
+                celda_codigo = f"{col}{i}"
+                celda_cargo = f"{col_cargo}{i}"
+                valor_codigo = sht.range(celda_codigo).value
+
+                if valor_codigo:
+                    valor_codigo = str(valor_codigo).strip().split(".")[0]  # "24301.0" → "24301"
+
+                    for codigo, total_cargo in codigos:
+                        if str(codigo) == valor_codigo:  # compara como string exacto
+                            sht.range(celda_cargo).value = total_cargo
+                            break #"""
                 
         # Guardar archivo
         archivo_salida = os.path.join(carpeta_salida, f"{mes_nombre} {anio}.xlsx")
