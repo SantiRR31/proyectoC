@@ -1,18 +1,21 @@
-INSERT INTO personal (nombreCompleto, rfc, clave, puesto) VALUES
-('ANGELES PEREZ ROSA MARTHA', 'AEPR690905AR5', 'E096571', 'Instructor de estilismo'),
-('GUILLEN VAZQUEZ MARIA ELENA', 'GUVE631104SS7', 'T03E031', 'Contadora'),
-('HERNANDEZ DIAZ ELOISA', 'HEDE740925N98', 'A03E010', ''),
-('HERRERA OLVERA MARIA LILIA', 'HEOL690625TK3', 'A03E031', ''),
-('MALAGON AVILA LUIS FERNANDO', 'MAAL6710227247', 'E0965', 'Jefe de Capacitación'),
-('MEJIA GONZALEZ FERNANDO', 'MEGF76705103D8', 'S01E07', 'Asistente de servicios en plantel'),
-('MEJIA GONZALEZ ROGELIO', 'MEGR7110138P8', 'S01E07', 'Asistente de servicios en plantel'),
-('MORENO VAZQUEZ JACQUELINE', 'MOVJ6810264V1', 'A03E01', '___ de apoyo'),
-('SOLIS RUFINO MANUEL ALEJANDRO', 'SORM740702EX3', 'E0965', 'Instructor diseño gráfico'),
-('DELGADO ARANA BERENICE', 'DEAB700330QJ9', 'E0965', 'Jefe del área de vinculación'),
-('PEREZ ESTRADA MARISELA D.', 'PEEM6809257S5', 'T26E04', 'Trabajador social'),
-('J. CUPERTINO SARMIENTO MERCADO', 'SAMJ8912182F9', 'E0965', 'Director'),
-('EVA GUADALUPE MORALES GONZALEZ', 'MOGE680829431', 'E0965', 'Instructor de estilismo'),
-('JONATHAN JESUS CRUZ MORALES', 'CUMJ931106A60', 'S01E07', 'Asistente de servicios en plantel'),
-('URIEL ADOLFO MARTINEZ MARTINEZ', 'MAMU871111TH0', 'E0965', 'Instructor de alimentos y bebidas'),
-('ANTONIO ALVAREZ CAMACHO', 'AACA750508K67', 'S01E07', 'Asistente de servicios en plantel'),
-('HECTOR MARCOS ABREU LARA', 'AELH621118H69', 'E0965', 'Intructor de mecánica');
+CREATE TABLE detalleIngresos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    noPoliza TEXT NOT NULL,
+    clave TEXT NOT NULL,
+    abono REAL NOT NULL,
+    fecha TEXT NOT NULL
+);
+
+CREATE TABLE polizasIngresos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    noPoliza TEXT NOT NULL,
+    fecha TEXT NOT NULL,
+    banco TEXT NOT NULL,
+    importe REAL NOT NULL,
+    nota TEXT
+);
+
+CREATE TABLE partidasIngresos (
+    partida TEXT PRIMARY KEY,
+    denominacion TEXT NOT NULL
+);

@@ -69,10 +69,6 @@ def gen_inf_consolidado():
     anio = str(hoy.year)
     mes_num = hoy.strftime("%m")
     mes_texto = meses_esp[hoy.month - 1]
-    # Valores fijos para mayo 2025
-    #anio = "2025"
-    #mes_num = "05"
-    #mes_texto = "mayo"
     
     nom_archivo = f"ingresos_{anio}-{mes_num}.xlsx"
     nom_hoja = f"{mes_texto} {anio}"
@@ -111,7 +107,6 @@ def gen_inf_consolidado():
         wb_destino = xw.Book(ruta_nueva, update_links=False, visible=False)
         hoja_destino = wb_destino.sheets.active
         
-        # Contador para ubicar las claves A
         idx_destino = 0
         
         # Primero escribe las fijas en los primeros 3 lugares
@@ -139,7 +134,6 @@ def gen_inf_consolidado():
         
         idx_destino_b = 0
         
-        # Agrega primero las fijas
         for clave_fija in claves_b_fijas:
             if idx_destino_b < len(celdas_claves_b):
                 hoja_destino.range(celdas_claves_b[idx_destino_b]).value = clave_fija
@@ -166,7 +160,6 @@ def gen_inf_consolidado():
         
         idx_destino_c = 0
         
-        # Agrega C003 primero
         hoja_destino.range(celdas_claves_c[idx_destino_c]).value = clave_c_fija
         clave_c_insertada.add(clave_c_fija)
         

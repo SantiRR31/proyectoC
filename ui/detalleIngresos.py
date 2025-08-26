@@ -167,7 +167,6 @@ def eliminar_registro(id_registro, frame_padre):
             app = xw.App(visible=False)
             wb = app.books.open(ruta_excel)               
             
-            # Buscar hoja que comience con "Pz {noPoliza}"
             hojas_a_eliminar = [
                 hoja for hoja in wb.sheets if hoja.name.startswith(f"Pz {noPoliza}")
             ]
@@ -385,7 +384,6 @@ def editar_registro(id_registro, fecha_antigua, no_poliza_ant, banco_ant, import
         except Exception as e:
             messagebox.showerror("Error inesperado", f"Ocurrió un error: {e}")
     
-    # ✅ BOTONES ABAJO (puedes moverlos dentro del frame_scroll_general si quieres que también se desplacen)
     frame_botones = ctk.CTkFrame(frame_scroll_general, fg_color="transparent")
     frame_botones.pack(pady=(20, 10))
     ctk.CTkButton(frame_botones, text="Guardar cambios", fg_color="#008d62", hover_color="#2ca880", command=guardar).pack(side="left", padx=10)

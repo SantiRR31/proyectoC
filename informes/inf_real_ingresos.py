@@ -119,7 +119,7 @@ def generar_informe_ingresos(mes_anio=None):
         gc.collect()
 
 def obtener_totales_ingresos(mes_anio):
-    conn = conectar_db2()  # Ajustar ruta según corresponda
+    conn = conectar_db2() 
     cursor = conn.cursor()
     cursor.execute("""
         SELECT clave, SUM(abono)
@@ -130,7 +130,6 @@ def obtener_totales_ingresos(mes_anio):
     """, (mes_anio.split('-')[1], mes_anio.split('-')[0]))
     resultados = cursor.fetchall()
     conn.close()
-    #print(resultados)
     return resultados
 
 def agrupar_por_letra_clave(partidas_mes):
