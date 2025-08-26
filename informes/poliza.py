@@ -12,6 +12,7 @@ from models.egresomodelos import *
 import customtkinter as ctk
 import threading
 from time import sleep
+import re 
 
 config = cargar_config()
 
@@ -160,7 +161,7 @@ def esta_archivo_en_uso(ruta):
         return True
 
 def guardar_pdf(poliza):
-    import re  # Aseguramos el import aquí si no está arriba
+ 
     app = None
     wb = None
     try:

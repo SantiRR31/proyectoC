@@ -10,7 +10,18 @@ CREATE TABLE polizasEgresos(
     observaciones TEXT,
     no_cheque TEXT,
     estado TEXT  
-);
+)
+
+CREATE TABLE "partidasEgresos" (
+    "CABM ACTUALIZADO" TEXT PRIMARY KEY,
+    "TIPO" INTEGER,
+    "PARTIDA ESPECÍFICA" INTEGER,
+    "CLAVE CUCoP" INTEGER UNIQUE,
+    "DESCRIPCIÓN" TEXT,
+    "NIVEL" INTEGER,
+    "CABM ANTERIOR" TEXT,
+    "UNIDAD  DE MEDIDA (sugerida)" TEXT
+)
 
 
 
@@ -21,25 +32,18 @@ CREATE TABLE detallePolizaEgreso (
     "PARTIDA ESPECÍFICA" INTEGER NOT NULL,
     FOREIGN KEY (id_poliza) REFERENCES polizasEgresos(id_poliza) ON DELETE CASCADE,
     FOREIGN KEY ("CLAVE CUCoP") REFERENCES partidasEgresos("CLAVE CUCoP")
-);
+)
+
+
+
+
+
+
 
 
 INSERT INTO detallePolizaEgreso (id_poliza, "CLAVE CUCoP", cargo, "PARTIDA ESPECÍFICA")
 SELECT id_poliza, "CLAVE CUCoP", cargo, "PARTIDA ESPECÍFICA"
 FROM detallePolizaEgreso_old;
-
-
-CREATE TABLE partidasEgresos (
-    "CABM ACTUALIZADO" TEXT PRIMARY KEY,
-    "TIPO" INTEGER,
-    "PARTIDA ESPECÍFICA" INTEGER,
-    "CLAVE CUCoP" INTEGER UNIQUE,
-    "DESCRIPCIÓN" TEXT,
-    "NIVEL" INTEGER,
-    "CABM ANTERIOR" TEXT,
-    "UNIDAD  DE MEDIDA (sugerida)" TEXT
-);
-
 drop table detallePolizaEgreso;
 drop table ;
 
@@ -47,6 +51,10 @@ drop table ;
 ALTER TABLE detallePolizaEgreso RENAME TO detallePolizaEgreso_old;
 -- ver el sql usado para crear la tabla 
 SELECT sql FROM sqlite_master WHERE type='table' AND name='detallePolizaEgreso';
+SELECT sql FROM sqlite_master WHERE type='table' AND name='partidasEgresos';
+SELECT sql FROM sqlite_master WHERE type='table' AND name='polizasEgresos';
+
+
 -- Ver las tablas existentes
 .tables
 -- 

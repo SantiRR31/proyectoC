@@ -13,7 +13,7 @@ def obtener_partidas_120_por_mes(mes_anio):
         SELECT d.cargo, p.fecha, p.nombre, p.no_poliza
         FROM detallePolizaEgreso d
         JOIN polizasEgresos p ON d.id_poliza = p.id_poliza
-        WHERE d."PARTIDA ESPECÍFICA" = 120
+        WHERE d."CLAVE CUCoP" = 120
           AND strftime('%Y-%m', substr(p.fecha, 7) || '-' || substr(p.fecha, 4, 2) || '-' || substr(p.fecha, 1, 2)) = ?
           AND estado != "cancelado"
     """
